@@ -111,7 +111,7 @@ in an assignment.
  * Concatenation
 
 ```julia
-	hcat(V::NamedVector...)
+hcat(V::NamedVector...)
 ```
 
  concatenates (column) vectors to an array.  If the names are identical
