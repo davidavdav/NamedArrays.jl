@@ -169,10 +169,7 @@ type NamedArray{T,N} <: AbstractArray{T,N}
 }
 ```
 
-but the inner constructor actually expects `NTuple`s for `names` and
-`dimnames`.  This is sometimes a bit annoying, if you want to
-initialize a new NamedArray from known `names` and `dimnames`.  We
-therefore have a function
+but the inner constructor actually expects `NTuple`s for `names` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `names` and `dimnames`.  We therefore have a function
 
 ```julia
     vec2tuple(x...) = x
