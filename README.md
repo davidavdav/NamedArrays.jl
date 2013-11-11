@@ -17,13 +17,13 @@ Synopsis
 --------
 
 ```julia
-    reload("src/NamedArray.jl")
-    n = NamedArray(rand(2,4))
-    setnames!(n, ["one", "two"], 1) 
-    n["one", 2:3]
-    n["two", :] = 11:14
-    n
-    sum(n,1)
+reload("src/NamedArray.jl")
+n = NamedArray(rand(2,4))
+setnames!(n, ["one", "two"], 1) 
+n["one", 2:3]
+n["two", :] = 11:14
+n
+sum(n,1)
 ```
     
 Implementation status
@@ -62,7 +62,7 @@ converts a NamedArray to an Array by dropping al names information
  * Arithmetic:
  - `*` and `.*` between numbers and NamedArray.  
 
-This is just a first attempt.  Code should probably be generated in
+  This is just a first attempt.  Code should probably be generated in
 meta programming. 
 
  * Print, Show:
@@ -85,13 +85,13 @@ similar(a::NamedArray, t::DataType, dims::NTuple)
 	getindex(A::NamedArray, I::IndexOrNamed...)
 ```
 
-here type IndexOrNamed is a union of most indexable types:
+  here type IndexOrNamed is a union of most indexable types:
 
 ```julia
 typealias IndexOrNamed Union(Real, Range1, String, AbstractVector)
 ```
 
-This allows indexing of most combinations of integer, range, string,
+  This allows indexing of most combinations of integer, range, string,
 vector of integer and Vector of String of any number of dimensions, as
 long as the underlying Array supports the indexing. 
 
@@ -105,7 +105,7 @@ long as the underlying Array supports the indexing.
 	setindex!(A::NamedArray, x, I::IndexOrNamed...)
 ```
 
-various forms of setindex!(), allowing most indexed expressions as LHS
+  various forms of setindex!(), allowing most indexed expressions as LHS
 in an assignment. 
 
  * Concatenation
@@ -114,7 +114,7 @@ in an assignment.
 	hcat(V::NamedVector...)
 ```
 
-concatenates (column) vectors to an array.  If the names are identical
+  concatenates (column) vectors to an array.  If the names are identical
 for all vectors, these are retained in the results.  Otherwise
 the names are reinitialized to the default "1", "2", ...
 
@@ -126,33 +126,33 @@ type AbstractArray.  However, they may not treat the names attributes
 correctly
 
 ```julia
-	a::NamedArray
-	b::NamedArray
-	d::Int
-	function f
-	sum(a)
-	sum(a, d)
-	prod(a)
-	prod(a, d)
-	isequal(a,b)
-	==(a, b)
-	cumsum(a)
-	cumsum(a, d)
-	cumprod(a)
-	cumprod(a, d)
-	maximum(a)
-	maximum(a, d)
-	eltype(a)
-	cummin(a)
-	cummin(a, d)
-	cummax(a)
-	cummanx(a, d)
-	repmat(a, d1, d2)
-	nnz(a)
-	minimum(a)
-	minimum(a, d)
-	mapslices(f, a, d)
-	map(f, a)
+a::NamedArray
+b::NamedArray
+d::Int
+function f
+sum(a)
+sum(a, d)
+prod(a)
+prod(a, d)
+isequal(a,b)
+==(a, b)
+cumsum(a)
+cumsum(a, d)
+cumprod(a)
+cumprod(a, d)
+maximum(a)
+maximum(a, d)
+eltype(a)
+cummin(a)
+cummin(a, d)
+cummax(a)
+cummanx(a, d)
+repmat(a, d1, d2)
+nnz(a)
+minimum(a)
+minimum(a, d)
+mapslices(f, a, d)
+map(f, a)
 ```
 
 Implementation
@@ -162,10 +162,10 @@ Currently, the type is defined as
 
 ```julia
 type NamedArray{T,N} <: AbstractArray{T,N}
-        array::Array{T,N}
-        names::Vector{Vector}
-        dimnames::Vector
-        dicts::Array{Dict}
+    array::Array{T,N}
+    names::Vector{Vector}
+    dimnames::Vector
+    dicts::Array{Dict}
 }
 ```
 
@@ -174,7 +174,7 @@ but the inner constructor actually expects `NTuple`s for `names` and
 initialize a new NamedArray from known `names` and `dimnames`.  We
 therefore have a function
 
-``julia
+```julia
     vec2tuple(x...) = x
 ```
 
