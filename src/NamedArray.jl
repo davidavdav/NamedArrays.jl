@@ -18,7 +18,7 @@ end
 
 ## copy
 import Base.copy
-copy(A::NamedArray) = NamedArray{typeof(A[1]),length(A.names)}(copy(A.array), copy(A.names), copy(A.dimnames))
+copy(A::NamedArray) = NamedArray{typeof(A[1]),length(A.names)}(copy(A.array), vec2tuple(copy(A.names)...), vec2tuple(copy(A.dimnames)...))
 
 ## from array.jl
 function copy!{T}(dest::NamedArray{T}, dsto::Integer, src::ArrayOrNamed{T}, so::Integer, N::
