@@ -7,6 +7,7 @@ require("src/namedarraytypes.jl")
 function setnames!(a::NamedArray, v::Vector, d::Int)
     @assert length(a.names[d]) == length(v)
     a.names[d] = v
+    a.dicts[d] = Dict(v, 1:length(v))
 end
 
 ## copy
