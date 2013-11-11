@@ -60,13 +60,13 @@ convert(::Type{Array}, a::NamedArray)
 converts a NamedArray to an Array by dropping al names information
 
  * Arithmetic:
- - `*` and `.*` between numbers and NamedArray.  
+  - `*` and `.*` between numbers and NamedArray.  
 
   This is just a first attempt.  Code should probably be generated in
 meta programming. 
 
  * Print, Show:
- - basic printing, no pretty-printing yet. 
+  - basic printing, no pretty-printing yet. 
 
  * Size, ndims
 
