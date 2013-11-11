@@ -1,7 +1,7 @@
 ## This is just an attempt to see if we can do named arrays
 
 ## type definition
-require("named/namedarraytypes.jl")
+require("src/namedarraytypes.jl")
 
 ## seting names, dimnames
 function setnames!(a::NamedArray, v::Vector, d::Int)
