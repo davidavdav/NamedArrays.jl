@@ -39,9 +39,9 @@ NamedArray(::Type{T}, dims...)
 these constructors add default names to the array of type String, "1",
 "2", ... for each dimension, and names the dimensions "A", "B",
 ... (which will be all right for 26 dimensions to start with; 26
-dimensions should be enough for anyone:-).  The first one initializes
-the NamedArray with the Array a, the second makes a uninitialized
-NamedArray of element type T with the specified dimensions. 
+dimensions should be enough for anyone:-).  The former initializes
+the NamedArray with the Array `a`, the latter makes an uninitialized
+NamedArray of element type `T` with the specified dimensions `d...`. 
 
  * Copy
 
@@ -57,12 +57,12 @@ makes a deep-copy of all the elements in a, and returns a NamedArray
 convert(::Type{Array}, a::NamedArray)
 ```
 
-converts a NamedArray to an Array by dropping al names information
+ converts a NamedArray to an Array by dropping al names information
 
  * Arithmetic:
   - `*` and `.*` between numbers and NamedArray.  
 
-  This is just a first attempt.  Code should probably be generated in
+ This is just a first attempt.  Code should probably be generated in
 meta programming. 
 
  * Print, Show:
@@ -79,33 +79,33 @@ similar(a::NamedArray, t::DataType, dims::NTuple)
  * Getindex
 
 ```julia
-	getindex(A::NamedArray, s0::String)
-	getindex(A::NamedArray, s::String...)
-	getindex(A::NamedArray, i0::Real) 
-	getindex(A::NamedArray, I::IndexOrNamed...)
+getindex(A::NamedArray, s0::String)
+getindex(A::NamedArray, s::String...)
+getindex(A::NamedArray, i0::Real) 
+getindex(A::NamedArray, I::IndexOrNamed...)
 ```
 
-  here type IndexOrNamed is a union of most indexable types:
+ here type IndexOrNamed is a union of most indexable types:
 
 ```julia
 typealias IndexOrNamed Union(Real, Range1, String, AbstractVector)
 ```
 
-  This allows indexing of most combinations of integer, range, string,
+ This allows indexing of most combinations of integer, range, string,
 vector of integer and Vector of String of any number of dimensions, as
 long as the underlying Array supports the indexing. 
 
  * Setindex
 
 ```julia
-	setindex!(A::NamedArray, x, i0::Real)
-	setindex!(A::NamedArray, x, I::AbstractVector 
-	setindex!(A::NamedArray, X::ArrayOrNamed, I::Range1)
-	setindex!(A::NamedArray, X::AbstractArray, I::AbstractVector)
-	setindex!(A::NamedArray, x, I::IndexOrNamed...)
+setindex!(A::NamedArray, x, i0::Real)
+setindex!(A::NamedArray, x, I::AbstractVector 
+setindex!(A::NamedArray, X::ArrayOrNamed, I::Range1)
+setindex!(A::NamedArray, X::AbstractArray, I::AbstractVector)
+setindex!(A::NamedArray, x, I::IndexOrNamed...)
 ```
 
-  various forms of setindex!(), allowing most indexed expressions as LHS
+ various forms of setindex!(), allowing most indexed expressions as LHS
 in an assignment. 
 
  * Concatenation
@@ -114,7 +114,7 @@ in an assignment.
 	hcat(V::NamedVector...)
 ```
 
-  concatenates (column) vectors to an array.  If the names are identical
+ concatenates (column) vectors to an array.  If the names are identical
 for all vectors, these are retained in the results.  Otherwise
 the names are reinitialized to the default "1", "2", ...
 
