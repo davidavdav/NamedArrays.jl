@@ -12,7 +12,7 @@ dimension-checking in certain matrix computations.
 
 In all other respects, a NamedArray should be the same as an Array. 
 
-Synopsys
+Synopsis
 --------
 
     reload("src/NamedArray.jl")
