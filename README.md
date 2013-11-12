@@ -118,6 +118,10 @@ hcat(V::NamedVector...)
 for all vectors, these are retained in the results.  Otherwise
 the names are reinitialized to the default "1", "2", ...
 
+ * Sum, prod, minimum, maximum
+
+ These functions, when operating along one dimension, keep the names in the orther dimensions, and name the left over singleton dimension as $function($dimname).
+
 Methods that AbstractArray covers
 ---------------------------
 
@@ -131,9 +135,7 @@ b::NamedArray
 d::Int
 function f
 sum(a)
-sum(a, d)
 prod(a)
-prod(a, d)
 isequal(a,b)
 ==(a, b)
 cumsum(a)
@@ -141,7 +143,6 @@ cumsum(a, d)
 cumprod(a)
 cumprod(a, d)
 maximum(a)
-maximum(a, d)
 eltype(a)
 cummin(a)
 cummin(a, d)
@@ -150,7 +151,6 @@ cummanx(a, d)
 repmat(a, d1, d2)
 nnz(a)
 minimum(a)
-minimum(a, d)
 mapslices(f, a, d)
 map(f, a)
 ```
