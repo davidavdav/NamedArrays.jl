@@ -37,8 +37,8 @@ end
 ## I don't understand how to do this
 import Base.convert,Base.promote_rule
 convert(::Type{Array}, A::NamedArray) = A.array
-promote_rule(::Type{Array},::Type{NamedArray}) = Array
-+(x::Array, y::NamedArray) = +(promote(x,y)...)
+#promote_rule(::Type{Array},::Type{NamedArray}) = Array
+#+(x::Array, y::NamedArray) = +(promote(x,y)...)
 function *(x::NamedArray, y::Number) 
     r = copy(x)
     r.array *= y
@@ -172,6 +172,7 @@ function setindex!(A::NamedArray, x, I::IndexOrNamed...)
     setindex!(A.array, x, II...)
 end
 
+# this keeps names...
 function hcat{T}(V::NamedVector{T}...) 
     keepnames=true
     V1=V[1]
@@ -185,5 +186,15 @@ function hcat{T}(V::NamedVector{T}...)
         NamedArray(a, (names[1], colnames), (V1.dimnames[1], "hcat"))
     else
         NamedArray(a)
+    end
+end
+
+## sum etc: keep names in one dimension
+import Base.sum, Base.prod, Base.maximum, Base.minimum
+for f = (:sum, :prod, :maximum, :minimum)
+    @eval function ($f)(a::NamedArray, d::Int)
+        s = ($f)(a.array, d)
+        names = [i==d ? [string($f,"(",a.dimnames[i],")")] : a.names[i] for i=1:ndims(a)]
+        NamedArray(s, vec2tuple(names...), vec2tuple(a.dimnames...))
     end
 end
