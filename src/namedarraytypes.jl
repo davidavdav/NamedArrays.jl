@@ -60,10 +60,14 @@ function Names(names::Vector)
     Names(names, false)
 end
 
+## This is a construction that allows you to say somethong like
+## n[!"one",2] or n[!["one", "two"], 2]
+import Base.!
 function !(names::Names)
     Names(names.names, !names.exclude)
 end
-
+!{T<:String}(names::Vector{T}) = !Names(names)
+!(name::String) = !Names([name])
 
 typealias NamedVector{T} NamedArray{T,1}
 typealias ArrayOrNamed{T} Union(Array{T}, NamedArray{T})
