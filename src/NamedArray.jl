@@ -93,6 +93,18 @@ function indices(dict::Dict, I::IndexOrNamed)
     elseif isa(I, String)
         dI = dict[I]
         return dI:dI
+    elseif isa(I, Names)
+        k = keys(dict)
+
+        if !is(eltype(I.names), eltype(k))
+            error("Elements of the Names object must be of the same type as the array names for each dimension")
+        end
+
+        if(I.exclude)
+            return map(function(s) dict[s] end, setdiff(k, I.names))
+        else
+            return map(function(s) dict[s] end, I.names)
+        end
     elseif isa(I, AbstractVector)
         if eltype(I) <: String
             return map(function(s) dict[s] end, I)
@@ -116,7 +128,6 @@ function getindex(A::NamedArray, I::IndexOrNamed...)
     names = map(function(i) getindex(A.names[i],II[i]) end, 1:length(II))
     NamedArray{eltype(a),ndims(a)}(a, vec2tuple(names...), vec2tuple(A.dimnames...))
 end
-
 
 ## These seem to be caught by the general getindex, I'm not sure if this is what we want...
 getindex(A::NamedArray, i0::Real) = arrayref(A.array,to_index(i0))
