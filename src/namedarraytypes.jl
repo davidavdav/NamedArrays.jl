@@ -49,8 +49,22 @@ function NamedArray(a::Array)
     dimnames = [string(char(64+i)) for i=1:ndims(a)]
     NamedArray(a, vec2tuple(names...), vec2tuple(dimnames...))
 end
-    
+
+
+immutable Names
+    names::Vector
+    exclude::Bool
+end
+
+function Names(names::Vector)
+    Names(names, false)
+end
+
+function !(names::Names)
+    Names(names.names, !names.exclude)
+end
+
 
 typealias NamedVector{T} NamedArray{T,1}
 typealias ArrayOrNamed{T} Union(Array{T}, NamedArray{T})
-typealias IndexOrNamed Union(Real, Range1, String, AbstractVector)
+typealias IndexOrNamed Union(Real, Range1, String, Names, AbstractVector)
