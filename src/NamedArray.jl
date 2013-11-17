@@ -95,11 +95,9 @@ function indices(dict::Dict, I::IndexOrNamed)
         return dI:dI
     elseif isa(I, Names)
         k = keys(dict)
-
         if !is(eltype(I.names), eltype(k))
             error("Elements of the Names object must be of the same type as the array names for each dimension")
         end
-
         if(I.exclude)
             return map(function(s) dict[s] end, setdiff(k, I.names))
         else
