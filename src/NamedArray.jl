@@ -78,7 +78,7 @@ import Base.getindex, Base.to_index
 
 ## sting indexed arrays, single elements: drop names
 getindex(A::NamedArray, s0::String) = getindex(A, A.dicts[1][s0])
-getindex(A::NamedArray, s::String...) = getindex(A, map(function(t) A.dicts[t[1]][t[2]] end, zip(1:length(s), s))...)
+getindex(A::NamedArray, s::String...) = getindex(A, map(t -> A.dicts[t[1]][t[2]], zip(1:length(s), s))...)
 
 ## I'm not sure this is the right name...
 ## This function takes a range or vector of ints or vector of strings, 
@@ -87,25 +87,25 @@ getindex(A::NamedArray, s::String...) = getindex(A, map(function(t) A.dicts[t[1]
 import Base.indices
 function indices(dict::Dict, I::IndexOrNamed)
     if isa(I, Real)
-        return I:I
+        if I<0
+            return setdiff(1:length(dict), -I)
+        else
+            return I:I
+        end
     elseif isa(I, Range)
         return I                # eltype(Range1) is always <: Real
     elseif isa(I, String)
         dI = dict[I]
         return dI:dI
-    elseif isa(I, Names)
+    elseif isa(I, NoNames)
         k = keys(dict)
         if !is(eltype(I.names), eltype(k))
             error("Elements of the Names object must be of the same type as the array names for each dimension")
         end
-        if(I.exclude)
-            return map(function(s) dict[s] end, setdiff(k, I.names))
-        else
-            return map(function(s) dict[s] end, I.names)
-        end
+        return map(s -> dict[s], setdiff(k, I.names))
     elseif isa(I, AbstractVector)
         if eltype(I) <: String
-            return map(function(s) dict[s] end, I)
+            return map(s -> dict[s], I)
         elseif eltype(I) <: Real
             return I
         else
@@ -123,7 +123,7 @@ function getindex(A::NamedArray, I::IndexOrNamed...)
     a = getindex(A.array, II...)
     if ndims(a) != ndims(A); return a; end # number of dimension changed
     @assert ndims(A) == length(II)
-    names = map(function(i) getindex(A.names[i],II[i]) end, 1:length(II))
+    names = map(i -> getindex(A.names[i],II[i]), 1:length(II))
     NamedArray{eltype(a),ndims(a)}(a, vec2tuple(names...), vec2tuple(A.dimnames...))
 end
 
@@ -189,7 +189,7 @@ function hcat{T}(V::NamedVector{T}...)
     for i=2:length(V)
         keepnames &= V[i].names==names
     end
-    a = hcat(map(function(a) a.array end,V)...)
+    a = hcat(map(a -> a.array, V)...)
     if keepnames
         colnames = [string(i) for i=1:size(a,2)]
         NamedArray(a, (names[1], colnames), (V1.dimnames[1], "hcat"))
