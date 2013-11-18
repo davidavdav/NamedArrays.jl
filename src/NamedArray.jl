@@ -97,12 +97,16 @@ function indices(dict::Dict, I::IndexOrNamed)
     elseif isa(I, String)
         dI = dict[I]
         return dI:dI
-    elseif isa(I, NoNames)
+    elseif isa(I, Names)
         k = keys(dict)
         if !is(eltype(I.names), eltype(k))
             error("Elements of the Names object must be of the same type as the array names for each dimension")
         end
-        return map(s -> dict[s], setdiff(k, I.names))
+        if I.exclude
+            return map(s -> dict[s], setdiff(k, I.names))
+        else
+            return map(s -> dict[s], I.names)
+        end
     elseif isa(I, AbstractVector)
         if eltype(I) <: String
             return map(s -> dict[s], I)
