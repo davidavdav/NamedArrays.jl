@@ -18,7 +18,7 @@ end
 
 ## copy
 import Base.copy
-copy(A::NamedArray) = NamedArray{typeof(A[1]),length(A.names)}(copy(A.array), vec2tuple(copy(A.names)...), vec2tuple(copy(A.dimnames)...))
+copy(A::NamedArray) = NamedArray{typeof(A[1]),length(A.names)}(copy(A.array), tuple(copy(A.names)...), tuple(copy(A.dimnames)...))
 
 ## from array.jl
 function copy!{T}(dest::NamedArray{T}, dsto::Integer, src::ArrayOrNamed{T}, so::Integer, N::
@@ -119,12 +119,12 @@ getindex(A::NamedArray, i0::Real) = arrayref(A.array,to_index(i0))
 function getindex(A::NamedArray, I::IndexOrNamed...)
     ## This is not completely safe...
     ## II = map(function(i) indices(A.dicts[i], I[i]) end, 1:length(I))
-    II = vec2tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
+    II = tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
     a = getindex(A.array, II...)
     if ndims(a) != ndims(A); return a; end # number of dimension changed
     @assert ndims(A) == length(II)
     names = map(i -> getindex(A.names[i],II[i]), 1:length(II))
-    NamedArray{eltype(a),ndims(a)}(a, vec2tuple(names...), vec2tuple(A.dimnames...))
+    NamedArray{eltype(a),ndims(a)}(a, tuple(names...), tuple(A.dimnames...))
 end
 
 ## These seem to be caught by the general getindex, I'm not sure if this is what we want...
@@ -177,7 +177,7 @@ setindex!{T<:Real}(A::NamedArray, X::AbstractArray, I::AbstractVector{T}) = seti
 
 ## This takes care of most other cases
 function setindex!(A::NamedArray, x, I::IndexOrNamed...)
-    II = vec2tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
+    II = tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
     setindex!(A.array, x, II...)
 end
 
@@ -204,6 +204,6 @@ for f = (:sum, :prod, :maximum, :minimum)
     @eval function ($f)(a::NamedArray, d::Int)
         s = ($f)(a.array, d)
         names = [i==d ? [string($f,"(",a.dimnames[i],")")] : a.names[i] for i=1:ndims(a)]
-        NamedArray(s, vec2tuple(names...), vec2tuple(a.dimnames...))
+        NamedArray(s, tuple(names...), tuple(a.dimnames...))
     end
 end
