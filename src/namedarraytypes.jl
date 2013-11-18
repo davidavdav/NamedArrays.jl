@@ -51,24 +51,18 @@ function NamedArray(a::Array)
 end
 
 
-immutable Names
+immutable NoNames
     names::Vector
-    exclude::Bool
 end
 
-function Names(names::Vector)
-    Names(names, false)
-end
 
 ## This is a construction that allows you to say somethong like
 ## n[!"one",2] or n[!["one", "two"], 2]
+## We might, for consistency, decide to do this with "-" instead of !
 import Base.!
-function !(names::Names)
-    Names(names.names, !names.exclude)
-end
-!{T<:String}(names::Vector{T}) = !Names(names)
-!(name::String) = !Names([name])
+!{T<:String}(names::Vector{T}) = NoNames(names)
+!(name::String) = NoNames([name])
 
 typealias NamedVector{T} NamedArray{T,1}
 typealias ArrayOrNamed{T} Union(Array{T}, NamedArray{T})
-typealias IndexOrNamed Union(Real, Range1, String, Names, AbstractVector)
+typealias IndexOrNamed Union(Real, Range1, String, NoNames, AbstractVector)
