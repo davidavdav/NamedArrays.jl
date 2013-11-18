@@ -19,9 +19,10 @@ Synopsis
 ```julia
 reload("src/NamedArray.jl")
 n = NamedArray(rand(2,4))
-setnames!(n, ["one", "two"], 1) 
+setnames!(n, ["one", "two"], 1)         # give the names "one" and "two" to the rows (dimension 1)
 n["one", 2:3]
 n["two", :] = 11:14
+n[!"two", :] = 4:7                      # all rows but the one called "two"
 n
 sum(n,1)
 ```
@@ -169,11 +170,5 @@ type NamedArray{T,N} <: AbstractArray{T,N}
 }
 ```
 
-but the inner constructor actually expects `NTuple`s for `names` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `names` and `dimnames`.  We therefore have a function
+but the inner constructor actually expects `NTuple`s for `names` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `names` and `dimnames`.  You can use the expression `tuple(Vector)...` for that.
 
-```julia
-    vec2tuple(x...) = x
-```
-
-which, when called with ellipses, turns a vector into a tuple.
-Perhaps there is a more general way of constructing a tuple...
