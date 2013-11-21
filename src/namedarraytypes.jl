@@ -6,23 +6,31 @@
 ## This code is licensed under the GNU General Public License, version 2
 ## See the file LICENSE in this distribution
 
+## The inner constructor assumes all elements exiisting
 type NamedArray{T,N} <: AbstractArray{T,N}
     array::Array{T,N}
-    names::Vector{Vector}
+#    names::Vector{Vector}
     dimnames::Vector
-    dicts::Array{Dict}
-    function NamedArray(array::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N,String})
-        @assert size(array)==map(length, names)
-        vnames = [name for name in names] # make this a vector
+    dicts::Vector{Dict}
+    function NamedArray(array::Array{T,N}, dimnames::NTuple{N,String}, dicts::NTuple{N,Dict})
+#        vnames = [name for name in names] # make this a vector
         vdimnames = [name for name in dimnames]
-        dicts = [Dict(n,1:length(n)) for n in names]
-        new(array, vnames, vdimnames, dicts)
+        vdicts = [dict for dict in dicts]
+        new(array, vdimnames, vdicts)
     end
+end
+## constructor with array, names and dimnames (dict is created from names)
+## first outer
+function NamedArray{T,N}(array::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N, String})
+    @assert size(array)==map(length, names)
+    dicts = map(names -> Dict(names,1:length(names)), names)
+    NamedArray{T,N}(array, dimnames, dicts) # call inner constructor
 end
 function NamedArray{T,N}(::Type{T}, names::NTuple{N,Vector},dimnames::NTuple{N,String})
     array = Array(T,map(length,names))
-    NamedArray{T,N}(array, names, dimnames)
+    NamedArray(array, names, dimnames) # call first outer constructor
 end
+
 function NamedArray(a::Array, names::NTuple, dimnames::NTuple)
     @assert ndims(a)==length(names)==length(dimnames)
 #    @assert eltype(names) <: Vector
