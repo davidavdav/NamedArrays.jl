@@ -9,16 +9,22 @@
 ## type definition
 require("src/namedarraytypes.jl")
 
+## access to the names of the dimensions
+names(dict::Dict) = collect(keys(dict))[sortperm(collect(values(dict)))] 
+names(a::NamedArray) = map(dict -> names(dict), a.dicts)
+names(a::NamedArray, d::Int) = names(a.dicts[d])
+dimnames(a::NamedArray) = a.dimnames
+dimnames(a::NamedArray, d::Int) = a.dimnames[d]
+
 ## seting names, dimnames
 function setnames!(a::NamedArray, v::Vector, d::Int)
-    @assert length(a.names[d]) == length(v)
-    a.names[d] = v
+    @assert size(a.array,d) == length(v)
     a.dicts[d] = Dict(v, 1:length(v))
 end
 
 ## copy
 import Base.copy
-copy(A::NamedArray) = NamedArray{typeof(A[1]),length(A.names)}(copy(A.array), tuple(copy(A.names)...), tuple(copy(A.dimnames)...))
+copy(a::NamedArray) = NamedArray{eltype(a),length(a.dicts)}(copy(a.array), tuple(copy(a.dimnames)...), tuple(copy(a.dicts)...))
 
 ## from array.jl
 function copy!{T}(dest::NamedArray{T}, dsto::Integer, src::ArrayOrNamed{T}, so::Integer, N::
@@ -47,19 +53,20 @@ end
 .*(x::NamedArray, y::Number) = *(x,y)
 *(y::Number, x::NamedArray) = *(x,y)
 
-import Base.print, Base.show, Base.display
+import Base.print, Base.show # , Base.display
 print(A::NamedArray) = print(A.array)
 function show(io::IO, A::NamedArray)
-    println(io, typeof(A))
-    print(io, "names: ")
-    for (n in A.names) print(io, n') end
-    println(io, "dimnames: ", A.dimnames')
-    println(io, A.array)
+    println(io, typeof(A), " names:")
+    for i in 1:length(A.dimnames)
+        print(io, " ", A.dimnames[i], ": ")
+        print(io, names(A,i)')
+    end
+    print(io, A.array)
 end
-function display(t::TextDisplay, x::NamedArray)
-    display(t, x.names)
-    display(t, x.array)
-end
+#function display(t::TextDisplay, x::NamedArray)
+#    display(t, x.names)
+#    display(t, x.array)
+#end
 
 import Base.size, Base.ndims
 size(a::NamedArray) = arraysize(a.array)
@@ -67,11 +74,11 @@ size(a::NamedArray, d) = arraysize(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
 import Base.similar
-function similar(A::NamedArray, t::DataType, dims::NTuple)
-    if size(A) != dims
+function similar(a::NamedArray, t::DataType, dims::NTuple)
+    if size(a) != dims
         return NamedArray(t, dims...) # re-initialize names arrays...
     else
-        return NamedArray(t, A.names, A.dimnames)
+        return NamedArray(t, names(a), a.dimnames)
     end
 end
 #similar(A::NamedArray, t::DataType, dims::Int...) = similar(A, t, dims)
@@ -152,8 +159,8 @@ function getindex(A::NamedArray, I::IndexOrNamed...)
         n -= 1
     end
     if ndims(a) != n || length(dims)==1 && ndims(A)>1; return a; end # number of dimension changed
-    names = map(i -> [getindex(A.names[i],II[i])], 1:n)
-    NamedArray{eltype(a),ndims(a)}(a, tuple(names...), tuple(A.dimnames[1:n]...))
+    newnames = map(i -> [getindex(names(A,i),II[i])], 1:n)
+    NamedArray(a, tuple(newnames...), tuple(A.dimnames[1:n]...))
 end
 
 ## These seem to be caught by the general getindex, I'm not sure if this is what we want...
@@ -209,25 +216,18 @@ function setindex!(A::NamedArray, x, I::IndexOrNamed...)
     setindex!(A.array, x, II...)
 end
 
-## access to the names of the dimensions
-names(dict::Dict) = collect(keys(dict))[sortperm(collect(values(dict)))] 
-names(a::NamedArray) = map(dict -> names(dict), a.dicts)
-names(a::NamedArray, d::Int) = names(a.dicts[d])
-dimnames(a::NamedArray) = a.dimnames
-dimnames(a::NamedArray, d::Int) = a.dimnames[d]
-
 # this keeps names...
 function hcat{T}(V::NamedVector{T}...) 
     keepnames=true
     V1=V[1]
-    names = V1.names
+    firstnames = names(V1)
     for i=2:length(V)
-        keepnames &= V[i].names==names
+        keepnames &= names(V[i])==firstnames
     end
     a = hcat(map(a -> a.array, V)...)
     if keepnames
         colnames = [string(i) for i=1:size(a,2)]
-        NamedArray(a, (names[1], colnames), (V1.dimnames[1], "hcat"))
+        NamedArray(a, (firstnames[1], colnames), (V1.dimnames[1], "hcat"))
     else
         NamedArray(a)
     end
@@ -238,7 +238,7 @@ import Base.sum, Base.prod, Base.maximum, Base.minimum
 for f = (:sum, :prod, :maximum, :minimum)
     @eval function ($f)(a::NamedArray, d::Int)
         s = ($f)(a.array, d)
-        names = [i==d ? [string($f,"(",a.dimnames[i],")")] : a.names[i] for i=1:ndims(a)]
-        NamedArray(s, tuple(names...), tuple(a.dimnames...))
+        newnames = [i==d ? [string($f,"(",a.dimnames[i],")")] : names(a,i) for i=1:ndims(a)]
+        NamedArray(s, tuple(newnames...), tuple(a.dimnames...))
     end
 end
