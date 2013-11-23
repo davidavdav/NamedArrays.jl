@@ -39,12 +39,39 @@ Integer)
     end
 end
 
+import Base.size, Base.ndims
+size(a::NamedArray) = arraysize(a.array)
+size(a::NamedArray, d) = arraysize(a.array, d)
+ndims(a::NamedArray) = ndims(a.array)
+
 ## convert, promote
-## I don't understand how to do this
 import Base.convert,Base.promote_rule
-convert(::Type{Array}, A::NamedArray) = A.array
-#promote_rule(::Type{Array},::Type{NamedArray}) = Array
-#+(x::Array, y::NamedArray) = +(promote(x,y)...)
+convert{T,N}(::Type{Array{T,N}}, A::NamedArray{T,N}) = A.array
+function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}},::Type{NamedArray{T2,N}})
+    println("my rule")
+    t = promote_type(T1,T2)
+    Array{t,N}
+end
+for op in (:+, :-, :.+, :.-, :.*, :./)
+    ## named %op% named
+    @eval function ($op)(x::NamedArray, y::NamedArray)
+        if names(x)==names(y) && dimnames(x)==dimnames(y)
+            NamedArray(($op)(x.array,y.array), tuple(names(x)...), tuple(dimnames(x)...))
+        else
+            warn("Dropping mismatching names")
+            ($op)(x.array,y.array)
+        end
+    end
+    ## named %op% array
+    @eval ($op)(x::NamedArray, y::Array) = NamedArray(($op)(x.array, y), tuple(names(x)...), tuple(x.dimnames...))
+    @eval ($op)(x::Array, y::NamedArray) = NamedArray(($op)(x, y.array), tuple(names(y)...), tuple(y.dimnames...))
+end
+for op in (:+, :-, :.+, :.-, :.*, :*, :/, :\) 
+    @eval ($op)(x::AbstractArray, y::AbstractArray) = ($op)(promote(x,y)...)
+end
+## matmul
+*(x::NamedArray, y::NamedArray) = NamedArray(x.array*y.array, (names(x,1),names(y,2)), (x.dimnames[1], y.dimnames[2]))
+
 function *(x::NamedArray, y::Number) 
     r = copy(x)
     r.array *= y
@@ -52,7 +79,6 @@ end
 .*(y::Number, x::NamedArray) = *(x,y)
 .*(x::NamedArray, y::Number) = *(x,y)
 *(y::Number, x::NamedArray) = *(x,y)
-
 import Base.print, Base.show # , Base.display
 print(A::NamedArray) = print(A.array)
 function show(io::IO, A::NamedArray)
@@ -63,15 +89,11 @@ function show(io::IO, A::NamedArray)
     end
     print(io, A.array)
 end
-#function display(t::TextDisplay, x::NamedArray)
-#    display(t, x.names)
-#    display(t, x.array)
-#end
 
-import Base.size, Base.ndims
-size(a::NamedArray) = arraysize(a.array)
-size(a::NamedArray, d) = arraysize(a.array, d)
-ndims(a::NamedArray) = ndims(a.array)
+function ctranspose(a::NamedArray) 
+    @assert ndims(a)==2
+    NamedArray(a.array', tuple(reverse(names(a))...), tuple(reverse(a.dimnames)...))
+end
 
 import Base.similar
 function similar(a::NamedArray, t::DataType, dims::NTuple)
