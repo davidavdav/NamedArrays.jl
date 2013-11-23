@@ -46,7 +46,11 @@ ndims(a::NamedArray) = ndims(a.array)
 
 ## convert, promote
 import Base.convert,Base.promote_rule
+## to array
 convert{T,N}(::Type{Array{T,N}}, A::NamedArray{T,N}) = A.array
+convert(::Type{Array}, a::NamedArray) = a.array
+## to other type
+convert{T}(::Type{NamedArray{T}}, a::NamedArray) = NamedArray(convert(Array{T}, a.array), tuple(a.dimnames...), tuple(a.dicts...))
 function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}},::Type{NamedArray{T2,N}})
     println("my rule")
     t = promote_type(T1,T2)
@@ -71,14 +75,26 @@ for op in (:+, :-, :.+, :.-, :.*, :*, :/, :\)
 end
 ## matmul
 *(x::NamedArray, y::NamedArray) = NamedArray(x.array*y.array, (names(x,1),names(y,2)), (x.dimnames[1], y.dimnames[2]))
-
-function *(x::NamedArray, y::Number) 
-    r = copy(x)
-    r.array *= y
+## scalar arithmetic
+for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\)
+    @eval function ($op)(x::NamedArray, y::Number) 
+        if promote_type(eltype(x),typeof(y)) == eltype(x)
+            r = copy(x)
+            r.array = $op(x.array,y)
+        else
+            NamedArray(($op)(x.array, y), tuple(x.dimnames...), tuple(x.dicts...))
+        end
+    end
+    @eval function ($op)(x::Number, y::NamedArray) 
+        if promote_type(typeof(x), eltype(y)) == eltype(y)
+            r = copy(y)
+            r.array = $op(x, y.array)
+        else
+            NamedArray(($op)(x, y.array), tuple(x.dimnames...), tuple(x.dicts...))
+        end
+    end
 end
-.*(y::Number, x::NamedArray) = *(x,y)
-.*(x::NamedArray, y::Number) = *(x,y)
-*(y::Number, x::NamedArray) = *(x,y)
+
 import Base.print, Base.show # , Base.display
 print(A::NamedArray) = print(A.array)
 function show(io::IO, A::NamedArray)
