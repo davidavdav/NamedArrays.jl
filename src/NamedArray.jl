@@ -125,10 +125,48 @@ end
 
 import Base.getindex, Base.to_index, Base.indices
 
-indices(dict::Dict, I::Real) = I
+# These functions transform various index types into values suitable for standard array indexing
 indices(dict::Dict, I::Range1) = I
+indices(dict::Dict, I::Range) = I
 indices(dict::Dict, I::String) = dict[I]
-indices{T<:String}(dict::Dict, I::Vector{T}) = map(s -> dict[s], I)
+indices{T<:String}(dict::Dict, I::AbstractVector{T}) = map(s -> dict[s], I)
+indices(dict::Dict, I::AbstractVector) = error("unsupported vector type: ", eltype(I))
+
+function indices(dict::Dict, I::Integer)
+    if I > 0
+        return I
+    else
+        return setdiff(1:length(dict), -I)
+    end
+end
+
+indices(dict::Dict, I::Real) = indices(convert(Int, I))
+
+function indices{T<:Integer}(dict::Dict, I::AbstractVector{T})
+    if all(I .> 0)
+        return I
+    elseif all(I .< 0)
+        return setdiff(1:length(dict), -I)
+    else
+        error("indices must all be of the same sign")
+    end
+end
+
+indices{T<:Real}(dict::Dict, I::AbstractVector{T}) = indices(dict, convert(Vector{Int}, I))
+
+function indices(dict::Dict, I::Names)
+    k = keys(dict)
+
+    if !is(eltype(I.names), eltype(k))
+        error("elements of the Names object must be of the same type as the array names for each dimension")
+    end
+
+    if I.exclude
+        return map(s -> dict[s], setdiff(names(dict), I.names))
+    else
+        return map(s -> dict[s], I.names)
+    end
+end
 
 ## first, we do all combinations of single indices, for efficiency reasons
 getindex(A::NamedArray, i1::Real) = arrayref(A.array,to_index(i1))
@@ -147,43 +185,6 @@ for T1 in types
 end
 ## This covers everything up over 3 dimensions
 getindex(a::NamedArray, index::Union(Real, String)...) = getindex(a.array, map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
-
-## This function takes a range or vector of ints or vector of strings, 
-## and returns a range or vector of ints, suitable for indexing using traditional 
-## array indexing
-## This makes the general getindex() very slow...
-function indices(dict::Dict, I::IndexOrNamed)
-    if isa(I, Real)
-        if I<0
-            return setdiff(1:length(dict), -I)
-        else
-            return I:I
-        end
-    elseif isa(I, Range)
-        return I                # eltype(Range1) is always <: Real
-    elseif isa(I, String)
-        dI = dict[I]
-        return dI:dI
-    elseif isa(I, Names)
-        k = keys(dict)
-        if !is(eltype(I.names), eltype(k))
-            error("Elements of the Names object must be of the same type as the array names for each dimension")
-        end
-        if I.exclude
-            return map(s -> dict[s], setdiff(names(dict), I.names))
-        else
-            return map(s -> dict[s], I.names)
-        end
-    elseif isa(I, AbstractVector)
-        if eltype(I) <: String
-            return map(s -> dict[s], I)
-        elseif eltype(I) <: Real
-            return I
-        else
-            error("Unsupported vector type ", eltype(I))
-        end
-    end
-end
 
 ##getindex(A::NamedArray, i0::Real) = arrayref(A.array,to_index(i0))
 ## for Ranges or Arrays we do an effort keep names
