@@ -321,12 +321,29 @@ import Base.flipdim
 function flipdim(a::NamedArray, d::Int) 
     newdicts = copy(a.dicts)
     newdicts[d] = copy(a.dicts[d])
-    n = size(a,d)
-    for (k,v) in zip(keys(newdicts[d]),values(newdicts[d]))
+    n = size(a,d)+1
+    for (k,v) in collect(newdicts[d])
         newdicts[d][k] = n - v
     end
     NamedArray(flipdim(a.array,d), tuple(a.dimnames...), tuple(newdicts...))
 end
+
+## circshift automagically works...
+## :' automagically works, how is this possible?
+
+import Base.permutedims
+function permutedims(a::NamedArray, perm::Vector{Int})
+    newdicts = a.dicts[perm]
+    newdimnames = a.dimnames[perm]
+    NamedArray(permutedims(a.array, perm), tuple(newdimnames...), tuple(newdicts...))
+end
+import Base.transpose
+transpose(a::NamedArray) = permutedims(a, [2,1])
+
+import Base.vec
+vec(a::NamedArray) = vec(a.array)
+
+# import Base.rotl90, Base.rot180, Base.rotr90
            
 fa(f::Function, a::NamedArray) = NamedArray(f(a), tuple(a.dimnames...), tuple(a.dicts...))
 faa(f::Function, a::NamedArray, args...) = NamedArray(f(a, args...), tuple(a.dimnames...), tuple(a.dicts...))
