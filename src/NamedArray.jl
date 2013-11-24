@@ -44,6 +44,7 @@ size(a::NamedArray) = arraysize(a.array)
 size(a::NamedArray, d) = arraysize(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
+
 ## convert, promote
 import Base.convert,Base.promote_rule
 ## to array
@@ -272,11 +273,62 @@ function hcat{T}(V::NamedVector{T}...)
 end
 
 ## sum etc: keep names in one dimension
-import Base.sum, Base.prod, Base.maximum, Base.minimum
-for f = (:sum, :prod, :maximum, :minimum)
+import Base.sum, Base.prod, Base.maximum, Base.minimum, Base.mean, Base.std
+for f = (:sum, :prod, :maximum, :minimum, :mean, :std)
     @eval function ($f)(a::NamedArray, d::Int)
         s = ($f)(a.array, d)
         newnames = [i==d ? [string($f,"(",a.dimnames[i],")")] : names(a,i) for i=1:ndims(a)]
         NamedArray(s, tuple(newnames...), tuple(a.dimnames...))
     end
 end
+
+function verify_names(a::NamedArray...)
+    nargs = length(a)
+    @assert nargs>1
+    bigi = indmax(map(length, a)) # find biggest dimension
+    big = a[bigi]
+    for i in setdiff(bigi, 1:nargs)
+        println("i ", i)
+        for d=1:ndims(a[i])
+            println("d ", d)
+            if size(a[i],d) > 1
+                @assert names(big,d) == names(a(i),d)
+            end
+        end
+    end
+    return bigi::Int, big
+end
+
+## broadcast
+import Base.broadcast, Base.broadcast!
+function broadcast(f::Function, a::NamedArray...)
+    ## verify that the names are consistent
+    bigi, big = verify_names(a...)
+    arrays = map(x->x.array, a)
+    NamedArray(broadcast(f, arrays...), tuple(big.dimnames...), tuple(big.dicts...))
+end
+
+function broadcast!(f::Function, dest::NamedArray, a::NamedArray...)
+    ## verify that the names are consistent, we assume dest is the right size
+    bigi, big = verify_names(a...)
+    arrays = map(x->x.array, a)
+    broadcast!(f, dest.array, arrays...)
+    dest
+end
+
+import Base.flipdim
+function flipdim(a::NamedArray, d::Int) 
+    newdicts = copy(a.dicts)
+    newdicts[d] = copy(a.dicts[d])
+    n = size(a,d)
+    for (k,v) in zip(keys(newdicts[d]),values(newdicts[d]))
+        newdicts[d][k] = n - v
+    end
+    NamedArray(flipdim(a.array,d), tuple(a.dimnames...), tuple(newdicts...))
+end
+           
+fa(f::Function, a::NamedArray) = NamedArray(f(a), tuple(a.dimnames...), tuple(a.dicts...))
+faa(f::Function, a::NamedArray, args...) = NamedArray(f(a, args...), tuple(a.dimnames...), tuple(a.dicts...))
+
+# import Base.inv
+# for f in (:inv
