@@ -42,7 +42,17 @@ these constructors add default names to the array of type String, "1",
 ... (which will be all right for 26 dimensions to start with; 26
 dimensions should be enough for anyone:-).  The former initializes
 the NamedArray with the Array `a`, the latter makes an uninitialized
-NamedArray of element type `T` with the specified dimensions `d...`. 
+NamedArray of element type `T` with the specified dimensions `dims...`. 
+
+ * Names, dimnames
+
+```julia
+names(a::NamedArray)
+names(a::NamedArray, dim)
+dimnames(a::NamedArray)
+```
+
+ return the names of the indices along dimension `dim` and the names of the dimensions themselves. 
 
  * Copy
 
@@ -50,7 +60,7 @@ NamedArray of element type `T` with the specified dimensions `d...`.
 copy(a::NamedArray)
 ```
 
-makes a deep-copy of all the elements in a, and returns a NamedArray
+makes a copy of all the elements in a, and returns a NamedArray
 
  * Convert
 
@@ -59,18 +69,26 @@ convert(::Type{Array}, a::NamedArray)
 ```
 
  converts a NamedArray to an Array by dropping al names information
+ 
+```julia
+convert{T}(::Type{NamedArray{T}}, a::NamedArray)
+```
+ converts the element type of a NamedArray
 
  * Arithmetic:
-  - `*` and `.*` between numbers and NamedArray.  
+  - between NamedArray and NamedArray
+  - between NamedArray and Array
+  - between NamedArray and Number
+    - `+`, `-`, `.+`, `.-`, `.*`, `./`
+  - between NamedArray and Number
+    - `*`, `/`, `\`
+  - Matrix Multiplication `*` between NamedArray and NamedArray 
 
- This is just a first attempt.  Code should probably be generated in
-meta programming. 
-
- * Print, Show:
+ * `print`, `show`:
   - basic printing, no pretty-printing yet. 
 
- * Size, ndims
-
+ * `size`, `ndims`
+ 
  * Similar
 
 ```julia
@@ -109,6 +127,9 @@ setindex!(A::NamedArray, x, I::IndexOrNamed...)
  various forms of setindex!(), allowing most indexed expressions as LHS
 in an assignment. 
 
+Methods with special treatment of names / dimnames
+--------------------------------------------------
+
  * Concatenation
 
 ```julia
@@ -119,7 +140,52 @@ hcat(V::NamedVector...)
 for all vectors, these are retained in the results.  Otherwise
 the names are reinitialized to the default "1", "2", ...
 
- * Sum, prod, minimum, maximum
+ * Transposition
+
+```julia
+'
+ctranspose
+transpose
+permutedims
+circshift
+```
+ 
+ operate on the dimnames as well
+ 
+ * Reordering of dimensions in NamedVectors
+
+```julia
+nthperm
+nthperm!
+permute!
+shuffle
+shuffle!
+reverse
+reverse!
+```
+
+ openrate on the names of the rows as well 
+
+
+ * Broadcasts
+
+```julia
+broadcast
+broadcast!
+```
+
+ these functions check consistency of the names of dimensions `d` with `length(d)>1`, and performs the normal `broadcast`
+
+ * Aggregates
+
+```julia
+sum
+prod
+maximum
+minimum
+mean
+std
+```
 
  These functions, when operating along one dimension, keep the names in the orther dimensions, and name the left over singleton dimension as $function($dimname).
 
@@ -164,7 +230,6 @@ Currently, the type is defined as
 ```julia
 type NamedArray{T,N} <: AbstractArray{T,N}
     array::Array{T,N}
-    names::Vector{Vector}
     dimnames::Vector
     dicts::Array{Dict}
 }
