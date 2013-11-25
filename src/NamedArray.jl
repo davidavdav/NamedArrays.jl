@@ -349,24 +349,30 @@ import Base.vec
 vec(a::NamedArray) = vec(a.array)
 
 # todo: import Base.rotl90, Base.rot180, Base.rotr90
-import Base.nthperm, Base.nthperm!, Base.permute!, Base.ipermute!, Base.shuffle
-function nthperm(a::NamedVector, n::Int)
-    newnames = nthperm(names(a)[1], n)
-    NamedArray(nthperm(a.array,n), (newnames,), (a.dimnames[1],))
+import Base.nthperm, Base.nthperm!, Base.permute!, Base.ipermute!, Base.shuffle, Base.shuffle!, Base.reverse, Base.reverse!
+function nthperm(v::NamedVector, n::Int)
+    newnames = nthperm(names(v)[1], n)
+    NamedArray(nthperm(v.array,n), (newnames,), (v.dimnames[1],))
 end
-function nthperm!(a::NamedArray, n::Int) 
-    setnames!(a, nthperm(names(a)[1], n), 1)
-    nthperm!(a.array,n)
-    a
+function nthperm!(v::NamedVector, n::Int) 
+    setnames!(v, nthperm(names(v)[1], n), 1)
+    nthperm!(v.array,n)
+    v
 end
-function permute!(a::NamedArray, perm::AbstractVector)
-    setnames!(a, names(a)[1][perm], 1)
-    permute!(a.array, perm)
-    a
+function permute!(v::NamedVector, perm::AbstractVector)
+    setnames!(v, names(v)[1][perm], 1)
+    permute!(v.array, perm)
+    v
 end
-ipermute!(a::NamedArray, perm::AbstractVector) = permute!(a, iperm(perm))
-shuffle(a::NamedArray) = permute
-
+ipermute!(v::NamedVector, perm::AbstractVector) = permute!(v, iperm(perm))
+shuffle(v::NamedVector) = permute!(copy(v), randperm(length(v)))
+shuffle!(v::NamedVector) = permute!(v, randperm(length(v)))
+reverse(v::NamedVector, start=1, stop=length(v)) = NamedArray(reverse(v.array, start, stop), (reverse(names(v)[1], start, stop),), (v.dimnames[1],))
+function reverse!(v::NamedVector, start=1, stop=length(v))
+    setnames!(v, reverse(names(v)[1], start, stop), 1)
+    reverse!(v.array, start, stop)
+    v
+end
            
 fa(f::Function, a::NamedArray) = NamedArray(f(a), a.dimnames, a.dicts)
 faa(f::Function, a::NamedArray, args...) = NamedArray(f(a, args...), a.dimnames, a.dicts)
