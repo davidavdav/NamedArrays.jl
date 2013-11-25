@@ -19,6 +19,9 @@ type NamedArray{T,N} <: AbstractArray{T,N}
         new(array, vdimnames, vdicts)
     end
 end
+## vector version of above
+NamedArray{S<:String}(array::Array, dimnames::Vector{S}, dicts::Vector{Dict}) = NamedArray(array, tuple(dimnames...), tuple(dicts...))
+
 ## constructor with array, names and dimnames (dict is created from names)
 ## first outer
 function NamedArray{T,N}(array::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N, String})
@@ -26,10 +29,15 @@ function NamedArray{T,N}(array::Array{T,N}, names::NTuple{N,Vector}, dimnames::N
     dicts = map(names -> Dict(names,1:length(names)), names)
     NamedArray{T,N}(array, dimnames, dicts) # call inner constructor
 end
+## vector version
+NamedArray{S<:String}(array::Array, names::Vector, dimnames::Vector{S}) = NamedArray(array, tuple(names...), tuple(dimnames...))
+## type constructor
 function NamedArray{T,N}(::Type{T}, names::NTuple{N,Vector},dimnames::NTuple{N,String})
     array = Array(T,map(length,names))
     NamedArray(array, names, dimnames) # call first outer constructor
 end
+## vector version
+NmaedArray{T,S<:String}(::Type{T}, names::Vector, dimnames::Vector{S}) = NamedArray(T, tuple(names...), tuple(dimnames...))
 
 function NamedArray(a::Array, names::NTuple, dimnames::NTuple)
     @assert ndims(a)==length(names)==length(dimnames)
@@ -38,10 +46,10 @@ function NamedArray(a::Array, names::NTuple, dimnames::NTuple)
     NamedArray{eltype(a),ndims(a)}(a, names, dimnames)
 end
 
-function NamedArray{T}(::Type{T}, names::Vector, dimnames::Vector)
-    @assert length(names) == length(dimnames)
-    NamedArray(T, tuple(names...), tuple(dimnames...))
-end
+#function NamedArray{T}(::Type{T}, names::Vector, dimnames::Vector)
+#    @assert length(names) == length(dimnames)
+#    NamedArray(T, tuple(names...), tuple(dimnames...))
+#end
     
 function NamedArray(T::DataType, dims::Int...)
     ld = length(dims)

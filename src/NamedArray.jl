@@ -51,7 +51,7 @@ import Base.convert,Base.promote_rule
 convert{T,N}(::Type{Array{T,N}}, A::NamedArray{T,N}) = A.array
 convert(::Type{Array}, a::NamedArray) = a.array
 ## to other type
-convert{T}(::Type{NamedArray{T}}, a::NamedArray) = NamedArray(convert(Array{T}, a.array), tuple(a.dimnames...), tuple(a.dicts...))
+convert{T}(::Type{NamedArray{T}}, a::NamedArray) = NamedArray(convert(Array{T}, a.array), a.dimnames, a.dicts)
 function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}},::Type{NamedArray{T2,N}})
     println("my rule")
     t = promote_type(T1,T2)
@@ -61,15 +61,15 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
     ## named %op% named
     @eval function ($op)(x::NamedArray, y::NamedArray)
         if names(x)==names(y) && dimnames(x)==dimnames(y)
-            NamedArray(($op)(x.array,y.array), tuple(names(x)...), tuple(dimnames(x)...))
+            NamedArray(($op)(x.array,y.array), names(x), dimnames(x))
         else
             warn("Dropping mismatching names")
             ($op)(x.array,y.array)
         end
     end
     ## named %op% array
-    @eval ($op)(x::NamedArray, y::Array) = NamedArray(($op)(x.array, y), tuple(names(x)...), tuple(x.dimnames...))
-    @eval ($op)(x::Array, y::NamedArray) = NamedArray(($op)(x, y.array), tuple(names(y)...), tuple(y.dimnames...))
+    @eval ($op)(x::NamedArray, y::Array) = NamedArray(($op)(x.array, y), names(x), x.dimnames)
+    @eval ($op)(x::Array, y::NamedArray) = NamedArray(($op)(x, y.array), names(y), y.dimnames)
 end
 for op in (:+, :-, :.+, :.-, :.*, :*, :/, :\) 
     @eval ($op)(x::AbstractArray, y::AbstractArray) = ($op)(promote(x,y)...)
@@ -83,7 +83,7 @@ for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\)
             r = copy(x)
             r.array = $op(x.array,y)
         else
-            NamedArray(($op)(x.array, y), tuple(x.dimnames...), tuple(x.dicts...))
+            NamedArray(($op)(x.array, y), x.dimnames, x.dicts)
         end
     end
     @eval function ($op)(x::Number, y::NamedArray) 
@@ -91,7 +91,7 @@ for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\)
             r = copy(y)
             r.array = $op(x, y.array)
         else
-            NamedArray(($op)(x, y.array), tuple(x.dimnames...), tuple(x.dicts...))
+            NamedArray(($op)(x, y.array), x.dimnames, x.dicts)
         end
     end
 end
@@ -107,9 +107,14 @@ function show(io::IO, A::NamedArray)
     print(io, A.array)
 end
 
+## this does ' as well '
 function ctranspose(a::NamedArray) 
-    @assert ndims(a)==2
-    NamedArray(a.array', tuple(reverse(names(a))...), tuple(reverse(a.dimnames)...))
+    @assert ndims(a)<=2
+    if ndims(a)==1
+        NamedArray(a.array', (["1"], names(a)[1],), ("'", a.dimnames[1],))
+    else
+        NamedArray(a.array', reverse(names(a)), reverse(a.dimnames))
+    end
 end
 
 import Base.similar
@@ -200,7 +205,7 @@ function getindex(A::NamedArray, I::IndexOrNamed...)
     end
     if ndims(a) != n || length(dims)==1 && ndims(A)>1; return a; end # number of dimension changed
     newnames = map(i -> [getindex(names(A,i),II[i])], 1:n)
-    NamedArray(a, tuple(newnames...), tuple(A.dimnames[1:n]...))
+    NamedArray(a, newnames, A.dimnames[1:n])
 end
 
 ## These seem to be caught by the general getindex, I'm not sure if this is what we want...
@@ -279,7 +284,7 @@ for f = (:sum, :prod, :maximum, :minimum, :mean, :std)
     @eval function ($f)(a::NamedArray, d::Int)
         s = ($f)(a.array, d)
         newnames = [i==d ? [string($f,"(",a.dimnames[i],")")] : names(a,i) for i=1:ndims(a)]
-        NamedArray(s, tuple(newnames...), tuple(a.dimnames...))
+        NamedArray(s, newnames, a.dimnames)
     end
 end
 
@@ -306,7 +311,7 @@ function broadcast(f::Function, a::NamedArray...)
     ## verify that the names are consistent
     bigi, big = verify_names(a...)
     arrays = map(x->x.array, a)
-    NamedArray(broadcast(f, arrays...), tuple(big.dimnames...), tuple(big.dicts...))
+    NamedArray(broadcast(f, arrays...), big.dimnames, big.dicts)
 end
 
 function broadcast!(f::Function, dest::NamedArray, a::NamedArray...)
@@ -325,7 +330,7 @@ function flipdim(a::NamedArray, d::Int)
     for (k,v) in collect(newdicts[d])
         newdicts[d][k] = n - v
     end
-    NamedArray(flipdim(a.array,d), tuple(a.dimnames...), tuple(newdicts...))
+    NamedArray(flipdim(a.array,d), a.dimnames, newdicts)
 end
 
 ## circshift automagically works...
@@ -335,7 +340,7 @@ import Base.permutedims
 function permutedims(a::NamedArray, perm::Vector{Int})
     newdicts = a.dicts[perm]
     newdimnames = a.dimnames[perm]
-    NamedArray(permutedims(a.array, perm), tuple(newdimnames...), tuple(newdicts...))
+    NamedArray(permutedims(a.array, perm), newdimnames, newdicts)
 end
 import Base.transpose
 transpose(a::NamedArray) = permutedims(a, [2,1])
@@ -343,10 +348,28 @@ transpose(a::NamedArray) = permutedims(a, [2,1])
 import Base.vec
 vec(a::NamedArray) = vec(a.array)
 
-# import Base.rotl90, Base.rot180, Base.rotr90
+# todo: import Base.rotl90, Base.rot180, Base.rotr90
+import Base.nthperm, Base.nthperm!, Base.permute!, Base.ipermute!, Base.shuffle
+function nthperm(a::NamedVector, n::Int)
+    newnames = nthperm(names(a)[1], n)
+    NamedArray(nthperm(a.array,n), (newnames,), (a.dimnames[1],))
+end
+function nthperm!(a::NamedArray, n::Int) 
+    setnames!(a, nthperm(names(a)[1], n), 1)
+    nthperm!(a.array,n)
+    a
+end
+function permute!(a::NamedArray, perm::AbstractVector)
+    setnames!(a, names(a)[1][perm], 1)
+    permute!(a.array, perm)
+    a
+end
+ipermute!(a::NamedArray, perm::AbstractVector) = permute!(a, iperm(perm))
+shuffle(a::NamedArray) = permute
+
            
-fa(f::Function, a::NamedArray) = NamedArray(f(a), tuple(a.dimnames...), tuple(a.dicts...))
-faa(f::Function, a::NamedArray, args...) = NamedArray(f(a, args...), tuple(a.dimnames...), tuple(a.dicts...))
+fa(f::Function, a::NamedArray) = NamedArray(f(a), a.dimnames, a.dicts)
+faa(f::Function, a::NamedArray, args...) = NamedArray(f(a, args...), a.dimnames, a.dicts)
 
 # import Base.inv
 # for f in (:inv
