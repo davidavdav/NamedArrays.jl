@@ -53,7 +53,7 @@ convert(::Type{Array}, a::NamedArray) = a.array
 ## to other type
 convert{T}(::Type{NamedArray{T}}, a::NamedArray) = NamedArray(convert(Array{T}, a.array), a.dimnames, a.dicts)
 function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}},::Type{NamedArray{T2,N}})
-    println("my rule")
+#    println("my rule")
     t = promote_type(T1,T2)
     Array{t,N}
 end
