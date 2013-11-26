@@ -192,7 +192,6 @@ end
 ## This covers everything up over 3 dimensions
 getindex(a::NamedArray, index::Union(Real, String)...) = getindex(a.array, map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
 
-##getindex(A::NamedArray, i0::Real) = arrayref(A.array,to_index(i0))
 ## for Ranges or Arrays we do an effort keep names
 ## We follow the protocol of Array, that the last singleton dimensions are dropped
 function getindex(A::NamedArray, I::IndexOrNamed...)
@@ -336,7 +335,7 @@ function flipdim(a::NamedArray, d::Int)
 end
 
 ## circshift automagically works...
-## :' automagically works, how is this possible?
+## :' automagically works, how is this possible? it is ctranspose!
 
 import Base.permutedims
 function permutedims(a::NamedArray, perm::Vector{Int})
