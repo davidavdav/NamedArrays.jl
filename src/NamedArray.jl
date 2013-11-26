@@ -349,7 +349,11 @@ transpose(a::NamedArray) = permutedims(a, [2,1])
 import Base.vec
 vec(a::NamedArray) = vec(a.array)
 
-# todo: import Base.rotl90, Base.rot180, Base.rotr90
+import Base.rotl90, Base.rot180, Base.rotr90
+rotr90(a::NamedArray) = transpose(flipud(a))
+rotl90(a::NamedArray) = transpose(fliplr(a))
+rot180(a::NamedArray) = fliplr(flipud(a))
+
 import Base.nthperm, Base.nthperm!, Base.permute!, Base.ipermute!, Base.shuffle, Base.shuffle!, Base.reverse, Base.reverse!
 function nthperm(v::NamedVector, n::Int)
     newnames = nthperm(names(v)[1], n)
