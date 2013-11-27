@@ -9,6 +9,8 @@
 ## type definition
 require("src/namedarraytypes.jl")
 
+include("show.jl")
+
 ## access to the names of the dimensions
 names(dict::Dict) = collect(keys(dict))[sortperm(collect(values(dict)))] 
 names(a::NamedArray) = map(dict -> names(dict), a.dicts)
@@ -71,13 +73,13 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
     @eval ($op)(x::NamedArray, y::Array) = NamedArray(($op)(x.array, y), names(x), x.dimnames)
     @eval ($op)(x::Array, y::NamedArray) = NamedArray(($op)(x, y.array), names(y), y.dimnames)
 end
-for op in (:+, :-, :.+, :.-, :.*, :*, :/, :\) 
+for op in (:+, :-, :.+, :.-, :.*, :*, :/, :\ ) 
     @eval ($op)(x::AbstractArray, y::AbstractArray) = ($op)(promote(x,y)...)
 end
 ## matmul
 *(x::NamedArray, y::NamedArray) = NamedArray(x.array*y.array, (names(x,1),names(y,2)), (x.dimnames[1], y.dimnames[2]))
 ## scalar arithmetic
-for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\)
+for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\ )
     @eval function ($op)(x::NamedArray, y::Number) 
         if promote_type(eltype(x),typeof(y)) == eltype(x)
             r = copy(x)
@@ -94,17 +96,6 @@ for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\)
             NamedArray(($op)(x, y.array), x.dimnames, x.dicts)
         end
     end
-end
-
-import Base.print, Base.show # , Base.display
-print(A::NamedArray) = print(A.array)
-function show(io::IO, A::NamedArray)
-    println(io, typeof(A), " names:")
-    for i in 1:length(A.dimnames)
-        print(io, " ", A.dimnames[i], ": ")
-        print(io, names(A,i)')
-    end
-    print(io, A.array)
 end
 
 ## this does ' as well '
