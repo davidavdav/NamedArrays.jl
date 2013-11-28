@@ -35,12 +35,22 @@ function show(io::IO, a::NamedArray)
     end
 end
 
-function display(d::TextDisplay, v::NamedVector) 
-    io = d.io
+#show(io::IO, x::NamedVector) = invoke(show, (IO, NamedArray), io, x)
+
+function show(io::IO, v::NamedVector)
     println(io, summary(v))
     maxnrow = Base.tty_rows() - 5
     show(io, v, min(maxnrow, length(v)))
-end
+end   
+
+display(d::TextDisplay, v::NamedVector) = show(d.io, v)
+
+#function display(d::TextDisplay, v::NamedVector) 
+#    io = d.io
+#    println(io, summary(v))
+#    maxnrow = Base.tty_rows() - 5
+#    show(io, v, min(maxnrow, length(v)))
+#end
 
 ## compute the ranges to be displayed, plus a total index comprising all ranges. 
 function compute_range(maxn, n)
@@ -73,12 +83,13 @@ function show(io::IO, a::NamedArray, maxnrow::Int)
     s = [sprint(showcompact, a.array[i,j]) for i=totrowrange, j=1:ncol]
     rowname, colname = names(a)
     colwidth = max(maximum(map(length, s)), maximum(map(length, colname)))
-    rownamewidth = maximum(map(length, rowname))
-    maxncol = div(Base.tty_cols() - rownamewidth - 1, colwidth+1) # dots, spaces between
+    rownamewidth = max(maximum(map(length, rowname)), sum(map(length, dimnames(a)))+3)
+    maxncol = div(Base.tty_cols() - rownamewidth - 3, colwidth+1) # dots, spaces between
     ## columns
     colrange, totcorange = compute_range(maxncol, ncol)
     ## header
-    println(io, sprint_row(rownamewidth, " ", colwidth, map(i->colname[i], colrange)))
+    println(io, sprint_row(rownamewidth, join(dimnames(a), " \\ "), 
+                           colwidth, map(i->colname[i], colrange)))
     ## data
     l = 1
     for i in 1:length(rowrange)
