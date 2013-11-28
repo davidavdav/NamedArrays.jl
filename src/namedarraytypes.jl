@@ -37,7 +37,7 @@ function NamedArray{T,N}(::Type{T}, names::NTuple{N,Vector},dimnames::NTuple{N,S
     NamedArray(array, names, dimnames) # call first outer constructor
 end
 ## vector version
-NmaedArray{T,S<:String}(::Type{T}, names::Vector, dimnames::Vector{S}) = NamedArray(T, tuple(names...), tuple(dimnames...))
+NamedArray{T,S<:String}(::Type{T}, names::Vector, dimnames::Vector{S}) = NamedArray(T, tuple(names...), tuple(dimnames...))
 
 function NamedArray(a::Array, names::NTuple, dimnames::NTuple)
     @assert ndims(a)==length(names)==length(dimnames)

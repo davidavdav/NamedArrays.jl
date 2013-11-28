@@ -7,7 +7,7 @@
 
 ## sum etc: keep names in one dimension
 # import Base.sum, Base.prod, Base.maximum, Base.minimum, Base.mean, Base.std
-for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var, )
+for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     eval(Expr(:import, :Base, f))
     @eval function ($f)(a::NamedArray, d::Dims)
         s = ($f)(a.array, d)
@@ -20,7 +20,7 @@ end
 function fan(f::Function, fname::String, a::NamedArray, dim::Int) 
     dimnames = copy(a.dimnames)
     dimnames[dim] = string(fname, "(", dimnames[dim], ")")
-    NamedArray(f(a.array), dimnames, a.dicts)
+    NamedArray(f(a.array,dim), dimnames, a.dicts)
 end
 
 ## rename a dimension
