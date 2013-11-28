@@ -52,3 +52,7 @@ for dim=1:2
     @assert flipdim(n,dim).array == flipdim(n.array,dim)
     @assert names(flipdim(n,dim),dim) == reverse(names(n,dim))
 end
+
+p = randperm(ndims(n))
+@assert permutedims(n, p).array == permutedims(n.array, p)
+
