@@ -51,7 +51,14 @@ function indices(dict::Dict, I::Names)
 end
 
 ## first, we do all combinations of single indices, for efficiency reasons
-getindex(A::NamedArray, i1::Real) = arrayref(A.array,to_index(i1))
+getindex(A::NamedArray, i1::Uint) = arrayref(A.array, to_index(i1)) # always positive
+function getindex(A::NamedArray, i1::Real) 
+    if i1>0
+        arrayref(A.array,to_index(i1))
+    else 
+        getindex(A.array, setdiff(1:length(A.dicts[1]),to_index(-i1)))
+    end
+end
 getindex(A::NamedArray, s1::String) = getindex(A, A.dicts[1][s1])
 types = [:Real, :String]
 for T1 in types 
