@@ -1,5 +1,5 @@
-NamedArray
-==========
+NamedArrays
+===========
 
 Julia type that implements a drop-in replacement of Array with named dimensions. 
 
@@ -17,7 +17,7 @@ Synopsis
 --------
 
 ```julia
-reload("src/NamedArray.jl")
+using NamedArrays
 n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1)         # give the names "one" and "two" to the rows (dimension 1)
 n["one", 2:3]
@@ -52,7 +52,15 @@ names(a::NamedArray, dim)
 dimnames(a::NamedArray)
 ```
 
- return the names of the indices along dimension `dim` and the names of the dimensions themselves. 
+ return the names of the indices along dimension `dim` and the names of the dimensions themselves.
+ 
+ ```julia
+ setnames!(a::NamedArray, names::Vector, dim::Int)
+ setnames!(a::NamedArray, name, dim::Int, index:Int)
+ setdimnames!(a::NamedArray, name, dim:Int)
+ ```
+ 
+ set the names or of dimension `dim`, or only the name at index `index`, or the name of the dimension `dim`. 
 
  * Copy
 
@@ -113,6 +121,16 @@ typealias IndexOrNamed Union(Real, Range1, String, AbstractVector)
  This allows indexing of most combinations of integer, range, string,
 vector of integer and Vector of String of any number of dimensions, as
 long as the underlying Array supports the indexing. 
+
+ There is a special meaning of negatove indices, like in the language R.  A negative index selects all but the indicted index from the array.  
+ 
+ String indices can be negated by the exclamation-mark operator `!` applied to the string:
+ 
+```julia
+n[!"one", :]
+```
+
+ When a single element is selected by an index expression, a scalar value is returned.  When an array slice is selected, an attempt is made to return a NamedArray with the correct names for the dimensions. 
 
  * Setindex
 
