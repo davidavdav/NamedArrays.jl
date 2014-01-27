@@ -5,7 +5,7 @@
 ## This code is licensed under the GNU General Public License, version 2
 ## See the file LICENSE in this distribution
 
-import Base.getindex, Base.to_index, Base.indices
+import Base.getindex, Base.to_index
 
 # These functions transform various index types into values suitable for standard array indexing
 indices(dict::Dict, I::Range1) = I
