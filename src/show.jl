@@ -65,6 +65,7 @@ function compute_range(maxn, n)
 end
 
 leftalign(s, l) = rpad(s, l, " ")
+rightalign(s, l) = lpad(s, l, " ")
 sprint_colpart(width::Int, s::Vector) = join(map(s->rpad(s, width, " "), s), " ")
 function sprint_row(namewidth::Int, name, width::Int, names::Tuple; dots="…")
     s = string(leftalign(name, namewidth), " ", sprint_colpart(width, names[1]))
@@ -82,13 +83,14 @@ function show(io::IO, a::NamedArray, maxnrow::Int)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, a.array[i,j]) for i=totrowrange, j=1:ncol]
     rowname, colname = names(a)
-    colwidth = max(maximum(map(length, s)), maximum(map(length, colname)))
-    rownamewidth = max(maximum(map(length, rowname)), sum(map(length, dimnames(a)))+3)
+    strlen(x) = length(string(x))
+    colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
+    rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, dimnames(a)))+3)
     maxncol = div(Base.tty_cols() - rownamewidth - 3, colwidth+1) # dots, spaces between
     ## columns
     colrange, totcorange = compute_range(maxncol, ncol)
     ## header
-    println(io, sprint_row(rownamewidth, join(dimnames(a), " \\ "), 
+    println(io, sprint_row(rownamewidth, rightalign(join(dimnames(a), " \\ "), rownamewidth), 
                            colwidth, map(i->colname[i], colrange)))
     ## data
     l = 1
