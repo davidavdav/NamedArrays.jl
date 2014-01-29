@@ -86,7 +86,7 @@ function getindex(A::NamedArray, I::IndexOrNamed...)
         n -= 1
     end
     if ndims(a) != n || length(dims)==1 && ndims(A)>1; return a; end # number of dimension changed
-    newnames = map(i -> [getindex(names(A,i),II[i])], 1:n)
+    newnames = [ [getindex(names(A,i),II[i])] for i=1:n ]
     NamedArray(a, newnames, A.dimnames[1:n])
 end
 
