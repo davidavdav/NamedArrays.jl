@@ -11,7 +11,9 @@ import Base.getindex, Base.to_index
 indices(dict::Dict, I::Range1) = I
 indices(dict::Dict, I::Range) = I
 indices(dict::Dict, I::String) = dict[I]
-indices{T<:String}(dict::Dict, I::AbstractVector{T}) = map(s -> dict[s], I)
+indices{T<:String}(dict::Dict, I::AbstractVector{T}) = map(s -> dict[s], I) # convenience
+indices(dict::Dict, I::BitArray) = find(I)
+indices(dict::Dict, I::AbstractVector{Bool}) = find(I)
 indices(dict::Dict, I::AbstractVector) = error("unsupported vector type: ", eltype(I))
 
 function indices(dict::Dict, I::Integer)
