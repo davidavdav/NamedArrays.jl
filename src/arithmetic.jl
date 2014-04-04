@@ -19,9 +19,10 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
     @eval ($op)(x::NamedArray, y::Array) = NamedArray(($op)(x.array, y), names(x), x.dimnames)
     @eval ($op)(x::Array, y::NamedArray) = NamedArray(($op)(x, y.array), names(y), y.dimnames)
 end
-for op in (:+, :-, :.+, :.-, :.*, :*, :/, :\ ) 
-    @eval ($op)(x::AbstractArray, y::AbstractArray) = ($op)(promote(x,y)...)
-end
+## Let's say I don't understand promote
+#for op in (:+, :-, :.+, :.-, :.*, :*, :/, :\ ) 
+#    @eval ($op)(x::AbstractArray, y::AbstractArray) = ($op)(promote(x,y)...)
+#end
 ## matmul
 *(x::NamedArray, y::NamedArray) = NamedArray(x.array*y.array, (names(x,1),names(y,2)), (x.dimnames[1], y.dimnames[2]))
 ## scalar arithmetic
