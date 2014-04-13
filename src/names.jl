@@ -4,6 +4,8 @@
 ## This code is licensed under the GNU General Public License, version 2
 ## See the file LICENSE in this distribution## access to the names of the dimensions
 
+import Base.names
+
 names(dict::Dict) = collect(keys(dict))[sortperm(collect(values(dict)))] 
 names(a::NamedArray) = [names(dict) for dict in a.dicts]
 names(a::NamedArray, d::Int) = names(a.dicts[d])
