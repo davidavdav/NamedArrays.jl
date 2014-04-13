@@ -1,4 +1,4 @@
-using NamedArrays
+## NamedArrays is loaded by runtests.jl
 
 n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1)     
