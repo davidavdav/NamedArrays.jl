@@ -1,6 +1,6 @@
 ## index.jl  methods for NamedArray that keep the names (some checking may be done)
 
-## (c) 2013 David A. van Leeuwen
+## (c) 2013, 2014 David A. van Leeuwen
 
 ## This code is licensed under the GNU General Public License, version 2
 ## See the file LICENSE in this distribution
@@ -49,10 +49,11 @@ function broadcast(f::Function, a::NamedArray...)
     NamedArray(broadcast(f, arrays...), big.dimnames, big.dicts)
 end
 
-function broadcast!(f::Function, dest::NamedArray, a::NamedArray...)
+function broadcast!(f::Function, dest::NamedArray, a::NamedArray, b::NamedArray...)
+    ab = tuple(a, b...)
     ## verify that the names are consistent, we assume dest is the right size
-    bigi, big = verify_names(a...)
-    arrays = map(x->x.array, a)
+    bigi, big = verify_names(ab...)
+    arrays = map(x->x.array, ab)
     broadcast!(f, dest.array, arrays...)
     dest
 end
