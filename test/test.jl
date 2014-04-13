@@ -1,5 +1,7 @@
 ## NamedArrays is loaded by runtests.jl
 
+print("Starting test, no assertions should fail...")
+
 n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1)     
 
@@ -56,3 +58,4 @@ end
 p = randperm(ndims(n))
 @assert permutedims(n, p).array == permutedims(n.array, p)
 
+println(" done")
