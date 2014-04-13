@@ -53,10 +53,10 @@ function indices(dict::Dict, I::Names)
 end
 
 ## first, we do all combinations of single indices, for efficiency reasons
-getindex(A::NamedArray, i1::Uint) = arrayref(A.array, to_index(i1)) # always positive
+getindex(A::NamedArray, i1::Uint) = getindex(A.array, i1) # always positive
 function getindex(A::NamedArray, i1::Real) 
     if i1>0
-        arrayref(A.array,to_index(i1))
+        getindex(A.array,i1)
     else 
         getindex(A.array, setdiff(1:length(A.dicts[1]),to_index(-i1)))
     end
@@ -91,21 +91,6 @@ function getindex(A::NamedArray, I::IndexOrNamed...)
     newnames = [ [getindex(names(A,i),II[i])] for i=1:n ]
     NamedArray(a, newnames, A.dimnames[1:n])
 end
-
-## These seem to be caught by the general getindex, I'm not sure if this is what we want...
-#getindex(A::NamedArray, i0::Real, i1::Real) = arrayref(A.array,to_index(i0),to_index(i1))
-#getindex(A::NamedArray, i0::Real, i1::Real, i2::Real) =
-#    arrayrefNamed(A.array,to_index(i0),to_index(i1),to_index(i2))
-#getindex(A::NamedArray, i0::Real, i1::Real, i2::Real, i3::Real) =
-#    arrayrefNamed(A.array,to_index(i0),to_index(i1),to_index(i2),to_index(i3))
-#getindex(A::NamedArray, i0::Real, i1::Real, i2::Real, i3::Real,  i4::Real) =
-#    arrayrefNamed(A.array,to_index(i0),to_index(i1),to_index(i2),to_index(i3),to_index(i4))
-#getindex(A::NamedArray, i0::Real, i1::Real, i2::Real, i3::Real,  i4::Real, i5::Real) =
-#    arrayrefNamed(A.array,to_index(i0),to_index(i1),to_index(i2),to_index(i3),to_index(i4),to_index(i5))
-
-#getindex(A::NamedArray, i0::Real, i1::Real, i2::Real, i3::Real,  i4::Real, i5::Real, I::Int...) =
-#    arrayref(A.array,to_index(i0),to_index(i1),to_index(i2),to_index(i3),to_index(i4),to_index(i5),I...)
-
 
 import Base.setindex!
 
