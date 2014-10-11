@@ -24,8 +24,8 @@ Integer)
 end
 
 import Base.size, Base.ndims
-size(a::NamedArray) = arraysize(a.array)
-size(a::NamedArray, d) = arraysize(a.array, d)
+size(a::NamedArray) = size(a.array)
+size(a::NamedArray, d) = size(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
 

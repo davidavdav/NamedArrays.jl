@@ -26,6 +26,14 @@ end
 ## matmul
 *(x::NamedArray, y::NamedArray) = NamedArray(x.array*y.array, (names(x,1),names(y,2)), (x.dimnames[1], y.dimnames[2]))
 ## scalar arithmetic
+## disambiguate
+for op in (:+, :-)
+    @eval begin
+        ($op)(x::NamedArray{Bool}, y::Bool) = NamedArray(($op)(x.array, y), x.dimnames, x.dicts)
+        ($op)(x::Bool, y::NamedArray{Bool}) = NamedArray(($op)(x, y.array), y.dimnames, y.dicts)
+    end
+end
+        
 for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\ )
     @eval function ($op)(x::NamedArray, y::Number) 
         if promote_type(eltype(x),typeof(y)) == eltype(x)

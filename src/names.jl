@@ -15,7 +15,7 @@ dimnames(a::NamedArray, d::Int) = a.dimnames[d]
 ## seting names, dimnames
 function setnames!(a::NamedArray, v::Vector, d::Int)
     @assert size(a.array,d) == length(v)
-    a.dicts[d] = Dict(v, 1:length(v))
+    a.dicts[d] = Dict(zip(v, 1:length(v)))
 end
 
 function setnames!(a::NamedArray, v, d::Int, i::Int)

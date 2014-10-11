@@ -26,7 +26,7 @@ NamedArray{S<:String}(array::Array, dimnames::Vector{S}, dicts::Vector{Dict}) = 
 ## first outer
 function NamedArray{T,N}(array::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N, String})
     @assert size(array)==map(length, names)
-    dicts = map(names -> Dict(names,1:length(names)), names)
+    dicts = map(names -> Dict(zip(names,1:length(names))), names)
     NamedArray{T,N}(array, dimnames, dicts) # call inner constructor
 end
 ## vector version
