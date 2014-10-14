@@ -69,7 +69,7 @@ for T1 in types
         for T3 in types 
             @eval getindex(a::NamedArray, i1::$T1, i2::$T2, i3::$T3) = getindex(a.array, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
             @eval setindex!{T}(a::NamedArray{T}, x, i1::$T1, i2::$T2, i3::$T3) =
-            arrayset(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
+            setindex!(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
 #            @eval getindex(a::NamedArray, i1::$T1, i2::$T2, i3::$T3, index::Union($(types...))...) = getindex(a.array, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
         end
     end 
@@ -94,21 +94,21 @@ end
 
 import Base.setindex!
 
-setindex!{T}(A::NamedArray{T}, x) = arrayset(A, convert(T,x), 1)
+setindex!{T}(A::NamedArray{T}, x) = setindex!(A, convert(T,x), 1)
 
-setindex!{T}(A::NamedArray{T}, x, i0::Real) = arrayset(A.array, convert(T,x), to_index(i0))
+setindex!{T}(A::NamedArray{T}, x, i0::Real) = setindex!(A.array, convert(T,x), to_index(i0))
 setindex!{T}(A::NamedArray{T}, x, i0::Real, i1::Real) =
-    arrayset(A.array, convert(T,x), to_index(i0), to_index(i1))
+    setindex!(A.array, convert(T,x), to_index(i0), to_index(i1))
 setindex!{T}(A::NamedArray{T}, x, i0::Real, i1::Real, i2::Real) =
-    arrayset(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2))
+    setindex!(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2))
 setindex!{T}(A::NamedArray{T}, x, i0::Real, i1::Real, i2::Real, i3::Real) =
-    arrayset(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3))
+    setindex!(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3))
 setindex!{T}(A::NamedArray{T}, x, i0::Real, i1::Real, i2::Real, i3::Real, i4::Real) =
-    arrayset(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3), to_index(i4))
+    setindex!(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3), to_index(i4))
 setindex!{T}(A::NamedArray{T}, x, i0::Real, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real) =
-    arrayset(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3), to_index(i4), to_index(i5))
+    setindex!(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3), to_index(i4), to_index(i5))
 setindex!{T}(A::NamedArray{T}, x, i0::Real, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real, I::Int...) =
-    arrayset(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3), to_index(i4), to_index(i5), I...)
+    setindex!(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3), to_index(i4), to_index(i5), I...)
 
 # n[1:4] = 5
 setindex!{T<:Real}(A::NamedArray, x, I::AbstractVector{T}) = setindex!(A.array, x, I)
