@@ -18,6 +18,9 @@ end
 
 print(a::NamedArray) = print(a.array)
 
+## This seems to be the essential function to overload for displaying in REPL:
+Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
+
 ## inspired by DataFrames
 
 function show(io::IO, a::NamedArray)
@@ -43,7 +46,7 @@ function show(io::IO, v::NamedVector)
     show(io, v, min(maxnrow, length(v)))
 end   
 
-display(d::TextDisplay, v::NamedVector) = show(d.io, v)
+## display(d::TextDisplay, v::NamedVector) = show(d.io, v)
 
 #function display(d::TextDisplay, v::NamedVector) 
 #    io = d.io
