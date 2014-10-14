@@ -28,20 +28,6 @@ size(a::NamedArray) = size(a.array)
 size(a::NamedArray, d) = size(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
-
-## convert, promote
-import Base.convert,Base.promote_rule
-## to array
-convert{T,N}(::Type{Array{T,N}}, A::NamedArray{T,N}) = A.array
-convert(::Type{Array}, a::NamedArray) = a.array
-## to other type
-convert{T}(::Type{NamedArray{T}}, a::NamedArray) = NamedArray(convert(Array{T}, a.array), a.dimnames, a.dicts)
-function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}},::Type{NamedArray{T2,N}})
-#    println("my rule")
-    t = promote_type(T1,T2)
-    Array{t,N}
-end
-
 import Base.similar
 function similar(a::NamedArray, t::DataType, dims::NTuple)
     if size(a) != dims

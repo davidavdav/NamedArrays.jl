@@ -23,5 +23,6 @@ include("keepnames.jl")
 include("names.jl")
 include("rearrange.jl")
 include("show.jl")
+include("convert.jl")
 
 end
