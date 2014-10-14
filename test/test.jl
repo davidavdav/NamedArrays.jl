@@ -5,6 +5,14 @@ print("Starting test, no assertions should fail...")
 n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1)     
 
+## getindex
+@assert [x for x in n] == [x for x in n.array]
+@assert n[2,4] == n.array[2,4]
+
+## setindex
+n[1,1] = 0
+@assert n[1,1] == 0
+
 ## sum
 @assert sum(n) == sum(n.array)
 @assert sum(n, 1).array == sum(n.array, 1)
