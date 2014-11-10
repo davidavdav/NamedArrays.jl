@@ -19,7 +19,7 @@ function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}},::Type{NamedArray
 end
 
 ## convenience functions
-for tf in [:float16, :float32, :float64] ## , :complex32, :complex64, :complex128]
+for tf in [:float16, :float32, :float64, :complex32, :complex64, :complex128]
     eval(Expr(:import, :Base, tf))
     @eval ($tf)(a::NamedArray) = NamedArray(($tf)(a.array), a.dimnames, a.dicts)
 end

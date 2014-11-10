@@ -6,7 +6,7 @@
 ## This code is licensed under the GNU General Public License, version 2
 ## See the file LICENSE in this distribution
 
-## The inner constructor assumes all elements exiisting
+## The inner constructor assumes all elements existing
 type NamedArray{T,N} <: AbstractArray{T,N}
     array::Array{T,N}
 #    names::Vector{Vector}
@@ -21,6 +21,11 @@ type NamedArray{T,N} <: AbstractArray{T,N}
 end
 ## vector version of above
 NamedArray{S<:String}(array::Array, dimnames::Vector{S}, dicts::Vector{Dict}) = NamedArray(array, tuple(dimnames...), tuple(dicts...))
+
+## temporary compatibility hack
+if VERSION < v"0.4.0-dev"
+    Base.Dict(z::Base.Zip2) = Dict(z.a, z.b)
+end
 
 ## constructor with array, names and dimnames (dict is created from names)
 ## first outer

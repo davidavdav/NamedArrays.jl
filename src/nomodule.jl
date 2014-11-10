@@ -1,3 +1,5 @@
+using Compat
+
 require("namedarraytypes.jl")
 
 include("arithmetic.jl")
