@@ -8,12 +8,14 @@
 
 module NamedArrays
 
+using Compat
+
 export NamedArray, NamedVector, Names
 
 ## type definition
 include("namedarraytypes.jl")
 
-export names, dimnames, setnames!, setdimnames!
+export names, dimnames, setnames!, setdimnames!, array
 
 include("arithmetic.jl")
 include("base.jl")
