@@ -15,6 +15,9 @@ indices{T<:String}(dict::Dict, I::AbstractVector{T}) = map(s -> dict[s], I) # co
 indices(dict::Dict, I::BitArray) = find(I)
 indices(dict::Dict, I::AbstractVector{Bool}) = find(I)
 indices(dict::Dict, I::AbstractVector) = error("unsupported vector type: ", eltype(I))
+## we want to accept any type as index, really
+#indices{K}(dict::Dict{K}, I::K) = dict[I]
+#indices{K}(dict::Dict{K}, I::AbstractVector{K}) = map(k -> dict[k], I)
 
 function indices(dict::Dict, I::Integer)
     if I > 0
@@ -26,7 +29,7 @@ end
 
 indices(dict::Dict, I::Real) = indices(convert(Int, I))
 
-function indices{T<:Integer}(dict::Dict, I::AbstractVector{T})
+function indices{T<:Integer,K}(dict::Dict{K}, I::AbstractVector{T})
     if all(I .> 0)
         return I
     elseif all(I .< 0)
@@ -76,6 +79,9 @@ for T1 in types
 end
 ## This covers everything up over 3 dimensions
 getindex(a::NamedArray, index::Union(Real, String)...) = getindex(a.array, map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
+
+## one more catch-all?
+#getindex(a::NamedArray, index...) = getindex(a.array, map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
 
 ## for Ranges or Arrays we do an effort keep names
 ## We follow the protocol of Array, that the last singleton dimensions are dropped
