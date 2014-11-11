@@ -6,11 +6,11 @@
 
 import Base.names
 
-names(dict::Dict) = collect(keys(dict))[sortperm(collect(values(dict)))] 
-names(a::NamedArray) = [names(dict) for dict in a.dicts]
-names(a::NamedArray, d::Int) = names(a.dicts[d])
-dimnames(a::NamedArray) = a.dimnames
-dimnames(a::NamedArray, d::Int) = a.dimnames[d]
+sortnames(dict::Dict) = String[string(k) for k in keys(dict)][sortperm(collect(values(dict)))] 
+allnames(a::NamedArray) = [sortnames(dict) for dict in a.dicts]
+names(a::NamedArray, d::Int) = sortnames(a.dicts[d])
+dimnames(a::NamedArray) = String[string(dn) for dn in a.dimnames]
+dimnames(a::NamedArray, d::Int) = string(a.dimnames[d])
 
 ## seting names, dimnames
 function setnames!(a::NamedArray, v::Vector, d::Int)

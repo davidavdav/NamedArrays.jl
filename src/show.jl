@@ -79,13 +79,13 @@ function sprint_row(namewidth::Int, name, width::Int, names::Tuple; dots="…")
 end
 
 ## for 2D printing
-function show(io::IO, a::NamedArray, maxnrow::Int)
+function show(io::IO, a::NamedMatrix, maxnrow::Int)
     @assert ndims(a)==2
     nrow, ncol = size(a)
     ## rows
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, a.array[i,j]) for i=totrowrange, j=1:ncol]
-    rowname, colname = names(a)
+    rowname, colname = allnames(a)
     strlen(x) = length(string(x))
     colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
     rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, dimnames(a)))+3)
