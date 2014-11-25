@@ -3,7 +3,8 @@
 print("Starting test, no assertions should fail...")
 
 n = NamedArray(rand(2,4))
-setnames!(n, ["one", "two"], 1)     
+setnames!(n, ["one", "two"], 1)
+setnames!(n, ["a", "b", "c", "d"], 2)     
 
 ## getindex
 @assert [x for x in n] == [x for x in n.array]
@@ -29,7 +30,7 @@ first = n.array[1,:]
 @assert n[1, 2:3].array == first[:,2:3]
 @assert names(n["one", :],1) == ["one"]
 @assert names(n[!"one", :],1) == ["two"]
-@assert names(n[1, !"1"],2) == ["2", "3", "4"]
+@assert names(n[1, !"a"], 2) == ["b", "c", "d"]
 
 ## copy
 m = copy(n)

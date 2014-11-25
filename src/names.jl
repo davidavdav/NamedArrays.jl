@@ -15,7 +15,16 @@ dimnames(a::NamedArray, d::Int) = string(a.dimnames[d])
 ## seting names, dimnames
 function setnames!(a::NamedArray, v::Vector, d::Int)
     @assert size(a.array,d) == length(v)
-    a.dicts[d] = Dict(zip(v, 1:length(v)))
+    ## a.dicts is a tuple, so we need to replace it as a whole...
+    vdicts = Dict[]
+    for i = 1:length(a.dicts)
+        if i==d
+            push!(vdicts, Dict(zip(v, 1:length(v))))
+        else
+            push!(vdicts, a.dicts[i])
+        end
+    end
+    a.dicts = tuple(vdicts...)
 end
 
 function setnames!(a::NamedArray, v, d::Int, i::Int)

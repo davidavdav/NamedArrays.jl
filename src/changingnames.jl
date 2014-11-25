@@ -12,7 +12,7 @@ for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     @eval function ($f)(a::NamedArray, d::Dims)
         s = ($f)(a.array, d)
         newnames = [issubset(i,d) ? [string($f,"(",a.dimnames[i],")")] : names(a,i) for i=1:ndims(a)]
-        NamedArray(s, newnames, a.dimnames)
+        NamedArray(s, tuple(newnames...), tuple(a.dimnames...))
     end
     @eval ($f)(a::NamedArray, d::Int) = ($f)(a, (d,))
 end
@@ -20,7 +20,7 @@ end
 function fan(f::Function, fname::String, a::NamedArray, dim::Int) 
     dimnames = copy(a.dimnames)
     dimnames[dim] = string(fname, "(", dimnames[dim], ")")
-    NamedArray(f(a.array,dim), dimnames, a.dicts)
+    NamedArray(f(a.array,dim), tuple(allnames(a)...), tuple(dimnames...))
 end
 
 ## rename a dimension

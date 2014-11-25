@@ -7,18 +7,29 @@
 
 import Base.getindex, Base.to_index
 
-# These functions transform various index types into values suitable for standard array indexing
-indices(dict::Dict, I::Range1) = I
-indices(dict::Dict, I::Range) = I
-indices(dict::Dict, I::String) = dict[I]
-indices{T<:String}(dict::Dict, I::AbstractVector{T}) = map(s -> dict[s], I) # convenience
-indices(dict::Dict, I::BitArray) = find(I)
-indices(dict::Dict, I::AbstractVector{Bool}) = find(I)
-indices(dict::Dict, I::AbstractVector) = error("unsupported vector type: ", eltype(I))
-## we want to accept any type as index, really
-#indices{K}(dict::Dict{K}, I::K) = dict[I]
-#indices{K}(dict::Dict{K}, I::AbstractVector{K}) = map(k -> dict[k], I)
+## resolve ambiguity, this should not happen
+indices(dict::Dict{Bool}, i::AbstractVector{Bool}) = error("Wrong index type")
+indices(dict::Dict{Bool}, i::Range{Bool}) = error("Wrong index type")
+for t in (:Integer, :Real)
+    @eval indices{K<:$t}(dict::Dict{K}, i::AbstractVector{K}) = error("Wrong index type")
+    @eval indices{K<:$t}(dict::Dict{K}, i::Range{K}) = error("Wrong index type")
+end
+indices(dict::Dict{Bool}, i::BitVector) = error("Wrong index type")
+getindex(a::NamedArray, i::AbstractArray) = getindex(a.array, i) ## abstractarray.jl
 
+# These functions transform various index types into values suitable for standard array indexing
+indices(dict::Dict, I::Range) = I
+indices{K}(dict::Dict{K}, I::K) = dict[I]
+indices{K}(dict::Dict{K}, I::AbstractVector{K}) = map(k -> dict[k], I) # convenience
+indices(dict::Dict, I::BitVector) = find(I)
+indices(dict::Dict, I::AbstractVector{Bool}) = find(I)
+
+if false
+    indices(dict::Dict, i::Integer) = i
+    indices{T<:Integer}(dict::Dict, i::AbstractVector{T}) = i
+end
+
+## negative integers / reals
 function indices(dict::Dict, I::Integer)
     if I > 0
         return I
@@ -26,10 +37,10 @@ function indices(dict::Dict, I::Integer)
         return setdiff(1:length(dict), -I)
     end
 end
-
 indices(dict::Dict, I::Real) = indices(convert(Int, I))
 
-function indices{T<:Integer,K}(dict::Dict{K}, I::AbstractVector{T})
+## Array of int, positive or negative
+function indices{T<:Integer}(dict::Dict, I::AbstractVector{T})
     if all(I .> 0)
         return I
     elseif all(I .< 0)
@@ -38,18 +49,16 @@ function indices{T<:Integer,K}(dict::Dict{K}, I::AbstractVector{T})
         error("indices must all be of the same sign")
     end
 end
-
 indices{T<:Real}(dict::Dict, I::AbstractVector{T}) = indices(dict, convert(Vector{Int}, I))
 
 function indices(dict::Dict, I::Names)
     k = keys(dict)
-
     if !is(eltype(I.names), eltype(k))
         error("elements of the Names object must be of the same type as the array names for each dimension")
     end
 
     if I.exclude
-        return map(s -> dict[s], setdiff(names(dict), I.names))
+        return map(s -> dict[s], setdiff(sortnames(dict), I.names))
     else
         return map(s -> dict[s], I.names)
     end
@@ -64,24 +73,20 @@ function getindex(A::NamedArray, i1::Real)
         getindex(A.array, setdiff(1:length(A.dicts[1]),to_index(-i1)))
     end
 end
-getindex(A::NamedArray, s1::String) = getindex(A, A.dicts[1][s1])
-types = [:Real, :String]
+
+types = [:Real]
 for T1 in types 
     for T2 in types
         @eval getindex(a::NamedArray, i1::$T1, i2::$T2) = getindex(a.array, indices(a.dicts[1], i1), indices(a.dicts[2], i2))
         for T3 in types 
             @eval getindex(a::NamedArray, i1::$T1, i2::$T2, i3::$T3) = getindex(a.array, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
-            @eval setindex!{T}(a::NamedArray{T}, x, i1::$T1, i2::$T2, i3::$T3) =
-            setindex!(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
-#            @eval getindex(a::NamedArray, i1::$T1, i2::$T2, i3::$T3, index::Union($(types...))...) = getindex(a.array, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
-        end
+#            @eval setindex!{T}(a::NamedArray{T}, x, i1::$T1, i2::$T2, i3::$T3) =
+#            setindex!(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
+       end
     end 
 end
 ## This covers everything up over 3 dimensions
-getindex(a::NamedArray, index::Union(Real, String)...) = getindex(a.array, map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
-
-## one more catch-all?
-#getindex(a::NamedArray, index...) = getindex(a.array, map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
+getindex(a::NamedArray, index...) = getindex(a.array, map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
 
 ## for Ranges or Arrays we do an effort keep names
 ## We follow the protocol of Array, that the last singleton dimensions are dropped
@@ -93,9 +98,15 @@ function getindex(A::NamedArray, I::IndexOrNamed...)
     while dims[n]==1 && n>1
         n -= 1
     end
-    if ndims(a) != n || length(dims)==1 && ndims(A)>1; return a; end # number of dimension changed
-    newnames = [ [getindex(names(A,i),II[i])] for i=1:n ]
-    NamedArray(a, newnames, A.dimnames[1:n])
+    if ndims(a) != n || length(dims)==1 && ndims(A)>1; 
+        return a;               # number of dimension changed
+    end 
+    names = Any[]
+    for d = 1:n
+        sortkeys = collect(keys(A.dicts[d]))[sortperm(collect(keys(A.dicts[d])))]
+        push!(names, [sortkeys[i] for i in II[d]])
+    end
+    NamedArray(a, tuple(names...), tuple(A.dimnames[1:n]...))
 end
 
 import Base.setindex!
@@ -131,7 +142,7 @@ end
 setindex!{T<:Real}(A::NamedArray, X::AbstractArray, I::AbstractVector{T}) = setindex!(A.array, X, I)
 
 ## This takes care of most other cases
-function setindex!(A::NamedArray, x, I::IndexOrNamed...)
+function setindex!(A::NamedArray, x, I...)
     II = tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
     setindex!(A.array, x, II...)
 end

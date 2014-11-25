@@ -114,7 +114,7 @@ end
 
 function show(io::IO, v::NamedVector, maxnrow::Int) 
     nrow=size(v, 1)
-    rownames = names(v)[1]
+    rownames = names(v,1)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, v.array[i]) for i=totrowrange]
     colwidth = maximum(map(length,s))

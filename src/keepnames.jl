@@ -9,7 +9,7 @@
 function hcat{T}(V::NamedVector{T}...) 
     keepnames=true
     V1=V[1]
-    firstnames = names(V1)
+    firstnames = names(V1,1)
     for i=2:length(V)
         keepnames &= names(V[i])==firstnames
     end
@@ -46,7 +46,7 @@ function broadcast(f::Function, a::NamedArray...)
     ## verify that the names are consistent
     bigi, big = verify_names(a...)
     arrays = map(x->x.array, a)
-    NamedArray(broadcast(f, arrays...), big.dimnames, big.dicts)
+    NamedArray(broadcast(f, arrays...), tuple(big.dimnames...), tuple(allnames(big)...))
 end
 
 function broadcast!(f::Function, dest::NamedArray, a::NamedArray, b::NamedArray...)
