@@ -13,11 +13,11 @@ type NamedArray{T,N,DT} <: AbstractArray{T,N}
     array::Array{T,N}
     dicts::DT
     dimnames::NTuple{N}
-    function NamedArray(array::Array{T,N}, dicts::NTuple{N,Dict}, dimnames::NTuple{N})
-        size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
-        for (d,dict) in zip(size(array),dicts)
-            Set(values(dict)) == Set(1:d) || error("Inconsistent values in dict")
-        end
+    function NamedArray(array::Array{T,N}, dicts::DT, dimnames::NTuple{N})
+#        size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
+#        for (d,dict) in zip(size(array),dicts)
+#            Set(values(dict)) == Set(1:d) || error("Inconsistent values in dict")
+#        end
         new(array, dicts, dimnames)
     end
 end

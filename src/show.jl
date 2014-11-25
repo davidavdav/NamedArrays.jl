@@ -31,8 +31,8 @@ function show(io::IO, a::NamedArray)
         show(io, a, min(maxnrow, nr))
     else                        # fallback for dim > 2
         for i in 1:length(a.dimnames)
-            print(io, " ", a.dimnames[i], ": ")
-            print(io, names(a,i)')
+            print(io, " ", strdimnames(a,i), ": ")
+            print(io, strnames(a,i)')
         end
         show(io, a.array)
     end
@@ -85,15 +85,15 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
     ## rows
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, a.array[i,j]) for i=totrowrange, j=1:ncol]
-    rowname, colname = allnames(a)
+    rowname, colname = strnames(a)
     strlen(x) = length(string(x))
     colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
-    rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, dimnames(a)))+3)
+    rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, strdimnames(a)))+3)
     maxncol = div(Base.tty_size()[2] - rownamewidth - 3, colwidth+1) # dots, spaces between
     ## columns
     colrange, totcorange = compute_range(maxncol, ncol)
     ## header
-    println(io, sprint_row(rownamewidth, rightalign(join(dimnames(a), " \\ "), rownamewidth), 
+    println(io, sprint_row(rownamewidth, rightalign(join(strdimnames(a), " \\ "), rownamewidth), 
                            colwidth, map(i->colname[i], colrange)))
     ## data
     l = 1
@@ -114,7 +114,7 @@ end
 
 function show(io::IO, v::NamedVector, maxnrow::Int) 
     nrow=size(v, 1)
-    rownames = names(v,1)
+    rownames = strnames(v,1)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, v.array[i]) for i=totrowrange]
     colwidth = maximum(map(length,s))

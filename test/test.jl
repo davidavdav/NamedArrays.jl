@@ -5,8 +5,8 @@ print("Starting test, no assertions should fail...")
 ## constructors
 n = NamedArray(Complex64, 5, 8)
 n = NamedArray(rand(2,4))
-setnames!(n, ["one", "two"], 1)
-setnames!(n, ["a", "b", "c", "d"], 2)     
+setnames!(n, ["one", "two"], 1) 
+setnames!(n, ["a", "b", "c", "d"], 2) 
 
 ## getindex
 @assert [x for x in n] == [x for x in n.array]

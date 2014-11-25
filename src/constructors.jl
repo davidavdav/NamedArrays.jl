@@ -23,14 +23,14 @@ end
 ## Type and dimensions
 function NamedArray(T::DataType, dims::Int...)
     ld = length(dims)
-    names = [[symbol(string(j)) for j=1:i] for i=dims]
+    names = [[string(j) for j=1:i] for i=dims]
     dimnames = [symbol(string(char(64+i))) for i=1:ld]
     a = Array(T, dims...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
 
 function NamedArray(a::Array) 
-    names = [[symbol(string(j)) for j=1:i] for i=size(a)]
+    names = [[string(j) for j=1:i] for i=size(a)]
     dimnames = [symbol(string(char(64+i))) for i=1:ndims(a)]
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
