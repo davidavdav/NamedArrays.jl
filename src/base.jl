@@ -8,7 +8,7 @@
 
 ## copy
 import Base.copy
-copy{T,N,DT}(a::NamedArray{T,N,DT}) = NamedArray{T, N, DT}(copy(a.array), tuple(a.dimnames...), a.dicts)
+copy{T,N,DT}(a::NamedArray{T,N,DT}) = NamedArray{T, N, DT}(copy(a.array), a.dicts, a.dimnames)
 
 ## from array.jl
 function copy!{T}(dest::NamedArray{T}, dsto::Integer, src::ArrayOrNamed{T}, so::Integer, N::

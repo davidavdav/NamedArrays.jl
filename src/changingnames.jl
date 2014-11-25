@@ -17,10 +17,16 @@ for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     @eval ($f)(a::NamedArray, d::Int) = ($f)(a, (d,))
 end
 
-function fan(f::Function, fname::String, a::NamedArray, dim::Int) 
-    dimnames = copy(a.dimnames)
-    dimnames[dim] = string(fname, "(", dimnames[dim], ")")
-    NamedArray(f(a.array,dim), tuple(allnames(a)...), tuple(dimnames...))
+function fan{T,N}(f::Function, fname::String, a::NamedArray{T,N}, dim::Int)
+    dimnames = Array(Any, N)
+    for i=1:N
+        if i==dim
+            dimnames[i] = string(fname, "(", a.dimnames[dim], ")")
+        else
+            dimnames[i] = a.dimnames[i]
+        end
+    end
+     NamedArray(f(a.array,dim), a.dicts, tuple(dimnames...))
 end
 
 ## rename a dimension

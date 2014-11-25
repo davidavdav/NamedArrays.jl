@@ -10,21 +10,26 @@ import Base.ctranspose
 function ctranspose(a::NamedArray) 
     @assert ndims(a)<=2
     if ndims(a)==1
-        NamedArray(a.array', (["1"], names(a)[1],), ("'", a.dimnames[1],))
+        NamedArray(a.array', (["1"], names(a,1)), ("'", a.dimnames[1]))
     else
-        NamedArray(a.array', reverse(names(a)), reverse(a.dimnames))
+        NamedArray(a.array', reverse(a.dicts), reverse(a.dimnames))
     end
 end
 
 import Base.flipdim
-function flipdim(a::NamedArray, d::Int) 
-    newdicts = copy(a.dicts)
-    newdicts[d] = copy(a.dicts[d])
+function flipdim{T,N}(a::NamedArray{T,N}, d::Int)
+    vdicts = Array(Dict, N)
     n = size(a,d)+1
-    for (k,v) in collect(newdicts[d])
-        newdicts[d][k] = n - v
+    for i=1:N
+        dict = copy(a.dicts[i])
+        if i==d
+            for (k,v) in collect(dict)
+                dict[k] = n - v
+            end
+        end
+        vdicts[i] = dict
     end
-    NamedArray(flipdim(a.array,d), a.dimnames, newdicts)
+    NamedArray(flipdim(a.array,d), tuple(vdicts...), a.dimnames)
 end
 
 ## circshift automagically works...
@@ -32,9 +37,9 @@ end
 
 import Base.permutedims
 function permutedims(a::NamedArray, perm::Vector{Int})
-    newdicts = a.dicts[perm]
-    newdimnames = a.dimnames[perm]
-    NamedArray(permutedims(a.array, perm), newdimnames, newdicts)
+    dicts = a.dicts[perm]
+    dimnames = a.dimnames[perm]
+    NamedArray(permutedims(a.array, perm), dicts, dimnames)
 end
 import Base.transpose
 transpose(a::NamedArray) = permutedims(a, [2,1])
@@ -49,25 +54,25 @@ rot180(a::NamedArray) = fliplr(flipud(a))
 
 import Base.nthperm, Base.nthperm!, Base.permute!, Base.ipermute!, Base.shuffle, Base.shuffle!, Base.reverse, Base.reverse!
 function nthperm(v::NamedVector, n::Int)
-    newnames = nthperm(names(v)[1], n)
-    NamedArray(nthperm(v.array,n), (newnames,), (v.dimnames[1],))
+    newnames = nthperm(names(v,1), n)
+    NamedArray(nthperm(v.array,n), (newnames,), v.dimnames)
 end
 function nthperm!(v::NamedVector, n::Int) 
-    setnames!(v, nthperm(names(v)[1], n), 1)
-    nthperm!(v.array,n)
+    setnames!(v, nthperm(names(v,1), n), 1)
+    nthperm!(v.array, n)
     v
 end
 function permute!(v::NamedVector, perm::AbstractVector)
-    setnames!(v, names(v)[1][perm], 1)
+    setnames!(v, names(v,1)[perm], 1)
     permute!(v.array, perm)
     v
 end
-ipermute!(v::NamedVector, perm::AbstractVector) = permute!(v, iperm(perm))
+ipermute!(v::NamedVector, perm::AbstractVector) = permute!(v, invperm(perm))
 shuffle(v::NamedVector) = permute!(copy(v), randperm(length(v)))
 shuffle!(v::NamedVector) = permute!(v, randperm(length(v)))
-reverse(v::NamedVector, start=1, stop=length(v)) = NamedArray(reverse(v.array, start, stop), (reverse(names(v)[1], start, stop),), (v.dimnames[1],))
+reverse(v::NamedVector, start=1, stop=length(v)) = NamedArray(reverse(v.array, start, stop),  (reverse(names(v,1), start, stop),), v.dimnames)
 function reverse!(v::NamedVector, start=1, stop=length(v))
-    setnames!(v, reverse(names(v)[1], start, stop), 1)
+    setnames!(v, reverse(names(v,1), start, stop), 1)
     reverse!(v.array, start, stop)
     v
 end

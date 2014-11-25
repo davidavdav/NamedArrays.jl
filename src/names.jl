@@ -34,12 +34,19 @@ function setnames!(a::NamedArray, v, d::Int, i::Int)
     a.dicts[d][v] = i
 end
 
-function setdimnames!{S<:String}(a::NamedArray, v::Vector{S})
-    @assert length(v) == ndims(a)
-    a.dimnames = copy(v)
+function setdimnames!{T,N}(a::NamedArray{T,N}, dn::NTuple{N})
+    a.dimnames = dn
 end
     
-function setdimnames!(a::NamedArray, v::String, d::Int)
-    @assert 1 <= d <= ndims(a)
-    a.dimnames[d] = v
+function setdimnames!{T,N}(a::NamedArray{T,N}, v, d::Int)
+    @assert 1 <= d <= N
+    vdimnames = Array(Any, N)
+    for i=1:N
+        if i==d
+            vdimnames[i] = v
+        else
+            vdimnames[i] = a.dimnames[i]
+        end
+    end
+    a.dimnames = tuple(vdimnames...)
 end

@@ -12,20 +12,21 @@ end
 function NamedArray{T,N}(array::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
     @assert size(array)==map(length, names)
     dicts = map(names -> Dict(zip(names,1:length(names))), names)
-    NamedArray{T,N,typeof(dicts)}(array, dimnames, dicts) # call inner constructor
+    NamedArray{T,N,typeof(dicts)}(array, dicts, dimnames) # call inner constructor
 end
 
-function NamedArray(a::Array, names::NTuple, dimnames::NTuple)
+function NamedArray{N}(a::Array, names::NTuple{N,Dict}, dimnames::NTuple)
     @assert ndims(a)==length(names)==length(dimnames)
-    println(typeof(dimnames), typeof(names))
-    NamedArray{eltype(a),ndims(a)}(a, names, dimnames)
+    NamedArray{eltype(a),ndims(a), typeof(names)}(a, names, dimnames) ## inner constructor
 end
 
+## Type and dimensions
 function NamedArray(T::DataType, dims::Int...)
     ld = length(dims)
     names = [[symbol(string(j)) for j=1:i] for i=dims]
     dimnames = [symbol(string(char(64+i))) for i=1:ld]
-    NamedArray(T, tuple(names...), tuple(dimnames...))
+    a = Array(T, dims...)
+    NamedArray(a, tuple(names...), tuple(dimnames...))
 end
 
 function NamedArray(a::Array) 

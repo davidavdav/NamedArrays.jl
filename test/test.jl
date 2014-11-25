@@ -2,6 +2,8 @@
 
 print("Starting test, no assertions should fail...")
 
+## constructors
+n = NamedArray(Complex64, 5, 8)
 n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1)
 setnames!(n, ["a", "b", "c", "d"], 2)     
@@ -22,6 +24,7 @@ n[1,1] = 0
 
 ## conversion
 @assert convert(Array, n) == n.array
+@assert float32(n).array == float32(n.array)
 
 ## indexing
 first = n.array[1,:]
@@ -58,6 +61,7 @@ for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos,
     @eval @assert ($f)(n).array == ($f)(n.array)
 end
 
+## rearranging
 @assert n'.array == n.array'
 for dim=1:2
     @assert flipdim(n,dim).array == flipdim(n.array,dim)
@@ -66,5 +70,36 @@ end
 
 p = randperm(ndims(n))
 @assert permutedims(n, p).array == permutedims(n.array, p)
+
+v = NamedArray(rand(10))
+p = rand(1:factorial(length(v)))
+@assert nthperm(v,p).array == nthperm(v.array, p)
+@assert names(nthperm(v,p),1) == nthperm(names(v,1), p)
+vv = copy(v)
+nthperm!(vv, p)
+@assert vv == nthperm(v, p)
+
+p = randperm(length(v))
+vv = copy(v)
+permute!(vv, p)
+a = copy(v.array)
+nm = copy(names(v,1))
+permute!(a, p)
+permute!(nm, p)
+@assert vv.array == a
+@assert names(vv,1) == nm
+ipermute!(vv, p)
+@assert vv == v
+
+vv = shuffle(v)
+shuffle!(vv)
+@assert reverse(v).array == reverse(v.array)
+@assert names(reverse(v),1) == reverse(names(v,1))
+vv = copy(v)
+reverse!(vv)
+@assert vv == reverse(v)
+
+
+
 
 println(" done")

@@ -11,15 +11,14 @@
 ## The inner constructor checks for consistency, the values must all be 1:d
 type NamedArray{T,N,DT} <: AbstractArray{T,N}
     array::Array{T,N}
-    dimnames::Vector
     dicts::DT
-    function NamedArray(array::Array{T,N}, dimnames::NTuple{N}, dicts::NTuple{N,Dict})
+    dimnames::NTuple{N}
+    function NamedArray(array::Array{T,N}, dicts::NTuple{N,Dict}, dimnames::NTuple{N})
         size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
         for (d,dict) in zip(size(array),dicts)
             Set(values(dict)) == Set(1:d) || error("Inconsistent values in dict")
         end
-        vdimnames = [name for name in dimnames]
-        new(array, vdimnames, dicts)
+        new(array, dicts, dimnames)
     end
 end
 

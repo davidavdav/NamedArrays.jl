@@ -21,5 +21,5 @@ end
 ## convenience functions
 for tf in [:float16, :float32, :float64, :complex32, :complex64, :complex128]
     eval(Expr(:import, :Base, tf))
-    @eval ($tf)(a::NamedArray) = NamedArray(($tf)(a.array), a.dimnames, a.dicts)
+    @eval ($tf)(a::NamedArray) = NamedArray(($tf)(a.array), a.dicts, a.dimnames)
 end
