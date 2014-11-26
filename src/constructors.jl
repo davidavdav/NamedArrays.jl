@@ -3,11 +3,6 @@
 
 ## Constructors related to the types in namedarraytypes.jl
 
-## temporary compatibility hack
-if VERSION < v"0.4.0-dev"
-    Base.Dict(z::Base.Zip2) = Dict(z.a, z.b)
-end
-
 ## call inner constructor
 function NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Dict}, dimnames::NTuple{N})
     NamedArray{T, N, typeof(names)}(a, names, dimnames) ## inner constructor

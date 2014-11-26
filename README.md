@@ -40,16 +40,26 @@ NamedArray(::Type{T}, dims...)
 ```
 
 these constructors add default names to the array of type String, "1",
-"2", ... for each dimension, and names the dimensions "A", "B",
+"2", ... for each dimension, and names the dimensions `:A`, `:B`,
 ... (which will be all right for 26 dimensions to start with; 26
 dimensions should be enough for anyone:-).  The former initializes
 the NamedArray with the Array `a`, the latter makes an uninitialized
 NamedArray of element type `T` with the specified dimensions `dims...`. 
 
+```julia
+NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Dict}, dimnames::NTuple{N})
+```
+This is the basic constructor for a namedarray.  `names` must be a tuple of `Dict`s whose support (the values) are exacly covering the range `1:size(a,dim)` for each dimension `dim`.   The keys in the various dictionarys may be of mixed types, but after initialization, the type of the names cannot be altered.  `dimnames` specify the names of the dimensions themselves, and may be of any type.
+
+```julia
+NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
+```
+This is a more friendly version of the basic constructor, where the support of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order.  
+
  * Names, dimnames
 
 ```julia
-names(a::NamedArray)
+allnames(a::NamedArray)
 names(a::NamedArray, dim)
 dimnames(a::NamedArray)
 ```
@@ -62,7 +72,7 @@ dimnames(a::NamedArray)
  setdimnames!(a::NamedArray, name, dim:Int)
  ```
  
- set the names or of dimension `dim`, or only the name at index `index`, or the name of the dimension `dim`. 
+sets all the names of dimension `dim`, or only the name at index `index`, or the name of the dimension `dim`. 
 
  * Copy
 
@@ -70,7 +80,7 @@ dimnames(a::NamedArray)
 copy(a::NamedArray)
 ```
 
-makes a copy of all the elements in a, and returns a NamedArray
+returns a copy of all the elements in a, and returns a NamedArray
 
  * Convert
 
@@ -82,6 +92,8 @@ convert(::Type{Array}, a::NamedArray)
  
 ```julia
 convert{T}(::Type{NamedArray{T}}, a::NamedArray)
+float32(a)
+float64(a)
 ```
  converts the element type of a NamedArray
 
@@ -95,7 +107,7 @@ convert{T}(::Type{NamedArray{T}}, a::NamedArray)
   - Matrix Multiplication `*` between NamedArray and NamedArray 
 
  * `print`, `show`:
-  - basic printing, no pretty-printing yet. 
+  - basic printing, limited support for pretty-printing. 
 
  * `size`, `ndims`
  
@@ -108,8 +120,6 @@ similar(a::NamedArray, t::DataType, dims::NTuple)
  * Getindex
 
 ```julia
-getindex(A::NamedArray, s0::String)
-getindex(A::NamedArray, s::String...)
 getindex(A::NamedArray, i0::Real) 
 getindex(A::NamedArray, I::IndexOrNamed...)
 ```
@@ -117,14 +127,18 @@ getindex(A::NamedArray, I::IndexOrNamed...)
  here type IndexOrNamed is a union of most indexable types:
 
 ```julia
-typealias IndexOrNamed Union(Real, Range1, String, AbstractVector)
+typealias IndexOrNamed Union(Real, Range1, Names, AbstractVector)
 ```
 
  This allows indexing of most combinations of integer, range, string,
 vector of integer and Vector of String of any number of dimensions, as
 long as the underlying Array supports the indexing. 
 
- There is a special meaning of negatove indices, like in the language R.  A negative index selects all but the indicted index from the array.  
+```julia
+n[-1,:]]
+```
+
+ There is a special meaning of negative indices, like in the language R.  A negative index selects all but the indicted index from the array.
  
  String indices can be negated by the exclamation-mark operator `!` applied to the string:
  
@@ -139,8 +153,8 @@ n[!"one", :]
 ```julia
 setindex!(A::NamedArray, x, i0::Real)
 setindex!(A::NamedArray, x, I::AbstractVector 
-setindex!(A::NamedArray, X::ArrayOrNamed, I::Range1)
-setindex!(A::NamedArray, X::AbstractArray, I::AbstractVector)
+setindex!(A::NamedArray, x::ArrayOrNamed, I::Range1)
+setindex!(A::NamedArray, x::AbstractArray, I::AbstractVector)
 setindex!(A::NamedArray, x, I::IndexOrNamed...)
 ```
 
@@ -207,7 +221,7 @@ mean
 std
 ```
 
- These functions, when operating along one dimension, keep the names in the orther dimensions, and name the left over singleton dimension as $function($dimname).
+ These functions, when operating along one dimension, keep the names in the orther dimensions, and name the left over singleton dimension as `$function($dimname)`.
 
 Methods that AbstractArray covers
 ---------------------------
@@ -248,10 +262,10 @@ Implementation
 Currently, the type is defined as
 
 ```julia
-type NamedArray{T,N} <: AbstractArray{T,N}
+type NamedArray{T,N,DT} <: AbstractArray{T,N}
     array::Array{T,N}
-    dimnames::Vector
-    dicts::Array{Dict}
+    dicts::DT
+    dimnames::NTuple{N}
 }
 ```
 

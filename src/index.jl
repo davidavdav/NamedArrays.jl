@@ -64,6 +64,15 @@ function indices(dict::Dict, I::Names)
     end
 end
 
+## 0.4-dev functions
+if VERSION >= v"0.4.0-dev"
+    indices(dict::Dict, it::Base.IteratorsMD.CartesianIndex) = it
+end
+
+## getindex()
+## resolve ambiguity in 0.4-dev
+getindex(A::NamedVector, ::Colon) = A
+
 ## first, we do all combinations of single indices, for efficiency reasons
 getindex(A::NamedArray, i1::Uint) = getindex(A.array, i1) # always positive
 function getindex(A::NamedArray, i1::Real) 
@@ -85,6 +94,7 @@ for T1 in types
        end
     end 
 end
+
 ## This covers everything up over 3 dimensions
 getindex(a::NamedArray, index...) = getindex(a.array, map(i -> indices(a.dicts[i], index[i]), 1:length(index))...)
 

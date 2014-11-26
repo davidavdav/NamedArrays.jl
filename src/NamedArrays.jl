@@ -15,8 +15,9 @@ export NamedArray, NamedVector, Names
 ## type definition
 include("namedarraytypes.jl")
 
-export names, dimnames, setnames!, setdimnames!, array
+export allnames, dimnames, setnames!, setdimnames!, array
 
+include("compat")
 include("constructors.jl")
 include("arithmetic.jl")
 include("base.jl")
