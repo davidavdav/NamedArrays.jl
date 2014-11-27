@@ -17,7 +17,7 @@ include("namedarraytypes.jl")
 
 export allnames, dimnames, setnames!, setdimnames!, array
 
-include("compat")
+include("compat.jl")
 include("constructors.jl")
 include("arithmetic.jl")
 include("base.jl")
