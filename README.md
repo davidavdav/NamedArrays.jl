@@ -49,7 +49,7 @@ NamedArray of element type `T` with the specified dimensions `dims...`.
 ```julia
 NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Dict}, dimnames::NTuple{N})
 ```
-This is the basic constructor for a namedarray.  `names` must be a tuple of `Dict`s whose support (the values) are exacly covering the range `1:size(a,dim)` for each dimension `dim`.   The keys in the various dictionarys may be of mixed types, but after initialization, the type of the names cannot be altered.  `dimnames` specify the names of the dimensions themselves, and may be of any type.
+This is the basic constructor for a namedarray.  `names` must be a tuple of `Dict`s whose support (the values) are exacly covering the range `1:size(a,dim)` for each dimension `dim`.   The keys in the various dictionaries may be of mixed types, but after initialization, the type of the names cannot be altered.  `dimnames` specify the names of the dimensions themselves, and may be of any type.
 
 ```julia
 NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
