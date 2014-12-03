@@ -1,6 +1,6 @@
 ## index.jl getindex and setindex methods for NamedArray
 
-## (c) 2013 David A. van Leeuwen
+## (c) 2013--2014 David A. van Leeuwen
 
 ## This code is licensed under the GNU General Public License, version 2
 ## See the file LICENSE in this distribution
@@ -28,6 +28,7 @@ getindex{T,K<:Real}(a::NamedArray{T,1,(Dict{K,Int64},)}, i::Uint64) = namedgetin
 for t in (:Real, :AbstractArray)
     @eval getindex{T,A<:$t}(a::NamedArray{T,1,(Dict{A,Int64},)}, i::$t) = namedgetindex(a, i)
 end
+getindex{T, K1<:Real, K2<:Real}(a::NamedArray{T,2,(Dict{K1,Int64},Dict{K2,Int64})}, i1::K1, i2::K2) = namedgetindex(a, i1, i2)
 getindex(a::NamedArray, i::Real) = getindex(a.array, to_index(i))
 
 ## Everything should be routed through Index / Indices
@@ -92,7 +93,6 @@ function indices(dict::Dict, I::Names)
     if !is(eltype(I.names), eltype(k))
         error("elements of the Names object must be of the same type as the array names for each dimension")
     end
-
     if I.exclude
         return Indices(map(s -> dict[s], setdiff(sortnames(dict), I.names)))
     else
@@ -115,13 +115,15 @@ getindex{T,K}(A::NamedArray{T,1,(Dict{K,Int},)}, i::Uint) = getindex(A.array, i)
 ## resolve ambiguity with AbstactArray
 getindex{T,R<:Real}(a::NamedArray{T, 1, (Dict{R,Int},)}, i::R) = getindex(a, indices(a.dicts[1], i))
 
+
+
 ## can we construct a faster getindex for a known key type?
 for t1 in [:Real, :K1]
     @eval getindex{T,K1}(a::NamedArray{T,1,(Dict{K1,Int},)}, i::$t1) = getindex(a, indices(a.dicts[1], i))
     for t2 in [:Real, :K2]
         @eval getindex{T,K1,K2}(a::NamedArray{T,2,(Dict{K1,Int},Dict{K2,Int})}, i1::$t1, i2::$t2) = getindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2))
         for t3 in [:Real, :K3]
-            @eval getindex{T,K1,K2,K3}(a::NamedArray{T,2,(Dict{K1,Int},Dict{K2,Int},Dict{K3,Int})}, i1::$t1, i2::$t2, i3::$t3) = getindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
+            @eval getindex{T,K1,K2,K3}(a::NamedArray{T,3,(Dict{K1,Int},Dict{K2,Int},Dict{K3,Int})}, i1::$t1, i2::$t2, i3::$t3) = getindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
         end
     end
 end
