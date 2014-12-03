@@ -20,7 +20,7 @@ getindex(a::NamedArray, i1, i2, i3, i4, i5, I...) = namedgetindex(a, indices(a.d
 if VERSION >= v"0.4.0-dev"
     getindex(a::NamedArray, it::Base.IteratorsMD.CartesianIndex) = getindex(a.array, it)
 end
-    
+
 ## single index
 indices{K}(dict::Dict{K,Int}, i::Integer) = i
 indices{K}(dict::Dict{K,Int}, i::K) = dict[i]
@@ -28,6 +28,10 @@ indices{K}(dict::Dict{K,Int}, i::K) = dict[i]
 indices{T<:Integer}(dict::Dict{T,Int}, i::AbstractArray{T}) = [dict[k] for k in i]
 indices{T<:Integer, K}(dict::Dict{K,Int}, i::AbstractArray{T}) = i
 indices{K}(dict::Dict{K,Int}, i::AbstractArray{K}) = [dict[k] for k in i]
+
+## negation
+indices{K<:Not}(dict::Dict{K,Int}, i::K) = dict[i]
+indices(dict::Dict, i::Not) = setdiff(1:length(dict), indices(dict, i.index))
 
 namedgetindex(a::NamedArray, i::Integer) = getindex(a.array, i)
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer) = getindex(a.array, i1, i2)

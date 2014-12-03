@@ -30,15 +30,10 @@ function NamedArray(a::Array)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
 
-## Names constructors
-
-Names(names::Vector) = Names(names, false)
-
 ## This is a construction that allows you to say somethong like
 ## n[!"one",2] or n[!["one", "two"], 2]
 ## We might, for consistency, decide to do this with "-" instead of !
-import Base.!
-!(names::Names) = Names(names.names, !names.exclude)
-!{T<:String}(names::Vector{T}) = !Names(names)
-!(name::String) = !Names([name])
+#import Base.!
+#!{T<:String}(names::Vector{T}) = !Names(names)
+#!(name::String) = !Names([name])
 

@@ -23,10 +23,9 @@ type NamedArray{T,N,DT} <: AbstractArray{T,N}
 end
 
 
-## a type that encapsulated any other type as a name
-immutable Names
-    names::Vector
-    exclude::Bool
+## a type that negates any index
+immutable Not{T}
+    index::T
 end
 
 typealias NamedVector{T} NamedArray{T,1}
