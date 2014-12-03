@@ -76,3 +76,23 @@ setindex!{T}(A::NamedArray{T}, x, i0::Real, i1::Real, i2::Real, i3::Real, i4::Re
     setindex!(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3), to_index(i4), to_index(i5))
 setindex!{T}(A::NamedArray{T}, x, i0::Real, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real, I::Int...) =
     setindex!(A.array, convert(T,x), to_index(i0), to_index(i1), to_index(i2), to_index(i3), to_index(i4), to_index(i5), I...)
+
+# n[1:4] = 5
+setindex!{T<:Real}(A::NamedArray, x, I::AbstractVector{T}) = setindex!(A.array, x, I)
+
+# n[1:4] = 1:4
+## shamelessly copied from array.jl
+function setindex!{T}(A::NamedArray{T}, X::ArrayOrNamed{T}, I::Range1{Int})
+    if length(X) != length(I); error("argument dimensions must match"); end
+    copy!(A, first(I), X, 1, length(I))
+    return A
+end
+
+# n[[1,3,4,6]] = 1:4
+setindex!{T<:Real}(A::NamedArray, X::AbstractArray, I::AbstractVector{T}) = setindex!(A.array, X, I)
+
+## This takes care of most other cases
+function setindex!(A::NamedArray, x, I...)
+    II = tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
+    setindex!(A.array, x, II...)
+end

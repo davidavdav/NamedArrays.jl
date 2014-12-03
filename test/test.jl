@@ -13,9 +13,17 @@ setnames!(n, ["a", "b", "c", "d"], 2)
 @assert n[2,4] == n.array[2,4]
 @assert n[2//1,4.0] == n.array[2,4]
 
+## copy
+m = copy(n)
+@assert m == n
+
 ## setindex
-n[1,1] = 0
-@assert n[1,1] == 0
+m[1,1] = 0
+m[2,:] = 1:4
+m[:,"c"] = -1
+m[1,[2,3]] = [10,20]
+m["one", 4//1] = 5
+@assert m.array == [0. 10 20 5; 1 2 -1 4]
 
 ## sum
 @assert sum(n) == sum(n.array)
@@ -35,10 +43,6 @@ first = n.array[1,:]
 @assert names(n["one", :],1) == ["one"]
 @assert names(n[Not("one"), :],1) == ["two"]
 @assert names(n[1, Not("a")], 2) == ["b", "c", "d"]
-
-## copy
-m = copy(n)
-@assert m == n
 
 ## changingnames
 for  f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
