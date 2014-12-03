@@ -29,14 +29,6 @@ immutable Names
     exclude::Bool
 end
 
-immutable Index
-    index::Int
-end
-
-immutable Indices
-    index::Vector{Int}
-end
-
 typealias NamedVector{T} NamedArray{T,1}
 typealias NamedMatrix{T} NamedArray{T,2}
 typealias ArrayOrNamed{T,N} Union(Array{T,N}, NamedArray{T,N})
