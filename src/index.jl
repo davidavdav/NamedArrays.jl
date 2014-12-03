@@ -14,7 +14,7 @@ getindex(a::NamedArray, i1, i2) = namedgetindex(a, indices(a.dicts[1], i1), indi
 getindex(a::NamedArray, i1, i2, i3) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
 getindex(a::NamedArray, i1, i2, i3, i4) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4))
 getindex(a::NamedArray, i1, i2, i3, i4, i5) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5))
-getindex(a::NamedArray, i1, i2, i3, i4, i5, I...) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5), [indices(a.dicts[5+i], ind) for (i,ind) in enumerate(I...)]...)
+getindex(a::NamedArray, i1, i2, i3, i4, i5, I...) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5), [indices(a.dicts[5+i], ind) for (i,ind) in enumerate(I)]...)
 
 ## 0.4-dev functions
 if VERSION >= v"0.4.0-dev"
@@ -22,19 +22,24 @@ if VERSION >= v"0.4.0-dev"
 end
 
 ## single index
-indices{K}(dict::Dict{K,Int}, i::Integer) = i
-indices{K}(dict::Dict{K,Int}, i::K) = dict[i]
+indices{K,V<:Integer}(dict::Dict{K,V}, i::Real) = to_index(i)
+indices{K,V<:Integer}(dict::Dict{K,V}, i::K) = dict[i]
 ## multiple indices
-indices{T<:Integer}(dict::Dict{T,Int}, i::AbstractArray{T}) = [dict[k] for k in i]
-indices{T<:Integer, K}(dict::Dict{K,Int}, i::AbstractArray{T}) = i
-indices{K}(dict::Dict{K,Int}, i::AbstractArray{K}) = [dict[k] for k in i]
+indices{T<:Integer,V<:Integer}(dict::Dict{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]
+indices{T<:Integer,K,V<:Integer}(dict::Dict{K,V}, i::AbstractArray{T}) = i
+indices{K,V<:Integer}(dict::Dict{K,V}, i::AbstractArray{K}) = [dict[k] for k in i]
 
 ## negation
-indices{K<:Not}(dict::Dict{K,Int}, i::K) = dict[i]
+indices{K<:Not,V<:Integer}(dict::Dict{K,V}, i::K) = dict[i]
 indices(dict::Dict, i::Not) = setdiff(1:length(dict), indices(dict, i.index))
 
 namedgetindex(a::NamedArray, i::Integer) = getindex(a.array, i)
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer) = getindex(a.array, i1, i2)
+namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer) = getindex(a.array, i1, i2, i3)
+namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer) = getindex(a.array, i1, i2, i3, i4)
+namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer) = getindex(a.array, i1, i2, i3, i4, i5)
+namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer, I::Integer...) = getindex(a.array, i1, i2, i3, i4, i5, I...)
+
 
 function namedgetindex(n::NamedArray, index...)
     a = getindex(n.array, index...)

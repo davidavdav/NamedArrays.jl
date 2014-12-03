@@ -11,6 +11,7 @@ setnames!(n, ["a", "b", "c", "d"], 2)
 ## getindex
 @assert [x for x in n] == [x for x in n.array]
 @assert n[2,4] == n.array[2,4]
+@assert n[2//1,4.0] == n.array[2,4]
 
 ## setindex
 n[1,1] = 0
@@ -26,7 +27,7 @@ n[1,1] = 0
 @assert convert(Array, n) == n.array
 @assert float32(n).array == float32(n.array)
 
-## indexing
+## more indexing
 first = n.array[1,:]
 @assert n["one", :].array == first
 @assert n[Not("two"), :].array == first
@@ -53,11 +54,11 @@ for f in (:cumprod, :cumsum, :cumsum_kbn, :cummin, :cummax)
 end
 
 #multidimensional
-m = NamedArray(rand(2,3,4,3,2))
-for i1=1:2 for i2=1:3 for i3=1:4 for i4=1:3 for i5=1:2
-    @assert m[i1,i2,i3,i4,i5] == m.array[i1,i2,i3,i4,i5]
-    @assert m[string(i1), string(i2), string(i3), string(i4), string(i5)] == m.array[i1,i2,i3,i4,i5]
-end end end end end
+m = NamedArray(rand(2,3,4,3,2,3))
+for i1=1:2 for i2=1:3 for i3=1:4 for i4=1:3 for i5=1:2 for i6=1:3
+    @assert m[i1,i2,i3,i4,i5,i6] == m.array[i1,i2,i3,i4,i5,i6]
+    @assert m[string(i1), string(i2), string(i3), string(i4), string(i5), string(i6)] == m.array[i1,i2,i3,i4,i5,i6]
+end end end end end end
 
 m = NamedArray(rand(10))
 @assert hcat(m, m).array == hcat(m.array, m.array)
