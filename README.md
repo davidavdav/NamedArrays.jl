@@ -76,7 +76,7 @@ This is the main use of `NamedArrays`.  As an index, not only integers, arrays o
 n[Not(1),:]]
 ```
 
-There is a special type constructor `Not()`, whose function is to specify which elements to exclude from the array.  This is similar to negative indices in the language R.  The elements in `Not(elsements...)` select all but the indicated elements from the array.
+There is a special type constructor `Not()`, whose function is to specify which elements to exclude from the array.  This is similar to negative indices in the language R.  The elements in `Not(elements...)` select all but the indicated elements from the array.
  
 Both integers and names can be negated. 
  
@@ -263,5 +263,5 @@ type NamedArray{T,N,DT} <: AbstractArray{T,N}
 }
 ```
 
-but the inner constructor actually expects `NTuple`s for `names` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `names` and `dimnames`.  You can use the expression `tuple(Vector)...` for that.
+but the inner constructor actually expects `NTuple`s for `names` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `names` and `dimnames`.  You can use the expression `tuple(Vector...)` for that.
 
