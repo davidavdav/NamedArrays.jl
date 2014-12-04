@@ -1,6 +1,10 @@
 ## convert.jl Convenience function for type conversion
+## (c) 2014 David A. van Leeuwen
 
 ## just give me the array!
+
+## This code is licensed under the MIT license
+## See the file LICENSE.md in this distribution
 
 import Base.convert,Base.promote_rule
 

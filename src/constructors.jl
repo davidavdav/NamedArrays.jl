@@ -3,6 +3,9 @@
 
 ## Constructors related to the types in namedarraytypes.jl
 
+## This code is licensed under the MIT license
+## See the file LICENSE.md in this distribution
+
 ## call inner constructor
 function NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Associative}, dimnames::NTuple{N})
     NamedArray{T, N, typeof(a), typeof(names)}(a, names, dimnames) ## inner constructor

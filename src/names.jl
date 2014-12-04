@@ -1,8 +1,8 @@
 ## names.jl retrieve and set dimension names
 ## (c) 2013 David A. van Leeuwen
 
-## This code is licensed under the GNU General Public License, version 2
-## See the file LICENSE in this distribution## access to the names of the dimensions
+## This code is licensed under the MIT license
+## See the file LICENSE.md in this distribution
 
 import Base.names
 

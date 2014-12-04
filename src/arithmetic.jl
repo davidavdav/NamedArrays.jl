@@ -2,8 +2,8 @@
 
 ## (c) 2013 David A. van Leeuwen
 
-## This code is licensed under the GNU General Public License, version 2
-## See the file LICENSE in this distribution
+## This code is licensed under the MIT License
+## See the file LICENSE.md in this distribution
 
 for op in (:+, :-, :.+, :.-, :.*, :./)
     ## named %op% named

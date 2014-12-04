@@ -2,8 +2,8 @@
 
 ## (c) 2013, 2014 David A. van Leeuwen
 
-## This code is licensed under the GNU General Public License, version 2
-## See the file LICENSE in this distribution
+## This code is licensed under the MIT license
+## See the file LICENSE.md in this distribution
 
 # Keep names for consistently named vectors, or drop them 
 function hcat{T}(V::NamedVector{T}...) 

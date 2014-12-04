@@ -1,6 +1,9 @@
 ## index.jl getindex and setindex methods for NamedArray
 ## (c) 2013--2014 David A. van Leeuwen
 
+## This code is licensed under the MIT license
+## See the file LICENSE.md in this distribution
+
 import Base.getindex, Base.to_index
 
 ## ambiguity from abstractarray.jl
