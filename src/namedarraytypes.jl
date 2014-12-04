@@ -9,11 +9,11 @@
 ## DT is a tuple of Dicts, characterized by the types of the keys.  
 ## This way NamedArray is dependent on the dictionary type of each dimensions. 
 ## The inner constructor checks for consistency, the values must all be 1:d
-type NamedArray{T,N,DT} <: AbstractArray{T,N}
-    array::Array{T,N}
+type NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
+    array::AT
     dicts::DT
     dimnames::NTuple{N}
-    function NamedArray(array::Array{T,N}, dicts::NTuple{N,Dict}, dimnames::NTuple{N})
+    function NamedArray(array::AbstractArray{T,N}, dicts::NTuple{N,Associative}, dimnames::NTuple{N})
         size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
         for (d,dict) in zip(size(array),dicts)
             Set(values(dict)) == Set(1:d) || error("Inconsistent values in dict")
