@@ -4,7 +4,7 @@
 import Base.getindex, Base.to_index
 
 ## ambiguity from abstractarray.jl
-getindex(a::NamedArray, i::Real) = namedgetindex(a, to_index(i))
+getindex(a::NamedArray, i::Real) = namedgetindex(a, indices(a.dicts[1], i))
 getindex(a::NamedArray, i::AbstractArray) = namedgetindex(a, indices(a.dicts[1], i))
 ## from subarray.jl
 getindex{T}(a::NamedArray{T,1}, ::Colon) = a
@@ -22,10 +22,13 @@ if VERSION >= v"0.4.0-dev"
 end
 
 ## single index
+indices{K<:Real,V<:Integer}(dict::Dict{K,V}, i::K) = dict[i]
 indices{K,V<:Integer}(dict::Dict{K,V}, i::Real) = to_index(i)
 indices{K,V<:Integer}(dict::Dict{K,V}, i::K) = dict[i]
 ## multiple indices
+## the following two lines are [artly because of ambiguity
 indices{T<:Integer,V<:Integer}(dict::Dict{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]
+indices{T<:Real,V<:Integer}(dict::Dict{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]
 indices{T<:Integer,K,V<:Integer}(dict::Dict{K,V}, i::AbstractArray{T}) = i
 indices{K,V<:Integer}(dict::Dict{K,V}, i::AbstractArray{K}) = [dict[k] for k in i]
 

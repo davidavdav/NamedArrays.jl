@@ -64,6 +64,15 @@ for i1=1:2 for i2=1:3 for i3=1:4 for i4=1:3 for i5=1:2 for i6=1:3
     @assert m[string(i1), string(i2), string(i3), string(i4), string(i5), string(i6)] == m.array[i1,i2,i3,i4,i5,i6]
 end end end end end end
 
+## weird indices
+m = NamedArray(rand(4), ([1//1, 1//2, 1//3, 1//4],), ("weird",))
+@assert m[1//2] == m.array[2]
+@assert m[[1//4,1//3]] == m.array[[4,3]]
+
+m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
+@assert m[1] == m.array[4]
+@assert array(m[[4,3,2,1]]) == m.array
+
 m = NamedArray(rand(10))
 @assert hcat(m, m).array == hcat(m.array, m.array)
 @assert broadcast(-, n, mean(n,1)).array == broadcast(-, n.array, mean(n.array,1))

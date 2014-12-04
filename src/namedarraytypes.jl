@@ -10,7 +10,7 @@
 ## This way NamedArray is dependent on the dictionary type of each dimensions. 
 ## The inner constructor checks for consistency, the values must all be 1:d
 type NamedArray{T,N,DT} <: AbstractArray{T,N}
-    array::AbstractArray{T,N}
+    array::Array{T,N}
     dicts::DT
     dimnames::NTuple{N}
     function NamedArray(array::Array{T,N}, dicts::NTuple{N,Associative}, dimnames::NTuple{N})
