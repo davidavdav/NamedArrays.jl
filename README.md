@@ -24,15 +24,13 @@ n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1)         # give the names "one" and "two" to the rows (dimension 1)
 n["one", 2:3]
 n["two", :] = 11:14
-n[!"two", :] = 4:7                      # all rows but the one called "two"
+n[Not("two"), :] = 4:7                      # all rows but the one called "two"
 n
 sum(n,1)
 ```
     
-Implementation status
----------------------
-
- * Construction
+Construction
+-------
 
 ```julia
 NamedArray(a::Array)
@@ -54,7 +52,47 @@ This is the basic constructor for a namedarray.  `names` must be a tuple of `Dic
 ```julia
 NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
 ```
-This is a more friendly version of the basic constructor, where the support of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order.  
+This is a more friendly version of the basic constructor, where the support of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order.
+
+In principle, there is no limit imposed to the type of the `names` used, but we discourage the use of `Real`, `AbstractArray` and `Range`, because they have a special interpretation in `getindex()` and `setindex`. 
+
+Indexing
+------
+```julia
+n[1,1]
+n[1,:]
+n["label",2]
+n[1:10, Not("label")]
+n[[2,4,6], ["a", "b", "d"]
+```
+
+This is the main use of `NamedArrays`.  As an index, not only integers, arrays of integer and ranges can be given, but also names (keys), arrays of keys and negations of any of any of these can be specified.  
+
+ When a single element is selected by an index expression, a scalar value is returned.  When an array slice is selected, an attempt is made to return a NamedArray with the correct names for the dimensions.
+
+* Negation / complement
+
+```julia
+n[Not(1),:]]
+```
+
+There is a special type constructor `Not()`, whose function is to specify which elements to exclude from the array.  This is similar to negative indices in the language R.  The elements in `Not(elsements...)` select all but the indicated elements from the array.
+ 
+Both integers and names can be negated. 
+ 
+```julia
+n[!"one", :]
+```
+
+Most index types can be used for assignment as LHS
+```julia
+n[1,1] = 0
+n["one", "b"] = 1
+n[:,"c"] = 1:4
+```
+
+General functions
+--
 
  * Names, dimnames
 
@@ -116,50 +154,6 @@ float64(a)
 ```julia
 similar(a::NamedArray, t::DataType, dims::NTuple)
 ```
-
- * Getindex
-
-```julia
-getindex(A::NamedArray, i0::Real) 
-getindex(A::NamedArray, I::IndexOrNamed...)
-```
-
- here type IndexOrNamed is a union of most indexable types:
-
-```julia
-typealias IndexOrNamed Union(Real, Range1, Names, AbstractVector)
-```
-
- This allows indexing of most combinations of integer, range, string,
-vector of integer and Vector of String of any number of dimensions, as
-long as the underlying Array supports the indexing. 
-
-```julia
-n[-1,:]]
-```
-
- There is a special meaning of negative indices, like in the language R.  A negative index selects all but the indicted index from the array.
- 
- String indices can be negated by the exclamation-mark operator `!` applied to the string:
- 
-```julia
-n[!"one", :]
-```
-
- When a single element is selected by an index expression, a scalar value is returned.  When an array slice is selected, an attempt is made to return a NamedArray with the correct names for the dimensions. 
-
- * Setindex
-
-```julia
-setindex!(A::NamedArray, x, i0::Real)
-setindex!(A::NamedArray, x, I::AbstractVector 
-setindex!(A::NamedArray, x::ArrayOrNamed, I::Range1)
-setindex!(A::NamedArray, x::AbstractArray, I::AbstractVector)
-setindex!(A::NamedArray, x, I::IndexOrNamed...)
-```
-
- various forms of setindex!(), allowing most indexed expressions as LHS
-in an assignment. 
 
 Methods with special treatment of names / dimnames
 --------------------------------------------------
