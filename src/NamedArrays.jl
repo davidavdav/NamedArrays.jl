@@ -10,7 +10,7 @@ module NamedArrays
 
 using Compat
 
-export NamedArray, NamedVector, Names
+export NamedArray, NamedVector, NamedMatrix, Not
 
 ## type definition
 include("namedarraytypes.jl")
