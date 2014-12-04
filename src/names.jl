@@ -6,14 +6,14 @@
 
 import Base.names
 
-sortnames(dict::Dict) = collect(keys(dict))[sortperm(collect(values(dict)))] 
+sortnames(dict::Associative) = collect(keys(dict))[sortperm(collect(values(dict)))] 
 allnames(a::NamedArray) = [sortnames(dict) for dict in a.dicts]
 names(a::NamedArray, d::Int) = sortnames(a.dicts[d])
 dimnames(a::NamedArray) = [dn for dn in a.dimnames]
 dimnames(a::NamedArray, d::Int) = a.dimnames[d]
 
 ## string versions of the above
-strnames(dict::Dict) = map(string, sortnames(dict))
+strnames(dict::Associative) = map(string, sortnames(dict))
 strnames(a::NamedArray) = [strnames(d) for d in a.dicts]
 strnames(a::NamedArray, d::Int) = strnames(a.dicts[d])
 strdimnames(a::NamedArray) = [string(dn) for dn in a.dimnames]
