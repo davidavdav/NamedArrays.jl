@@ -38,3 +38,6 @@ end
 #similar(A::NamedArray, t::DataType, dims::Int...) = similar(A, t, dims)
 #similar(A::NamedArray, t::DataType) = similar(A, t, size(A.array))
 #similar(A::NamedArray) = similar(A, eltype(A.array), size(A.array))
+
+## our own interpretation of ind2sub
+Base.ind2sub(n::NamedArray, index::Integer) = tuple(map(x -> names(n, x[1])[x[2]], enumerate(ind2sub(size(n), index)))...)

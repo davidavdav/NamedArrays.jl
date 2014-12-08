@@ -83,6 +83,14 @@ for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos,
     @eval @assert ($f)(n).array == ($f)(n.array)
 end
 
+## matmul
+for m in (NamedArray(rand(4)), NamedArray(rand(4,3)))
+    m * m'
+    m' * m
+    @assert n * m == n * m.array
+    @assert m' * n' == m' * n.array' == m' * n'.array ## middle one dispatches Ac_mul_Bc!
+end
+
 ## rearranging
 @assert n'.array == n.array'
 for dim=1:2
