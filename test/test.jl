@@ -1,40 +1,20 @@
 ## NamedArrays is loaded by runtests.jl
 
-print("Starting test, no assertions should fail...")
+print("Starting test, no assertions should fail... ")
 
+print("construction, ")
 ## constructors
-n = NamedArray(Complex64, 5, 8)
+n1 = NamedArray(Complex64, 5, 8)
+n2 = NamedArray(rand(2,3), (["s", "t"],[:a, :b, :c]), ("string", :symbol))
 n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1) 
 setnames!(n, ["a", "b", "c", "d"], 2) 
 
+print("getindex, ")
 ## getindex
 @assert [x for x in n] == [x for x in n.array]
 @assert n[2,4] == n.array[2,4]
 @assert n[2//1,4.0] == n.array[2,4]
-
-## copy
-m = copy(n)
-@assert m == n
-
-## setindex
-m[1,1] = 0
-m[2,:] = 1:4
-m[:,"c"] = -1
-m[1,[2,3]] = [10,20]
-m["one", 4//1] = 5
-@assert m.array == [0. 10 20 5; 1 2 -1 4]
-
-## sum
-@assert sum(n) == sum(n.array)
-@assert sum(n, 1).array == sum(n.array, 1)
-@assert sum(n, 2).array == sum(n.array, 2)
-@assert names(sum(n, 2),1) == ["one", "two"]
-
-## conversion
-@assert convert(Array, n) == n.array
-@assert float32(n).array == float32(n.array)
-
 ## more indexing
 first = n.array[1,:]
 @assert n["one", :].array == first
@@ -44,6 +24,33 @@ first = n.array[1,:]
 @assert names(n[Not("one"), :],1) == ["two"]
 @assert names(n[1, Not("a")], 2) == ["b", "c", "d"]
 
+print("copy, ")
+## copy
+m = copy(n)
+@assert m == n
+
+print("setindex, ")
+## setindex
+m[1,1] = 0
+m[2,:] = 1:4
+m[:,"c"] = -1
+m[1,[2,3]] = [10,20]
+m["one", 4//1] = 5
+@assert m.array == [0. 10 20 5; 1 2 -1 4]
+
+print("sum, ")
+## sum
+@assert sum(n) == sum(n.array)
+@assert sum(n, 1).array == sum(n.array, 1)
+@assert sum(n, 2).array == sum(n.array, 2)
+@assert names(sum(n, 2),1) == ["one", "two"]
+
+print("conversions, ")
+## conversion
+@assert convert(Array, n) == n.array
+@assert float32(n).array == float32(n.array)
+
+print("changing names, ")
 ## changingnames
 for  f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     for dim=1:2
@@ -57,6 +64,7 @@ for f in (:cumprod, :cumsum, :cumsum_kbn, :cummin, :cummax)
     end
 end
 
+print("multi-dimensional, ")
 #multidimensional
 m = NamedArray(rand(2,3,4,3,2,3))
 for i1=1:2 for i2=1:3 for i3=1:4 for i4=1:3 for i5=1:2 for i6=1:3
@@ -64,6 +72,7 @@ for i1=1:2 for i2=1:3 for i3=1:4 for i4=1:3 for i5=1:2 for i6=1:3
     @assert m[string(i1), string(i2), string(i3), string(i4), string(i5), string(i6)] == m.array[i1,i2,i3,i4,i5,i6]
 end end end end end end
 
+print("dodgy indices, ")
 ## weird indices
 m = NamedArray(rand(4), ([1//1, 1//2, 1//3, 1//4],), ("weird",))
 @assert m[1//2] == m.array[2]
@@ -74,23 +83,29 @@ m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 ## this goes wrong for julia-v0.3
 ## @assert array(m[[4,3,2,1]]) == m.array
 
+print("hcat, ")
 m = NamedArray(rand(10))
 @assert hcat(m, m).array == hcat(m.array, m.array)
+print("broadcast, ")
 @assert broadcast(-, n, mean(n,1)).array == broadcast(-, n.array, mean(n.array,1))
 
+print("vectorized, ")
 ## a selection of vectorized functions
 for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos, :atan, :sinc, :cosc, :deg2rad, :log, :log2, :log10, :log1p, :exp, :exp2, :exp10, :expm1, :abs, :abs2, :sign, :sqrt,  :erf, :erfc, :erfcx, :erfi, :dawson, :erfinv, :erfcinv, :gamma, :lgamma, :digamma, :invdigamma, :trigamma, :besselj0, :besselj1, :bessely0, :bessely1, :eta, :zeta)
     @eval @assert ($f)(n).array == ($f)(n.array)
 end
 
+print("matmul, ")
 ## matmul
 for m in (NamedArray(rand(4)), NamedArray(rand(4,3)))
     m * m'
     m' * m
-    @assert n * m == n * m.array
-    @assert m' * n' == m' * n.array' == m' * n'.array ## middle one dispatches Ac_mul_Bc!
+    @assert n * m == n * m.array == n.array * m == n.array * m.array
+    ## the first expression dispatches Ac_mul_Bc!:
+    @assert m' * n.array' == m' * n' == m.array' * n' == m.array' * n.array'
 end
 
+print("re-arrange, ")
 ## rearranging
 @assert n'.array == n.array'
 for dim=1:2
@@ -129,7 +144,15 @@ vv = copy(v)
 reverse!(vv)
 @assert vv == reverse(v)
 
-println(" done")
+if VERSION >= v"0.4.0-dev"
+    print("eachindex, ")
+    ## eachindex
+    for i in eachindex(n)
+        @assert n[i] == n.array[i]
+    end
+end
+
+println("done!")
 
 ## how are we doing for speed?
 function sgetindex(x, r1=1:size(x,1), r2=1:size(x,2))
@@ -150,6 +173,6 @@ t2 = @elapsed sgetindex(n.array)
 si, sj = allnames(n)
 t3 = @elapsed sgetindex(n, si, sj)
 
-println("Timing named:", t1, " array:", t2, " named dict:", t3)
+println("Timing named index:", t1, " array index:", t2, " named key:", t3)
 
 
