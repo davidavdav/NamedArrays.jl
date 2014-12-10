@@ -61,3 +61,5 @@ function setdimnames!{T,N}(a::NamedArray{T,N}, v, d::Int)
     end
     a.dimnames = tuple(vdimnames...)
 end
+
+defaultnames(n::NamedArray, dim::Integer) = [string(i) for i=1:size(n,dim)]
