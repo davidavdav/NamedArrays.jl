@@ -1,6 +1,6 @@
 ## arithmetic.jl operators for NamedArray
 
-## (c) 2013 David A. van Leeuwen
+## (c) 2013--2014 David A. van Leeuwen
 
 ## This code is licensed under the MIT License
 ## See the file LICENSE.md in this distribution
@@ -162,7 +162,7 @@ end
 
 cholfact{T<:BlasFloat}(n::NamedArray{T}, uplo::Symbol=:U; pivot=false, tol=0.0) = cholfact!(copy(n), uplo, pivot=pivot, tol=tol)
 
-## ldlt
+## ldlt skipped
 
 ## TODO: Wait for factorization.jl to change type of QR: AbstractMatrix
 ## from factorization
@@ -177,7 +177,7 @@ hessfact!(n::NamedMatrix) = hessfact!(n.array)
 
 schurfact!(n::NamedMatrix) = schurfact!(n.array)
 schurfact(n::NamedMatrix) = schurfact!(copy(n))
-schurfact(A::NamedMatrix, B::AbstractMatrix) = schirfact!(A.array, B)
+schurfact(A::NamedMatrix, B::AbstractMatrix) = schurfact!(A.array, B)
 
 svdfact!(n::NamedMatrix; thin::Bool=true) = svdfact!(n.array; thin=thin)
 svdfact{T<:BlasFloat}(A::NamedMatrix{T};thin=true) = svdfact!(copy(A),thin=thin)

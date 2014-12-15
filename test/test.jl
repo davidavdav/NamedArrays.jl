@@ -152,6 +152,8 @@ if VERSION >= v"0.4.0-dev"
     end
 end
 
+include("matrixops.jl")
+
 println("done!")
 
 ## how are we doing for speed?
