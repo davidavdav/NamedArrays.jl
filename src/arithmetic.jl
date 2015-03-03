@@ -59,7 +59,7 @@ import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfa
 ## ambiguity, this can somtimes be a pain to resolve...
 *{Tx,TiA,Ty}(x::SparseMatrixCSC{Tx,TiA},y::NamedMatrix{Ty}) = x*y.array
 *{Tx,S,Ty}(x::SparseMatrixCSC{Tx,S},y::NamedVector{Ty}) = x*y.array
-for t in (:Tridiagonal, :Triangular, :Givens, :Bidiagonal)
+for t in (:Tridiagonal, :AbstractTriangular, :Givens, :Bidiagonal)
     @eval *(x::$t, y::NamedMatrix) = NamedArray(x*y.array, ([string(i) for i in 1:size(x,1)],names(y,2)), y.dimnames)
     @eval *(x::$t, y::NamedVector) = x*y.array
 end
@@ -90,8 +90,8 @@ Base.Ac_mul_Bc!(A::Matrix, B::NamedMatrix, C::Matrix) = Ac_mul_Bc!(A, B.array, C
 ## Abstract \ Named
 ## ambiguity
 \{Tx<:Number,Ty<:Number}(x::Diagonal{Tx}, y::NamedVector{Ty}) = x \ y.array
-\{Tx<:Number,Ty<:Number}(x::Union(Bidiagonal{Tx},Triangular{Tx}), y::NamedVector{Ty}) = x \ y.array
-\{Tx<:Number,Ty<:Number}(x::Union(Bidiagonal{Tx},Triangular{Tx}), y::NamedMatrix{Ty}) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
+\{Tx<:Number,Ty<:Number}(x::Union(Bidiagonal{Tx},AbstractTriangular{Tx}), y::NamedVector{Ty}) = x \ y.array
+\{Tx<:Number,Ty<:Number}(x::Union(Bidiagonal{Tx},AbstractTriangular{Tx}), y::NamedMatrix{Ty}) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
 if VERSION >= v"0.4.0-dev"
     \(x::Bidiagonal,y::NamedVector) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
     \(x::Bidiagonal,y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))

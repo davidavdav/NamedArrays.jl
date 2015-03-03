@@ -1,8 +1,8 @@
 using Compat
 
+include("compat.jl")
 require("namedarraytypes.jl")
 
-include("compat.jl")
 include("constructors.jl")
 include("arithmetic.jl")
 include("base.jl")
