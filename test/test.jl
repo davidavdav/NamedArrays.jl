@@ -77,6 +77,8 @@ print("dodgy indices, ")
 m = NamedArray(rand(4), ([1//1, 1//2, 1//3, 1//4],), ("weird",))
 @assert m[1//2] == m.array[2]
 @assert m[[1//4,1//3]] == m.array[[4,3]]
+m[1//4] = 1
+@assert m[4] == 1
 
 m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 @assert m[1] == m.array[4]
