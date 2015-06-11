@@ -126,7 +126,7 @@ returns a copy of all the elements in a, and returns a NamedArray
 convert(::Type{Array}, a::NamedArray)
 ```
 
- converts a NamedArray to an Array by dropping al names information
+ converts a NamedArray to an Array by dropping all name information
  
 ```julia
 convert{T}(::Type{NamedArray{T}}, a::NamedArray)
