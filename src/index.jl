@@ -1,5 +1,5 @@
 ## index.jl getindex and setindex methods for NamedArray
-## (c) 2013--2014 David A. van Leeuwen
+## (c) 2013--2015 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
@@ -60,7 +60,7 @@ function namedgetindex(n::NamedArray, index...)
     newnames = Any[]
     for d = 1:N
         sortkeys = names(n, d)
-        push!(newnames, [sortkeys[i] for i in index[d]])
+        push!(newnames, eltype(sortkeys)[sortkeys[i] for i in index[d]])
     end
     NamedArray(a, tuple(newnames...), tuple(n.dimnames[1:N]...))
 end
