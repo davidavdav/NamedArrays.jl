@@ -10,6 +10,15 @@ n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1) 
 setnames!(n, ["a", "b", "c", "d"], 2) 
 
+a = [1 2 3; 4 5 6]
+n3 = NamedArray(a, (["a","b"],["C","D","E"]))
+n4 = NamedArray(a, (["a"=>1,"b"=>2],["C"=>1,"D"=>2,"E"=>3]))
+
+@assert n3.array == n4.array == a
+@assert dimnames(n3) == dimnames(n4) == Any[:A,:B]
+@assert names(n3,1) == names(n4,1) == ["a","b"]
+@assert names(n3,2) == names(n4,2) == ["C","D","E"]
+
 print("getindex, ")
 ## getindex
 @assert [x for x in n] == [x for x in n.array]
