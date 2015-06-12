@@ -11,11 +11,25 @@ function NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Associative}, di
     NamedArray{T, N, typeof(a), typeof(names)}(a, names, dimnames) ## inner constructor
 end
 
+## dimnames created as default, then inner constructor called
+function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Associative})
+    dimnames = [symbol(string(char(64+i))) for i=1:ndims(array)]
+    NamedArray{T, N, typeof(array), typeof(names)}(array, names, tuple(dimnames...)) ## inner constructor
+end
+
 ## constructor with array, names and dimnames (dict is created from names)
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
     dicts = map(names -> Dict(zip(names,1:length(names))), names)
-    NamedArray(array, dicts, dimnames) # call constructor above
+    NamedArray(array, dicts, dimnames)
 end
+
+## constructor with array, names (dict is created from names), dimnames created as default
+function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector})
+    dicts = map(names -> Dict(zip(names,1:length(names))), names)
+    dimnames = [symbol(string(char(64+i))) for i=1:length(names)]
+    NamedArray(array, dicts, tuple(dimnames...))
+end
+
 
 ## Type and dimensions
 function NamedArray(T::DataType, dims::Int...)
