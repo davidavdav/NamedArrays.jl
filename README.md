@@ -20,11 +20,12 @@ Synopsis
 
 ```julia
 using NamedArrays
-n = NamedArray(rand(2,4))
-setnames!(n, ["one", "two"], 1)         # give the names "one" and "two" to the rows (dimension 1)
+n = NamedArray(rand(3,4))
+setnames!(n, ["one", "two", "three"], 1)         # give the names "one", "two" and "three" to the rows (dimension 1)
+setnames!(n, ["a","b","c","d"], 2)
 n["one", 2:3]
 n["two", :] = 11:14
-n[Not("two"), :] = 4:7                      # all rows but the one called "two"
+n[Not("two"), :] = 4:11                      # all rows but the one called "two"
 n
 sum(n,1)
 ```
@@ -61,19 +62,19 @@ Indexing
 ```julia
 n[1,1]
 n[1,:]
-n["label",2]
-n[1:10, Not("label")]
-n[[2,4,6], ["a", "b", "d"]
+n["two",2]
+n[[1,3], Not("c")]
+n[:, ["a", "b", "d"]]
 ```
 
 This is the main use of `NamedArrays`.  As an index, not only integers, arrays of integer and ranges can be given, but also names (keys), arrays of keys and negations of any of any of these can be specified.  
 
- When a single element is selected by an index expression, a scalar value is returned.  When an array slice is selected, an attempt is made to return a NamedArray with the correct names for the dimensions.
+When a single element is selected by an index expression, a scalar value is returned.  When an array slice is selected, an attempt is made to return a NamedArray with the correct names for the dimensions.
 
 * Negation / complement
 
 ```julia
-n[Not(1),:]]
+n[Not(1),:]
 ```
 
 There is a special type constructor `Not()`, whose function is to specify which elements to exclude from the array.  This is similar to negative indices in the language R.  The elements in `Not(elements...)` select all but the indicated elements from the array.
@@ -110,7 +111,7 @@ dimnames(a::NamedArray)
  setdimnames!(a::NamedArray, name, dim:Int)
  ```
  
-sets all the names of dimension `dim`, or only the name at index `index`, or the name of the dimension `dim`. 
+ sets all the names of dimension `dim`, or only the name at index `index`, or the name of the dimension `dim`. 
 
  * Copy
 
@@ -118,7 +119,7 @@ sets all the names of dimension `dim`, or only the name at index `index`, or the
 copy(a::NamedArray)
 ```
 
-returns a copy of all the elements in a, and returns a NamedArray
+ returns a copy of all the elements in a, and returns a NamedArray
 
  * Convert
 
@@ -192,7 +193,7 @@ reverse
 reverse!
 ```
 
- openrate on the names of the rows as well 
+ operate on the names of the rows as well 
 
 
  * Broadcasts
@@ -215,7 +216,7 @@ mean
 std
 ```
 
- These functions, when operating along one dimension, keep the names in the orther dimensions, and name the left over singleton dimension as `$function($dimname)`.
+ These functions, when operating along one dimension, keep the names in the other dimensions, and name the left over singleton dimension as `$function($dimname)`.
 
 Methods that AbstractArray covers
 ---------------------------
@@ -242,7 +243,7 @@ eltype(a)
 cummin(a)
 cummin(a, d)
 cummax(a)
-cummanx(a, d)
+cummax(a, d)
 repmat(a, d1, d2)
 nnz(a)
 minimum(a)
