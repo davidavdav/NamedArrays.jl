@@ -87,7 +87,7 @@ There is a special type constructor `Not()`, whose function is to specify which 
 Both integers and names can be negated. 
  
 ```julia
-n[!"one", :]
+n[Not("one"), :]
 ```
 
 Most index types can be used for assignment as LHS
