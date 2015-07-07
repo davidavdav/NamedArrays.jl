@@ -11,12 +11,12 @@ function hcat{T}(V::NamedVector{T}...)
     V1=V[1]
     firstnames = names(V1,1)
     for i=2:length(V)
-        keepnames &= names(V[i])==firstnames
+        keepnames &= names(V[i],1)==firstnames
     end
     a = hcat(map(a -> a.array, V)...)
     if keepnames
         colnames = [string(i) for i=1:size(a,2)]
-        NamedArray(a, (firstnames[1], colnames), (V1.dimnames[1], "hcat"))
+        NamedArray(a, (firstnames, colnames), (V1.dimnames[1], "hcat"))
     else
         NamedArray(a)
     end

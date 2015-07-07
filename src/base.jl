@@ -41,3 +41,6 @@ end
 
 ## our own interpretation of ind2sub
 Base.ind2sub(n::NamedArray, index::Integer) = tuple(map(x -> names(n, x[1])[x[2]], enumerate(ind2sub(size(n), index)))...)
+
+## simplified text representation of namedarray
+Base.writedlm(io, n::NamedVecOrMat) = writedlm(io, hcat(names(n,1), n.array))

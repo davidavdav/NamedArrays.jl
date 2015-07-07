@@ -95,8 +95,12 @@ m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 ## @assert array(m[[4,3,2,1]]) == m.array
 
 print("hcat, ")
-m = NamedArray(rand(10))
-@assert hcat(m, m).array == hcat(m.array, m.array)
+letters = [string(char(96+i)) for i=1:26]
+m = NamedArray(rand(10), (letters[1:10],))
+m2 = NamedArray(rand(10), (letters[1:10],))
+mm = hcat(m, m2)
+@assert mm.array == hcat(m.array, m2.array)
+@assert names(mm,1) == names(m,1)
 print("broadcast, ")
 @assert broadcast(-, n, mean(n,1)).array == broadcast(-, n.array, mean(n.array,1))
 

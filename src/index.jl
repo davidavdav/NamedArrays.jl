@@ -88,7 +88,7 @@ setindex!{T<:Real}(A::NamedArray, x, I::AbstractVector{T}) = setindex!(A.array, 
 
 # n[1:4] = 1:4
 ## shamelessly copied from array.jl
-function setindex!{T}(A::NamedArray{T}, X::ArrayOrNamed{T}, I::Range1{Int})
+function setindex!{T}(A::NamedArray{T}, X::ArrayOrNamed{T}, I::Range{Int})
     if length(X) != length(I); error("argument dimensions must match"); end
     copy!(A, first(I), X, 1, length(I))
     return A
