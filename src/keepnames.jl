@@ -6,7 +6,7 @@
 ## See the file LICENSE.md in this distribution
 
 # Keep names for consistently named vectors, or drop them 
-function hcat{T}(V::NamedVector{T}...) 
+function Base.hcat{T}(V::NamedVector{T}...) 
     keepnames=true
     V1=V[1]
     firstnames = names(V1,1)
