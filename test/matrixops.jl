@@ -20,7 +20,11 @@ for t in (Float32, Float64)
     d = diag(a)
     diagm(d)
     cond(a)
-    null(a)
+    if VERSION ≥ v"0.4-dev"
+        nullspace(a)
+    else
+        null(a)
+    end
     kron(a, a)
     linreg(a[:,1], b[:,1])
     lyap(a, c)

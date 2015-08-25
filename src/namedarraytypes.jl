@@ -9,6 +9,8 @@
 ## DT is a tuple of Dicts, characterized by the types of the keys.  
 ## This way NamedArray is dependent on the dictionary type of each dimensions. 
 ## The inner constructor checks for consistency, the values must all be 1:d
+if !isdefined(:NamedArray)
+
 type NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
     array::AT
     dicts::DT
@@ -33,3 +35,4 @@ typealias NamedMatrix{T} NamedArray{T,2}
 typealias NamedVecOrMat{T} Union(NamedVector{T},NamedMatrix{T})
 typealias ArrayOrNamed{T,N} Union(Array{T,N}, NamedArray{T,N})
 
+end

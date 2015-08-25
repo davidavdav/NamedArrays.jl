@@ -23,7 +23,7 @@ strdimnames(a::NamedArray, d::Int) = string(a.dimnames[d])
 ## seting names, dimnames
 function setnames!(a::NamedArray, v::Vector, d::Int)
     size(a.array,d) == length(v) || error("inconsistent vector length")
-    eltype(a.dicts[d])[1] == eltype(v) || error("inconsistent name type")
+    eltype(keys(a.dicts[d])) == eltype(v) || error("inconsistent name type")
     ## a.dicts is a tuple, so we need to replace it as a whole...
     vdicts = Dict[]
     for i = 1:length(a.dicts)

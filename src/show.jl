@@ -63,7 +63,7 @@ function compute_range(maxn, n)
     else
         r = (1:n,)
     end
-    totr = vcat(map(r->[r], r)...)
+    totr = vcat(map(collect, r)...)
     r, totr
 end
 

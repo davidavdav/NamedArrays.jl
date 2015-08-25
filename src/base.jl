@@ -28,11 +28,11 @@ size(a::NamedArray, d) = size(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
 import Base.similar
-function similar(a::NamedArray, t::DataType, dims::NTuple)
+function similar(a::NamedArray, t::Type, dims::NTuple)
     if size(a) != dims
         return NamedArray(t, dims...) # re-initialize names arrays...
     else
-        return NamedArray(t, names(a), a.dimnames)
+        return NamedArray(similar(a.array, t), a.dicts, a.dimnames)
     end
 end
 #similar(A::NamedArray, t::DataType, dims::Int...) = similar(A, t, dims)

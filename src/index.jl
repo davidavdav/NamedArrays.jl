@@ -29,11 +29,13 @@ indices{K<:Real,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
 indices{K,V<:Integer}(dict::Associative{K,V}, i::Real) = to_index(i)
 indices{K,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
 ## multiple indices
-## the following two lines are [artly because of ambiguity
+## the following two lines are partly because of ambiguity
 indices{T<:Integer,V<:Integer}(dict::Associative{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]
 indices{T<:Real,V<:Integer}(dict::Associative{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]
 indices{T<:Integer,K,V<:Integer}(dict::Associative{K,V}, i::AbstractArray{T}) = i
 indices{K,V<:Integer}(dict::Associative{K,V}, i::AbstractArray{K}) = [dict[k] for k in i]
+## in 0.4, we need to take care of : ourselves it seems
+indices{K,V<:Integer}(dict::Associative{K,V}, ::Colon) = collect(1:length(dict))
 
 ## negation
 indices{K<:Not,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]

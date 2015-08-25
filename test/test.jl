@@ -12,7 +12,7 @@ setnames!(n, ["a", "b", "c", "d"], 2)
 
 a = [1 2 3; 4 5 6]
 n3 = NamedArray(a, (["a","b"],["C","D","E"]))
-n4 = NamedArray(a, (["a"=>1,"b"=>2],["C"=>1,"D"=>2,"E"=>3]))
+n4 = NamedArray(a, (@compat Dict("a"=>1,"b"=>2),@compat Dict("C"=>1,"D"=>2,"E"=>3)))
 
 @assert n3.array == n4.array == a
 @assert dimnames(n3) == dimnames(n4) == Any[:A,:B]
@@ -23,7 +23,9 @@ print("getindex, ")
 ## getindex
 @assert [x for x in n] == [x for x in n.array]
 @assert n[2,4] == n.array[2,4]
-@assert n[2//1,4.0] == n.array[2,4]
+if VERSION < v"0.4-dev"
+    @assert n[2//1,4.0] == n.array[2,4]
+end
 ## more indexing
 first = n.array[1,:]
 @assert n["one", :].array == first
@@ -44,7 +46,11 @@ m[1,1] = 0
 m[2,:] = 1:4
 m[:,"c"] = -1
 m[1,[2,3]] = [10,20]
-m["one", 4//1] = 5
+if VERSION < v"0.4-dev"
+    m["one", 4//1] = 5
+else
+    m["one", 4] = 5
+end
 @assert m.array == [0. 10 20 5; 1 2 -1 4]
 
 print("sum, ")
@@ -57,7 +63,7 @@ print("sum, ")
 print("conversions, ")
 ## conversion
 @assert convert(Array, n) == n.array
-@assert float32(n).array == float32(n.array)
+@assert @compat map(Float32, n).array == @compat map(Float32, n.array)
 
 print("changing names, ")
 ## changingnames
@@ -95,7 +101,7 @@ m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 ## @assert array(m[[4,3,2,1]]) == m.array
 
 print("hcat, ")
-letters = [string(char(96+i)) for i=1:26]
+letters = [string(@compat Char(96+i)) for i=1:26]
 m = NamedArray(rand(10), (letters[1:10],))
 m2 = NamedArray(rand(10), (letters[1:10],))
 mm = hcat(m, m2)
