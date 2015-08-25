@@ -103,7 +103,7 @@ end
 \(x::AbstractMatrix, y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
 
 ## keeping names for some matrix routines
-for f in (:inv, :chol, :rref, :sqrtm, :pinv, :expm)
+for f in (:inv, :chol, :sqrtm, :pinv, :expm)
     eval(Expr(:import, :Base, f))
     @eval ($f)(n::NamedArray) = NamedArray(($f)(n.array), n.dicts, n.dimnames)
 end
