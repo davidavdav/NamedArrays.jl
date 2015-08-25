@@ -5,6 +5,8 @@
 ## This code is licensed under the MIT License
 ## See the file LICENSE.md in this distribution
 
+import Base: +, -, *, /, .+, .-, .*, ./, \
+
 -(n::NamedArray) = NamedArray(-n.array, n.dicts, n.dimnames)
 
 ## disambiguation magic
