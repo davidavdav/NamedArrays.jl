@@ -6,9 +6,10 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-letter(i) = string(@compat Char(64+i))
+letter(i) = string(@compat Char((64+i) % 256))
 
-## call inner constructor
+## Basic constructor: array, tuple of dicts, tuple
+## This calls the inner constructor with the appropriate types
 function NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Associative}, dimnames::NTuple{N})
     NamedArray{T, N, typeof(a), typeof(names)}(a, names, dimnames) ## inner constructor
 end
@@ -32,6 +33,19 @@ function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector})
     NamedArray(array, dicts, tuple(dimnames...))
 end
 
+## vectors instead of tuples, with defaults
+function NamedArray{T,N,VT}(a::AbstractArray{T,N},
+                            names::Vector{VT}=[[string(i) for i=1:d] for d in size(a)],
+                            dimnames::Vector = [symbol(letter(i)) for i=1:N])
+    length(names) == length(dimnames) == N || error("Dimension mismatch")
+    if VT <: Associative
+        dicts = tuple(names...)
+    else
+        dicts = map(names -> Dict(zip(names,1:length(names))), tuple(names...))
+    end 
+    NamedArray(a, dicts, tuple(dimnames...))
+end
+
 
 ## Type and dimensions
 function NamedArray(T::DataType, dims::Int...)
@@ -42,10 +56,4 @@ function NamedArray(T::DataType, dims::Int...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
 
-## just an array
-function NamedArray(a::AbstractArray)
-    names = [[string(j) for j=1:i] for i=size(a)]
-    dimnames = [symbol(letter(i)) for i=1:ndims(a)]
-    NamedArray(a, tuple(names...), tuple(dimnames...))
-end
 
