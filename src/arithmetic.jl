@@ -14,6 +14,11 @@ import Base: +, -, *, /, .+, .-, .*, ./, \
 .*{N}(n::NamedArray{Bool,N}, b::BitArray{N}) = NamedArray(n.array .* b, n.dicts, n.dimnames)
 .*{N}(b::BitArray{N}, n::NamedArray{Bool,N}) = n .* b
 
+## disambiguation (Argh...)
+for op in (:+, :-)
+    @eval ($op){T1<:Number,T2<:Number}(x::Range{T1}, y::NamedVector{T2}) = NamedArray(($op)(x,y.array), y.dicts, y.dimnames)
+end
+
 for op in (:+, :-, :.+, :.-, :.*, :./)
     ## named %op% named
     @eval begin
@@ -46,6 +51,10 @@ for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\ )
         ($op){T1<:Number,T2<:Number}(x::T1, y::NamedArray{T2}) = NamedArray(($op)(x, y.array), y.dicts, y.dimnames)
     end
 end
+
+## disambiguation
+-{T1<:Number,T2<:Number}(x::NamedVector{T1}, y::Range{T2}) = NamedArray(x.array - y, x.dicts, x.dimnames)
+-{T1,T2}(x::NamedArray{T1}, y::Range{T2}) = NamedArray(x.array - y, x.dicts, x.dimnames)
 
 ## NamedArray, AbstractArray, same dimensions
 for op in (:+, :-, :.+, :.-, :.*, :./)

@@ -8,6 +8,12 @@
 
 letter(i) = string(@compat Char((64+i) % 256))
 
+## disambiguation (Argh...)
+if VERSION ≥ v"0.4-dev"
+    NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N}) = 0
+    NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = 0
+end
+    
 ## Basic constructor: array, tuple of dicts, tuple
 ## This calls the inner constructor with the appropriate types
 function NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Associative}, dimnames::NTuple{N})
