@@ -6,6 +6,8 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
+VERSION >= v"0.4.0-dev+6521" && __precompile__()
+
 module NamedArrays
 
 using Compat

@@ -54,6 +54,10 @@ end
 
 
 ## Type and dimensions
+"""
+`NamedArray(T::Type, dims::Int...)` creates an uninitialized array with default names
+for the dimensions (`:A`, `:B`, ...) and indices (`"1"`, `"2"`, ...).
+"""
 function NamedArray(T::DataType, dims::Int...)
     ld = length(dims)
     names = [[string(j) for j=1:i] for i=dims]

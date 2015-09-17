@@ -17,7 +17,7 @@ for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     @eval ($f)(a::NamedArray, d::Int) = ($f)(a, (d,))
 end
 
-function fan{T,N}(f::Function, fname::String, a::NamedArray{T,N}, dim::Int)
+function fan{T,N}(f::Function, fname::AbstractString, a::NamedArray{T,N}, dim::Int)
     dimnames = Array(Any, N)
     for i=1:N
         if i==dim

@@ -210,10 +210,10 @@ cond(n::NamedArray) = cond(n.array)
 null(n::NamedArray) = null(n.array)
 
 function kron(a::NamedArray, b::NamedArray)
-    n = Array(typeof(String[]), 2)
-    dn = String[]
+    n = Array(typeof(AbstractString[]), 2)
+    dn = AbstractString[]
     for dim in 1:2
-        n[dim] = String[]
+        n[dim] = AbstractString[]
         for i in names(a, dim)
             for j in names(b, dim)
                 push!(n[dim], string(i, "×", j))
