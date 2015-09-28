@@ -32,7 +32,7 @@ end
 
 typealias NamedVector{T} NamedArray{T,1}
 typealias NamedMatrix{T} NamedArray{T,2}
-typealias NamedVecOrMat{T} Union(NamedVector{T},NamedMatrix{T})
-typealias ArrayOrNamed{T,N} Union(Array{T,N}, NamedArray{T,N})
+@compat typealias NamedVecOrMat{T} Union{NamedVector{T},NamedMatrix{T}}
+@compat typealias ArrayOrNamed{T,N} Union{Array{T,N}, NamedArray{T,N}}
 
 end

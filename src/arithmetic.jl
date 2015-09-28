@@ -101,8 +101,8 @@ Base.Ac_mul_Bc!(A::Matrix, B::NamedMatrix, C::Matrix) = Ac_mul_Bc!(A, B.array, C
 ## Abstract \ Named
 ## ambiguity
 \{Tx<:Number,Ty<:Number}(x::Diagonal{Tx}, y::NamedVector{Ty}) = x \ y.array
-\{Tx<:Number,Ty<:Number}(x::Union(Bidiagonal{Tx},AbstractTriangular{Tx}), y::NamedVector{Ty}) = x \ y.array
-\{Tx<:Number,Ty<:Number}(x::Union(Bidiagonal{Tx},AbstractTriangular{Tx}), y::NamedMatrix{Ty}) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
+@compat \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},AbstractTriangular{Tx}}, y::NamedVector{Ty}) = x \ y.array
+@compat \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},AbstractTriangular{Tx}}, y::NamedMatrix{Ty}) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
 if VERSION >= v"0.4.0-dev"
     \(x::Bidiagonal,y::NamedVector) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
     \(x::Bidiagonal,y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))

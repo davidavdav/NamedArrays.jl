@@ -6,7 +6,7 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-letter(i) = string(@compat Char((64+i) % 256))
+@compat letter(i) = string(Char((64+i) % 256))
 
 ## disambiguation (Argh...)
 if VERSION ≥ v"0.4-dev"
