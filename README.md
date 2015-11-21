@@ -198,7 +198,7 @@ reverse
 reverse!
 ```
 
- openrate on the names of the rows as well 
+ operate on the names of the rows as well 
 
 
  * Broadcasts
