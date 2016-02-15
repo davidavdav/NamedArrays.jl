@@ -104,3 +104,9 @@ function setindex!(A::NamedArray, x, I...)
     II = tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
     setindex!(A.array, x, II...)
 end
+
+## 0.4-dev functions
+if VERSION >= v"0.4.0-dev"
+    setindex!(a::NamedArray, x, it::Base.IteratorsMD.CartesianIndex) = setindex!(a.array, x, it)
+end
+

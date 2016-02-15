@@ -52,6 +52,13 @@ else
     m["one", 4] = 5
 end
 @assert m.array == [0. 10 20 5; 1 2 -1 4]
+if VERSION >= v"0.4.0-dev"
+    m2 = copy(m)
+    for i in eachindex(m)
+        m[i] = 2*m[i]
+    end
+    @assert 2*(m2.array) == m.array
+end
 
 print("sum, ")
 ## sum
