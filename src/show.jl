@@ -10,10 +10,11 @@ import Base.print, Base.show, Base.summary, Base.display
 
 function summary(a::NamedArray) 
     if ndims(a)==1
-        string(length(a), "-element ", typeof(a))
+        s = string(length(a), "-element ")
     else
-        string(join(size(a), "x"), " ", typeof(a))
+        s = string(join(size(a), "×"), " ")
     end
+    return s * string("Named", typeof(a.array))
 end
 
 print(a::NamedArray) = print(a.array)
