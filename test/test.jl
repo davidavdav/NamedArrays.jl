@@ -106,6 +106,11 @@ m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 @assert m[1] == m.array[4]
 ## this goes wrong for julia-v0.3
 ## @assert array(m[[4,3,2,1]]) == m.array
+print("sort, ")
+m = NamedArray(rand(100))
+ms = sort(m)
+@assert ms.array == sort(m.array)
+@assert names(ms, 1) == names(m, 1)[sortperm(m.array)]
 
 print("hcat, ")
 letters = [string(@compat Char(96+i)) for i=1:26]

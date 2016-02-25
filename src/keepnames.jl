@@ -64,3 +64,18 @@ for f in (:sin, :cos, :tan, :sind, :cosd, :tand, :sinpi, :cospi, :sinh, :cosh, :
     @eval ($f)(a::NamedArray) = NamedArray(($f)(a.array), a.dicts, a.dimnames)
 end
 
+## reorder names
+import Base.sort
+function sort(a::NamedVector)
+    i = sortperm(a.array)
+    return NamedArray(a.array[i], (names(a, 1)[i],), a.dimnames)
+end
+
+## drop names
+function sort(a::NamedArray, dim::Integer)
+    if ndims(a)==1 && dim==1
+        return sort(a)
+    else
+        return sort(a.array, dim)
+    end
+end
