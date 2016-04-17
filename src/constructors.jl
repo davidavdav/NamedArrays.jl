@@ -41,8 +41,8 @@ end
 
 ## vectors instead of tuples, with defaults
 function NamedArray{T,N,VT}(a::AbstractArray{T,N},
-                            names::Vector{VT}=[[string(i) for i=1:d] for d in size(a)],
-                            dimnames::Vector = [symbol(letter(i)) for i=1:N])
+                            names::Vector{VT}=[ASCIIString[string(i) for i=1:d] for d in size(a)],
+                            dimnames::Vector = Symbol[symbol(letter(i)) for i=1:N])
     length(names) == length(dimnames) == N || error("Dimension mismatch")
     if VT <: Associative
         dicts = tuple(names...)

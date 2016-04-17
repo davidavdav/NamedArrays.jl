@@ -20,9 +20,11 @@ n4 = NamedArray(a, (@compat Dict("a"=>1,"b"=>2),@compat Dict("C"=>1,"D"=>2,"E"=>
 @assert names(n3,2) == names(n4,2) == ["C","D","E"]
 
 ## 0-dim case #21
-n0 = NamedArray(Array{Int}())
-@assert size(n0) == ()
-@assert n0[1] == n0.array[1]
+if VERSION ≥ v"0.4-dev"
+    n0 = NamedArray(Array{Int}())
+    @assert size(n0) == ()
+    @assert n0[1] == n0.array[1]
+end
 
 print("getindex, ")
 ## getindex
