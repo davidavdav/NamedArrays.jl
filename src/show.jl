@@ -1,15 +1,17 @@
 ## show.jl.  show and print methods for NamedArray
 ## (c) 2013 David A. van Leeuwen
 
-## Julia type that implements a drop-in replacement of Array with named dimensions. 
+## Julia type that implements a drop-in replacement of Array with named dimensions.
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
 import Base.print, Base.show, Base.summary, Base.display
 
-function summary(a::NamedArray) 
-    if ndims(a)==1
+function summary(a::NamedArray)
+    if ndims(a) == 0
+        s = "0-dimensional "
+    elseif ndims(a)==1
         s = string(length(a), "-element ")
     else
         s = string(join(size(a), "×"), " ")
@@ -45,18 +47,18 @@ function show(io::IO, v::NamedVector)
     println(io, summary(v))
     maxnrow = Base.tty_size()[1] - 5
     show(io, v, min(maxnrow, length(v)))
-end   
+end
 
 ## display(d::TextDisplay, v::NamedVector) = show(d.io, v)
 
-#function display(d::TextDisplay, v::NamedVector) 
+#function display(d::TextDisplay, v::NamedVector)
 #    io = d.io
 #    println(io, summary(v))
 #    maxnrow = Base.tty_rows() - 5
 #    show(io, v, min(maxnrow, length(v)))
 #end
 
-## compute the ranges to be displayed, plus a total index comprising all ranges. 
+## compute the ranges to be displayed, plus a total index comprising all ranges.
 function compute_range(maxn, n)
     if maxn < n
         hn = div(maxn,2)
@@ -94,7 +96,7 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
     ## columns
     colrange, totcorange = compute_range(maxncol, ncol)
     ## header
-    println(io, sprint_row(rownamewidth, rightalign(join(strdimnames(a), " \\ "), rownamewidth), 
+    println(io, sprint_row(rownamewidth, rightalign(join(strdimnames(a), " \\ "), rownamewidth),
                            colwidth, map(i->colname[i], colrange)))
     ## data
     l = 1
@@ -113,7 +115,7 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
     end
 end
 
-function show(io::IO, v::NamedVector, maxnrow::Int) 
+function show(io::IO, v::NamedVector, maxnrow::Int)
     nrow=size(v, 1)
     rownames = strnames(v,1)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
@@ -134,5 +136,3 @@ function show(io::IO, v::NamedVector, maxnrow::Int)
         end
     end
 end
-
-
