@@ -24,11 +24,15 @@ Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
 
 ## inspired by DataFrames
 
+if VERSION < v"0.5.0-dev+2023"
+    displaysize(io::IO) = Base.tty_size()
+end
+
 function show(io::IO, a::NamedArray)
     println(io, summary(a))
     if ndims(a)==2
         (nr,nc) = size(a)
-        maxnrow = Base.tty_size()[1] - 5 # summary, header, dots, + 2 empty lines...
+        maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
         show(io, a, min(maxnrow, nr))
     else                        # fallback for dim > 2
         for i in 1:length(a.dimnames)
@@ -43,7 +47,7 @@ end
 
 function show(io::IO, v::NamedVector)
     println(io, summary(v))
-    maxnrow = Base.tty_size()[1] - 5
+    maxnrow = displaysize(io)[1] - 5
     show(io, v, min(maxnrow, length(v)))
 end   
 
@@ -90,7 +94,7 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
     strlen(x) = length(string(x))
     colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
     rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, strdimnames(a)))+3)
-    maxncol = div(Base.tty_size()[2] - rownamewidth - 3, colwidth+1) # dots, spaces between
+    maxncol = div(displaysize(io)[2] - rownamewidth - 3, colwidth+1) # dots, spaces between
     ## columns
     colrange, totcorange = compute_range(maxncol, ncol)
     ## header
