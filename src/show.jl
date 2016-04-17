@@ -9,14 +9,7 @@
 import Base.print, Base.show, Base.summary, Base.display
 
 function summary(a::NamedArray)
-    if ndims(a) == 0
-        s = "0-dimensional "
-    elseif ndims(a)==1
-        s = string(length(a), "-element ")
-    else
-        s = string(join(size(a), "×"), " ")
-    end
-    return s * string("Named", typeof(a.array))
+    return Base.dims2string(size(a)) * string(" NamedArray{", eltype(a), ",", ndims(a), "}:")
 end
 
 print(a::NamedArray) = print(a.array)
@@ -28,7 +21,7 @@ Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
 
 function show(io::IO, a::NamedArray)
     println(io, summary(a))
-    if ndims(a)==2
+    if ndims(a) == 2
         (nr,nc) = size(a)
         maxnrow = Base.tty_size()[1] - 5 # summary, header, dots, + 2 empty lines...
         show(io, a, min(maxnrow, nr))
@@ -101,7 +94,7 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
     ## data
     l = 1
     for i in 1:length(rowrange)
-        if i>1
+        if i > 1
             vdots = map(i->["⋮" for i=1:length(i)], colrange)
             println(io, sprint_row(rownamewidth, " ", colwidth, vdots, dots="⋱"))
         end
@@ -116,7 +109,7 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
 end
 
 function show(io::IO, v::NamedVector, maxnrow::Int)
-    nrow=size(v, 1)
+    nrow = size(v, 1)
     rownames = strnames(v,1)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, v.array[i]) for i=totrowrange]
@@ -124,7 +117,7 @@ function show(io::IO, v::NamedVector, maxnrow::Int)
     rownamewidth = maximum(map(length, rownames))
     l = 1
     for i in 1:length(rowrange)
-        if i>1
+        if i > 1
             vdots = ["⋮"]
             println(io, sprint_row(rownamewidth, " ", colwidth, (vdots,)))
         end
