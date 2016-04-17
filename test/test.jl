@@ -35,12 +35,14 @@ if VERSION < v"0.4-dev"
 end
 ## more indexing
 first = n.array[1,:]
-@assert n["one", :].array == first
-@assert n[Not("two"), :].array == first
-@assert n[1, 2:3].array == first[:,2:3]
-@assert names(n["one", :],1) == ["one"]
+@assert convert(Array, n["one", :]) == first
+@assert n[Not("two"), :].array == n.array[1:1,:]
+@assert convert(Array, n[1, 2:3]) == n.array[1,2:3]
+if VERSION < v"0.5.0-dev"
+    @assert names(n["one", :],1) == ["one"]
+end
 @assert names(n[Not("one"), :],1) == ["two"]
-@assert names(n[1, Not("a")], 2) == ["b", "c", "d"]
+@assert names(n[1:1, Not("a")], 2) == ["b", "c", "d"]
 
 print("copy, ")
 ## copy
@@ -142,7 +144,9 @@ for m in (NamedArray(rand(4)), NamedArray(rand(4,3)))
     m' * m
     @assert n * m == n * m.array == n.array * m == n.array * m.array
     ## the first expression dispatches Ac_mul_Bc!:
-    @assert m' * n.array' == m' * n' == m.array' * n' == m.array' * n.array'
+    @assert isapprox(m' * n.array', m' * n')
+    @assert isapprox(m' * n', m.array' * n')
+    @assert isapprox(m.array' * n', m.array' * n.array')
 end
 
 print("re-arrange, ")

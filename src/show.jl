@@ -17,12 +17,6 @@ print(a::NamedArray) = print(a.array)
 ## This seems to be the essential function to overload for displaying in REPL:
 Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
 
-## inspired by DataFrames
-
-if VERSION < v"0.5.0-dev+2023"
-    displaysize(io::IO) = Base.tty_size()
-end
-
 function show(io::IO, a::NamedArray)
     println(io, summary(a))
     if ndims(a) == 2
