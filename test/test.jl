@@ -7,8 +7,8 @@ print("construction, ")
 n1 = NamedArray(Complex64, 5, 8)
 n2 = NamedArray(rand(2,3), (["s", "t"],[:a, :b, :c]), ("string", :symbol))
 n = NamedArray(rand(2,4))
-setnames!(n, ["one", "two"], 1) 
-setnames!(n, ["a", "b", "c", "d"], 2) 
+setnames!(n, ["one", "two"], 1)
+setnames!(n, ["a", "b", "c", "d"], 2)
 
 a = [1 2 3; 4 5 6]
 n3 = NamedArray(a, (["a","b"],["C","D","E"]))
@@ -18,6 +18,11 @@ n4 = NamedArray(a, (@compat Dict("a"=>1,"b"=>2),@compat Dict("C"=>1,"D"=>2,"E"=>
 @assert dimnames(n3) == dimnames(n4) == Any[:A,:B]
 @assert names(n3,1) == names(n4,1) == ["a","b"]
 @assert names(n3,2) == names(n4,2) == ["C","D","E"]
+
+## 0-dim case #21
+n0 = NamedArray(Array{Int}())
+@assert size(n0) == ()
+@assert n0[1] == n0.array[1]
 
 print("getindex, ")
 ## getindex
@@ -209,5 +214,3 @@ si, sj = allnames(n)
 t3 = @elapsed sgetindex(n, si, sj)
 
 println("Timing named index:", t1, " array index:", t2, " named key:", t3)
-
-

@@ -10,10 +10,10 @@
 
 ## disambiguation (Argh...)
 if VERSION ≥ v"0.4-dev"
-    NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N}) = 0
-    NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = 0
+    NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
+    NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
 end
-    
+
 ## Basic constructor: array, tuple of dicts, tuple
 ## This calls the inner constructor with the appropriate types
 function NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Associative}, dimnames::NTuple{N})
@@ -48,7 +48,7 @@ function NamedArray{T,N,VT}(a::AbstractArray{T,N},
         dicts = tuple(names...)
     else
         dicts = map(names -> Dict(zip(names,1:length(names))), tuple(names...))
-    end 
+    end
     NamedArray(a, dicts, tuple(dimnames...))
 end
 
@@ -65,5 +65,3 @@ function NamedArray(T::DataType, dims::Int...)
     a = Array(T, dims...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
-
-

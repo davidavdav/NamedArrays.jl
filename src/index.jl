@@ -12,6 +12,9 @@ getindex(a::NamedArray, i::AbstractArray) = namedgetindex(a, indices(a.dicts[1],
 ## from subarray.jl
 getindex{T}(a::NamedArray{T,1}, ::Colon) = a
 
+## special 0-dimensional case
+getindex{T}(a::NamedArray{T,0}, i::Real) = getindex(a.array, i)
+
 getindex(a::NamedArray, i) = namedgetindex(a, indices(a.dicts[1], i))
 getindex(a::NamedArray, i1, i2) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2))
 getindex(a::NamedArray, i1, i2, i3) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
@@ -109,4 +112,3 @@ end
 if VERSION >= v"0.4.0-dev"
     setindex!(a::NamedArray, x, it::Base.IteratorsMD.CartesianIndex) = setindex!(a.array, x, it)
 end
-

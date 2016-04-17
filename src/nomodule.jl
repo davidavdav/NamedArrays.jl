@@ -1,7 +1,9 @@
 using Compat
 
 include("compat.jl")
-require("namedarraytypes.jl")
+if !isdefined(:NamedArray)
+    include("namedarraytypes.jl")
+end
 
 include("constructors.jl")
 include("arithmetic.jl")
