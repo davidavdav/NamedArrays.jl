@@ -63,7 +63,7 @@ end
 
 leftalign(s, l) = rpad(s, l, " ")
 rightalign(s, l) = lpad(s, l, " ")
-sprint_colpart(width::Int, s::Vector) = join(map(s->rpad(s, width, " "), s), " ")
+sprint_colpart(width::Int, s::Vector) = join(map(s->lpad(s, width, " "), s), " ")
 function sprint_row(namewidth::Int, name, width::Int, names::Tuple; dots="…", sep=" │ ")
     s = string(leftalign(name, namewidth), sep, sprint_colpart(width, names[1]))
     if length(names)>1
