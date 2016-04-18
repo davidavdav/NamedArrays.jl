@@ -36,8 +36,10 @@ end
 
 function show(io::IO, v::NamedVector)
     println(io, summary(v))
-    maxnrow = displaysize(io)[1] - 5
-    show(io, v, min(maxnrow, length(v)))
+    if size(v) != (0,)
+        maxnrow = displaysize(io)[1] - 5
+        show(io, v, min(maxnrow, length(v)))
+    end
 end
 
 ## display(d::TextDisplay, v::NamedVector) = show(d.io, v)
