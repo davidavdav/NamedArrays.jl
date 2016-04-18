@@ -63,11 +63,11 @@ end
 
 leftalign(s, l) = rpad(s, l, " ")
 rightalign(s, l) = lpad(s, l, " ")
-sprint_colpart(width::Int, s::Vector) = join(map(s->lpad(s, width, " "), s), " ")
+sprint_colpart(width::Int, s::Vector) = join(map(s->lpad(s, width, " "), s), "  ")
 function sprint_row(namewidth::Int, name, width::Int, names::Tuple; dots="…", sep=" │ ")
     s = string(leftalign(name, namewidth), sep, sprint_colpart(width, names[1]))
     if length(names)>1
-        s = string(s, " ", dots, "  ", sprint_colpart(width, names[2]))
+        s = string(s, "  ", dots, "  ", sprint_colpart(width, names[2]))
     end
     s
 end
@@ -83,7 +83,7 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
     strlen(x) = length(string(x))
     colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
     rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, strdimnames(a)))+3)
-    maxncol = div(displaysize(io)[2] - rownamewidth - 4, colwidth+1) # dots, spaces between
+    maxncol = div(displaysize(io)[2] - rownamewidth - 4, colwidth+2) # dots, spaces between
     ## columns
     colrange, totcorange = compute_range(maxncol, ncol)
     ## header
