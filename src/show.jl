@@ -101,8 +101,13 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
         r = rowrange[i]
         for j in 1:length(r)
             row = s[l,:]
+            if (i == 1 && j == 1) || (i == length(rowrange) && j == length(r))
+                dots = "…"
+            else
+                dots = " "
+            end
             println(io, sprint_row(rownamewidth, rowname[totrowrange[l]], colwidth,
-                                   map(r -> row[r], colrange)))
+                                   map(r -> row[r], colrange), dots=dots))
             l += 1
         end
     end
