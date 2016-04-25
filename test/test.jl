@@ -198,6 +198,13 @@ end
 
 include("matrixops.jl")
 
+println("show")
+if VERSION >= v"0.4.0-dev"
+    println(NamedArray(Array{Int}()))
+end
+println(NamedArray([]))
+println(n)
+
 println("done!")
 
 ## how are we doing for speed?
