@@ -90,13 +90,14 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
     header = sprint_row(rownamewidth, rightalign(join(strdimnames(a), " ╲ "), rownamewidth),
                         colwidth, map(i->colname[i], colrange))
     println(io, header)
-    println(io, "─"^(rownamewidth+1), "┼", "─"^(length(header)-rownamewidth-2))
+    print(io, "─"^(rownamewidth+1), "┼", "─"^(length(header)-rownamewidth-2))
     ## data
     l = 1
     for i in 1:length(rowrange)
         if i > 1
             vdots = map(i->["⋮" for i=1:length(i)], colrange)
-            println(io, sprint_row(rownamewidth, "⋮", colwidth, vdots, dots="⋱", sep="   "))
+            println(io)
+            print(io, sprint_row(rownamewidth, "⋮", colwidth, vdots, dots="⋱", sep="   "))
         end
         r = rowrange[i]
         for j in 1:length(r)
@@ -106,8 +107,9 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
             else
                 dots = " "
             end
-            println(io, sprint_row(rownamewidth, rowname[totrowrange[l]], colwidth,
-                                   map(r -> row[r], colrange), dots=dots))
+            println(io)
+            print(io, sprint_row(rownamewidth, rowname[totrowrange[l]], colwidth,
+                                 map(r -> row[r], colrange), dots=dots))
             l += 1
         end
     end
@@ -122,18 +124,20 @@ function show(io::IO, v::NamedVector, maxnrow::Int)
     rownamewidth = maximum(map(length, rownames))
     ## header
     println(io, string(leftalign(strdimnames(v, 1), rownamewidth), " │ "))
-    println(io, "─"^(rownamewidth+1), "┼", "─"^(colwidth+1))
+    print(io, "─"^(rownamewidth+1), "┼", "─"^(colwidth+1))
     ## data
     l = 1
     for i in 1:length(rowrange)
         if i > 1
             vdots = ["⋮"]
-            println(io, sprint_row(rownamewidth, "⋮", colwidth, (vdots,), sep="   "))
+            println(io)
+            print(io, sprint_row(rownamewidth, "⋮", colwidth, (vdots,), sep="   "))
         end
         r = rowrange[i]
         for j in 1:length(r)
             row = s[l]
-            println(io, sprint_row(rownamewidth, rownames[totrowrange[l]], colwidth, ([row],)))
+            println(io)
+            print(io, sprint_row(rownamewidth, rownames[totrowrange[l]], colwidth, ([row],)))
             l += 1
         end
     end
