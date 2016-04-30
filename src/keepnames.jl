@@ -5,8 +5,8 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-# Keep names for consistently named vectors, or drop them 
-function Base.hcat{T}(V::NamedVector{T}...) 
+# Keep names for consistently named vectors, or drop them
+function Base.hcat{T}(V::NamedVector{T}...)
     keepnames=true
     V1=V[1]
     firstnames = names(V1,1)
@@ -65,17 +65,32 @@ for f in (:sin, :cos, :tan, :sind, :cosd, :tand, :sinpi, :cospi, :sinh, :cosh, :
 end
 
 ## reorder names
-import Base.sort
-function sort(a::NamedVector)
-    i = sortperm(a.array)
-    return NamedArray(a.array[i], (names(a, 1)[i],), a.dimnames)
+import Base: sort, sort!
+function sort!(a::NamedVector; kws...)
+    i = sortperm(a.array; kws...)
+    newi = similar(i)
+    newi[i] = 1:size(a,1)
+    n = names(a, 1)
+    for (key, index) in zip(n, newi)
+        a.dicts[1][key] = index
+    end
+    a.array = a.array[i]
+    a
 end
 
-## drop names
-function sort(a::NamedArray, dim::Integer)
+function sort(a::NamedVector; kws...)
+    return sort!(copy(a); kws...)
+end
+
+## Note: I can't think of a sensible way to define sort!(a::NamedArray, dim>1)
+
+## drop name of sorted dimension, as each index along that dimension is sorted individually
+function sort(a::NamedArray, dim::Integer; kws...)
     if ndims(a)==1 && dim==1
-        return sort(a)
+        return sort(a; kws...)
     else
-        return sort(a.array, dim)
+        n = allnames(a)
+        n[dim] = [string(i) for i in 1:size(a,dim)]
+        return NamedArray(sort(a.array, dim; kws...), tuple(n...), a.dimnames)
     end
 end

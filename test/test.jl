@@ -117,9 +117,19 @@ m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 ## @assert array(m[[4,3,2,1]]) == m.array
 print("sort, ")
 m = NamedArray(rand(100))
-ms = sort(m)
-@assert ms.array == sort(m.array)
-@assert names(ms, 1) == names(m, 1)[sortperm(m.array)]
+for rev in [false, true]
+    ms = sort(m, rev=rev)
+    @assert ms.array == sort(m.array, rev=rev)
+    @assert names(ms, 1) == names(m, 1)[sortperm(m.array, rev=rev)]
+end
+m = NamedArray(rand(10,10))
+for rev in [false, true]
+    for dim in 1:2
+        ms = sort(m, dim, rev=rev)
+        @assert ms.array == sort(m.array, dim, rev=rev)
+        @assert names(ms, dim) == [string(i) for i in 1:size(ms, dim)]
+    end
+end
 
 print("hcat, ")
 letters = [string(@compat Char(96+i)) for i=1:26]

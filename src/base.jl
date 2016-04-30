@@ -7,7 +7,7 @@
 
 ## copy
 import Base.copy
-copy{T,N,AT,DT}(a::NamedArray{T,N,AT,DT}) = NamedArray{T,N,AT,DT}(copy(a.array), a.dicts, a.dimnames)
+copy{T,N,AT,DT}(a::NamedArray{T,N,AT,DT}) = NamedArray{T,N,AT,DT}(copy(a.array), deepcopy(a.dicts), copy(a.dimnames))
 
 ## from array.jl
 function copy!{T}(dest::NamedArray{T}, dsto::Integer, src::ArrayOrNamed{T}, so::Integer, N::
@@ -15,7 +15,7 @@ Integer)
     if so+N-1 > length(src) || dsto+N-1 > length(dest) || dsto < 1 || so < 1
         throw(BoundsError())
     end
-    if isa(src, NamedArray) 
+    if isa(src, NamedArray)
         unsafe_copy!(dest.array, dsto, src.array, so, N)
     else
         unsafe_copy!(dest.array, dsto, src, so, N)
