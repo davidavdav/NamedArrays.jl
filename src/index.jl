@@ -27,10 +27,17 @@ if VERSION >= v"0.4.0-dev"
     getindex(a::NamedArray, it::Base.IteratorsMD.CartesianIndex) = getindex(a.array, it)
 end
 
+## indices(::Associative, index) converts any type `index` to Integer
+
 ## single index
 indices{K<:Real,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
 indices{K,V<:Integer}(dict::Associative{K,V}, i::Real) = to_index(i)
 indices{K,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
+if VERSION >= v"0.4.0-dev"
+    ## ambiguity if dict key is CartesionIndex
+    indices{K<:CartesianIndex,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
+    indices(dict::Associative, ci::CartesianIndex) = ci
+end
 ## multiple indices
 ## the following two lines are partly because of ambiguity
 indices{T<:Integer,V<:Integer}(dict::Associative{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]

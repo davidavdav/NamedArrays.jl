@@ -18,17 +18,26 @@ print(a::NamedArray) = print(a.array)
 Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
 
 function show(io::IO, a::NamedArray)
-    println(io, summary(a))
+    print(io, summary(a))
     if ndims(a) == 2
         (nr,nc) = size(a)
         maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
+        println(io)
         show(io, a, min(maxnrow, nr))
     else                        # fallback for dim > 2
-        for i in 1:length(a.dimnames)
-            print(io, " ", strdimnames(a,i), ": ")
-            print(io, strnames(a,i)')
+        s = size(a)
+        nlinesneeded = prod(s[3:end]) * (s[1] + 3) + 1
+        if nlinesneeded > displaysize(io)[1]
+            maxnrow = clamp((displaysize(io)[1] - 3) ÷ (prod(s[3:end])) - 3, 3, s[1])
+        else
+            maxnrow = s[1]
         end
-        show(io, a.array)
+        for idx in CartesianRange(size(a)[3:end])
+            cartnames = [string(strdimnames(a, 2+i), "=", strnames(a, 2+i)[ind]) for (i, ind) in enumerate(idx.I)]
+            println(io)
+            println(io, "[:, :, ", join(cartnames, ", "), "] =")
+            show(io, a[:,:,idx.I...], maxnrow)
+        end
     end
 end
 
