@@ -7,7 +7,7 @@
 
 ## copy
 import Base.copy
-copy{T,N,AT,DT}(a::NamedArray{T,N,AT,DT}) = NamedArray{T,N,AT,DT}(copy(a.array), deepcopy(a.dicts), copy(a.dimnames))
+copy{T,N,AT,DT}(a::NamedArray{T,N,AT,DT}) = NamedArray{T,N,AT,DT}(copy(a.array), deepcopy(a.dicts), identity(a.dimnames))
 
 ## from array.jl
 function copy!{T}(dest::NamedArray{T}, dsto::Integer, src::ArrayOrNamed{T}, so::Integer, N::
@@ -27,8 +27,7 @@ size(a::NamedArray) = size(a.array)
 size(a::NamedArray, d) = size(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
-import Base.similar
-function similar(a::NamedArray, t::Type, dims::NTuple)
+function Base.similar(a::NamedArray, t::Type, dims::Base.Dims)
     if size(a) != dims
         return NamedArray(t, dims...) # re-initialize names arrays...
     else

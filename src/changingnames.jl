@@ -1,4 +1,4 @@
-## changingnames.jl  methods for NamedArray that change some of the names 
+## changingnames.jl  methods for NamedArray that change some of the names
 
 ## (c) 2013 David A. van Leeuwen
 
@@ -32,6 +32,5 @@ end
 ## rename a dimension
 for f in (:cumprod, :cumsum, :cumsum_kbn, :cummin, :cummax)
     eval(Expr(:import, :Base, f))
-    @eval ($f)(a::NamedArray, d=1) = fan($f, string($f), a, d)
+    @eval ($f)(a::NamedArray, d::Integer=1) = fan($f, string($f), a, d)
 end
-

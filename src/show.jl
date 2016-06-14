@@ -17,6 +17,7 @@ print(a::NamedArray) = print(a.array)
 ## This seems to be the essential function to overload for displaying in REPL:
 Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
 
+## ndims==1 is dispatched below
 function show(io::IO, a::NamedArray)
     print(io, summary(a))
     if ndims(a) == 2
@@ -24,7 +25,7 @@ function show(io::IO, a::NamedArray)
         maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
         println(io)
         show(io, a, min(maxnrow, nr))
-    else                        # fallback for dim > 2
+    elseif ndims(a) != 0
         s = size(a)
         nlinesneeded = prod(s[3:end]) * (s[1] + 3) + 1
         if nlinesneeded > displaysize(io)[1]
@@ -34,7 +35,7 @@ function show(io::IO, a::NamedArray)
         end
         for idx in CartesianRange(size(a)[3:end])
             cartnames = [string(strdimnames(a, 2+i), "=", strnames(a, 2+i)[ind]) for (i, ind) in enumerate(idx.I)]
-            println(io)
+            println(io, "\n")
             println(io, "[:, :, ", join(cartnames, ", "), "] =")
             show(io, a[:,:,idx.I...], maxnrow)
         end

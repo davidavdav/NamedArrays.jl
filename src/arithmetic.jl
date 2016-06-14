@@ -63,7 +63,7 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
     end
 end
 
-import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfact, qrfact!, qrfact, eigfact!, eigvals!, hessfact ,schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!, scale, cond, null, kron, linreg, lyap, sylvester, isposdef
+import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfact, qrfact!, qrfact, eigfact!, eigvals!, hessfact , schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!, scale, cond, kron, linreg, lyap, sylvester, isposdef
 
 
 ## matmul
@@ -207,7 +207,7 @@ scale(b::AbstractVector, A::NamedMatrix) = NamedArray(scale(b, A.array), A.dicts
 # rank, vecnorm, norm, condskeel, trace, det, logdet OK
 cond(n::NamedArray) = cond(n.array)
 
-null(n::NamedArray) = null(n.array)
+# null(n::NamedArray) = null(n.array)
 
 function kron(a::NamedArray, b::NamedArray)
     n = Array(typeof(AbstractString[]), 2)

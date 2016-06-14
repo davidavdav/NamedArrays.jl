@@ -12,3 +12,7 @@ if VERSION < v"0.5.0-dev+2023"
 else
     using Combinatorics
 end
+
+if VERSION < v"0.5.0-dev"
+    String = ASCIIString
+end
