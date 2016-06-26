@@ -43,6 +43,9 @@ if VERSION < v"0.5.0-dev"
 end
 @assert names(n[Not("one"), :],1) == ["two"]
 @assert names(n[1:1, Not("a")], 2) == ["b", "c", "d"]
+## indexing by pair
+@assert n[:B=>"a", :A=>"two"] == n.array[2, 1]
+@assert n[:A=>"one", :B=>"d"] == n.array[1, 4]
 
 print("copy, ")
 ## copy
@@ -68,6 +71,8 @@ if VERSION >= v"0.4.0-dev"
     end
     @assert 2*(m2.array) == m.array
 end
+m[:B=>"c", :A=>"one"] = π
+@assert m[1,3] == Float64(π)
 
 print("sum, ")
 ## sum

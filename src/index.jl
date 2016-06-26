@@ -1,5 +1,5 @@
 ## index.jl getindex and setindex methods for NamedArray
-## (c) 2013--2015 David A. van Leeuwen
+## (c) 2013--2016 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
@@ -58,15 +58,16 @@ namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer)
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer) = getindex(a.array, i1, i2, i3, i4, i5)
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer, I::Integer...) = getindex(a.array, i1, i2, i3, i4, i5, I...)
 
-
+## namedgetindex collects the elements from the array, and takes care of the index names
+## `index` is an integer now, and has been computed by `indices()`
 function namedgetindex(n::NamedArray, index...)
     a = getindex(n.array, index...)
     dims = map(length, index)
     N = length(dims)
-    while dims[N]==1 && N>1
+    while dims[N] == 1 && N > 1
         N -= 1
     end
-    if ndims(a) != N || length(dims)==1 && ndims(n)>1
+    if ndims(a) != N || length(dims) == 1 && ndims(n) > 1
         return a;               # number of dimension changed
     end
     newnames = Any[]
@@ -76,6 +77,19 @@ function namedgetindex(n::NamedArray, index...)
     end
     NamedArray(a, tuple(newnames...), tuple(n.dimnames[1:N]...))
 end
+
+function indices(n::NamedArray, I::Pair...)
+    length(I) == ndims(n) || error("Incorrect number of dimensions")
+    dict = Dict{Any,Any}(I...)
+    Set(keys(dict)) == Set(n.dimnames) || error("Dimension name mismatch")
+    result = Vector{Int}(ndims(n))
+    for (i, name) in enumerate(n.dimnames)
+        result[i] = n.dicts[i][dict[name]]
+    end
+    return result
+end
+
+getindex(n::NamedArray, I::Pair...) = getindex(n.array, indices(n, I...)...)
 
 import Base.setindex!
 
@@ -119,3 +133,5 @@ end
 if VERSION >= v"0.4.0-dev"
     setindex!(a::NamedArray, x, it::Base.IteratorsMD.CartesianIndex) = setindex!(a.array, x, it)
 end
+
+setindex!(n::NamedArray, x, I::Pair...) = setindex!(n.array, x, indices(n, I...)...)

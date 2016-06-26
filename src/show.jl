@@ -15,7 +15,10 @@ end
 print(a::NamedArray) = print(a.array)
 
 ## This seems to be the essential function to overload for displaying in REPL:
-Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
+Base.show(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
+if VERSION < v"0.5.0-dev+4356"
+    Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
+end
 
 ## ndims==1 is dispatched below
 function show(io::IO, a::NamedArray)
