@@ -55,15 +55,6 @@ function show(io::IO, v::NamedVector)
     end
 end
 
-## display(d::TextDisplay, v::NamedVector) = show(d.io, v)
-
-#function display(d::TextDisplay, v::NamedVector)
-#    io = d.io
-#    println(io, summary(v))
-#    maxnrow = Base.tty_rows() - 5
-#    show(io, v, min(maxnrow, length(v)))
-#end
-
 ## compute the ranges to be displayed, plus a total index comprising all ranges.
 function compute_range(maxn, n)
     if maxn < n
@@ -127,6 +118,34 @@ function show(io::IO, a::NamedMatrix, maxnrow::Int)
                                  map(r -> row[r], colrange), dots=dots))
             l += 1
         end
+    end
+end
+
+## special case of sparse matrix, based on base/sparse/sparsematrix.c
+function show{T1,T2}(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}})
+    S = n.array
+    if nnz(S) != 0
+        print(io, S.m, "×", S.n, " named sparse matrix with ", nnz(S), " ", eltype(S), " nonzero entries", nnz(S) == 0 ? "" : ":")
+    end
+    maxnrow = displaysize(io)[1]
+    half_screen_rows = div(maxnrow - 5, 2)
+    rownames, colnames = strnames(n)
+    rowpad = maximum([length(n) for n in rownames])
+    colpad = maximum([length(n) for n in colnames])
+    k = 0
+    sep = "\n\t"
+    for col = 1:S.n, k = S.colptr[col] : (S.colptr[col+1]-1)
+        if k < half_screen_rows || k > nnz(S)-half_screen_rows
+            print(io, sep, '[', rpad(rownames[S.rowval[k]], rowpad), ", ", lpad(colnames[col], colpad), "]  =  ")
+            if isassigned(S.nzval, k)
+                Base.show(io, S.nzval[k])
+            else
+                print(io, Base.undef_ref_str)
+            end
+        elseif k == half_screen_rows
+            print(io, sep, lpad("⋮", rowpad + colpad + 7))
+        end
+        k += 1
     end
 end
 
