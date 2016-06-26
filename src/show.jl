@@ -8,8 +8,9 @@
 
 import Base.print, Base.show, Base.summary, Base.display
 
-function summary(a::NamedArray)
-    return Base.dims2string(size(a)) * string(" NamedArray{", eltype(a), ",", ndims(a), "}:")
+## fallback
+function summary{T,N,AT}(a::NamedArray{T,N,AT})
+    return Base.dims2string(size(a)) * string(" Named ", AT)
 end
 
 print(a::NamedArray) = print(a.array)
@@ -125,7 +126,7 @@ end
 function show{T1,T2}(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}})
     S = n.array
     if nnz(S) != 0
-        print(io, S.m, "×", S.n, " named sparse matrix with ", nnz(S), " ", eltype(S), " nonzero entries", nnz(S) == 0 ? "" : ":")
+        print(io, S.m, "×", S.n, " Named sparse matrix with ", nnz(S), " ", eltype(S), " nonzero entries", nnz(S) == 0 ? "" : ":")
     end
     maxnrow = displaysize(io)[1]
     half_screen_rows = div(maxnrow - 5, 2)
