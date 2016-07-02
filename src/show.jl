@@ -41,7 +41,7 @@ function show(io::IO, a::NamedArray)
             cartnames = [string(strdimnames(a, 2+i), "=", strnames(a, 2+i)[ind]) for (i, ind) in enumerate(idx.I)]
             println(io, "\n")
             println(io, "[:, :, ", join(cartnames, ", "), "] =")
-            show(io, a[:,:,idx.I...], maxnrow)
+            show(io, a[:, :, idx], maxnrow)
         end
     end
 end
