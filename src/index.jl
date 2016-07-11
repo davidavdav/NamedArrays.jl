@@ -6,21 +6,12 @@
 
 import Base.getindex, Base.to_index
 
-## ambiguity from abstractarray.jl
-getindex(a::NamedArray, i::Real) = namedgetindex(a, indices(a.dicts[1], i))
-getindex(a::NamedArray, i::AbstractArray) = namedgetindex(a, indices(a.dicts[1], i))
-## from subarray.jl
-getindex{T}(a::NamedArray{T,1}, ::Colon) = a
-
 ## special 0-dimensional case
 getindex{T}(a::NamedArray{T,0}, i::Real) = getindex(a.array, i)
 
-getindex(a::NamedArray, i) = namedgetindex(a, indices(a.dicts[1], i))
-getindex(a::NamedArray, i1, i2) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2))
-getindex(a::NamedArray, i1, i2, i3) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
-getindex(a::NamedArray, i1, i2, i3, i4) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4))
-getindex(a::NamedArray, i1, i2, i3, i4, i5) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5))
-getindex(a::NamedArray, i1, i2, i3, i4, i5, I...) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5), [indices(a.dicts[5+i], ind) for (i,ind) in enumerate(I)]...)
+@inline function getindex{T,N}(a::NamedArray{T,N}, I::Vararg{Any,N})
+    namedgetindex(a, map((d,i)->indices(d, i), a.dicts, I)...)
+end
 
 ## 0.4-dev functions
 if VERSION >= v"0.4.0-dev"
@@ -95,22 +86,8 @@ import Base.setindex!
 
 setindex!{T}(A::NamedArray{T}, x) = setindex!(A, convert(T,x), 1)
 
-setindex!{T}(a::NamedArray{T}, x, i1::Real) = setindex!(a.array, convert(T,x), indices(a.dicts[1],i1))
-setindex!{T}(a::NamedArray{T}, x, i1::Real, i2::Real) =
-    setindex!(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2))
-setindex!{T}(a::NamedArray{T}, x, i1::Real, i2::Real, i3::Real) =
-    setindex!(a.array, convert(T,x), indices(a.dicts[1],i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3))
-setindex!{T}(a::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real) =
-    setindex!(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4))
-setindex!{T}(a::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real) =
-    setindex!(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5))
-setindex!{T}(a::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real, i6::Real) =
-    setindex!(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5), indices(a.dicts[6], i6))
-setindex!{T}(a::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real, i6::Real, I...) =
-    setindex!(a.array, convert(T,x), indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5), indices(a.dicts[6], i6), I...)
-
 # n[1:4] = 5
-setindex!{T<:Real}(A::NamedArray, x, I::AbstractVector{T}) = setindex!(A.array, x, I)
+setindex!{T<:Real}(A::NamedArray, x, I::Union{Colon,AbstractVector{T}}) = setindex!(A.array, x, I)
 
 # n[1:4] = 1:4
 ## shamelessly copied from array.jl
@@ -120,12 +97,9 @@ function setindex!{T}(A::NamedArray{T}, X::ArrayOrNamed{T}, I::Range{Int})
     return A
 end
 
-# n[[1,3,4,6]] = 1:4
-setindex!{T<:Real}(A::NamedArray, X::AbstractArray, I::AbstractVector{T}) = setindex!(A.array, X, I)
-
 ## This takes care of most other cases
-function setindex!(A::NamedArray, x, I...)
-    II = tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
+@inline function setindex!{T,N}(A::NamedArray{T,N}, x, I::Vararg{Any,N})
+    II = map((d,i)->indices(d, i), A.dicts, I)
     setindex!(A.array, x, II...)
 end
 
@@ -134,4 +108,4 @@ if VERSION >= v"0.4.0-dev"
     setindex!(a::NamedArray, x, it::Base.IteratorsMD.CartesianIndex) = setindex!(a.array, x, it)
 end
 
-setindex!(n::NamedArray, x, I::Pair...) = setindex!(n.array, x, indices(n, I...)...)
+@inline setindex!{T,N}(n::NamedArray{T,N}, x, I::Vararg{Pair,N}) = setindex!(n.array, x, indices(n, I...)...)

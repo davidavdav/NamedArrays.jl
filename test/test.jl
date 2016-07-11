@@ -244,4 +244,8 @@ t2 = @elapsed sgetindex(n.array)
 si, sj = allnames(n)
 t3 = @elapsed sgetindex(n, si, sj)
 
+# julia issue #17328
+a = NamedArray([1.0,2.0,3.0,4.0])
+@test sumabs(a, 1)[1] == 10
+
 println("Timing named index:", t1, " array index:", t2, " named key:", t3)
