@@ -18,13 +18,15 @@ end
 
 import Base.flipdim
 function flipdim{T,N}(a::NamedArray{T,N}, d::Int)
-    vdicts = Array(Dict, N)
+    vdicts = Array(OrderedDict, N)
     n = size(a,d)+1
     for i=1:N
         dict = copy(a.dicts[i])
         if i==d
-            for (k,v) in collect(dict)
-                dict[k] = n - v
+            newnames = reverse(names(dict))
+            empty!(dict)
+            for (ind,k) in enumerate(newnames)
+                dict[k] = ind
             end
         end
         vdicts[i] = dict
