@@ -15,7 +15,7 @@ type NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
     array::AT
     dicts::DT
     dimnames::NTuple{N}
-    function NamedArray(array::AbstractArray{T,N}, dicts::NTuple{N,Associative}, dimnames::NTuple{N})
+    function NamedArray(array::AbstractArray{T,N}, dicts::NTuple{N,OrderedDict}, dimnames::NTuple{N})
         size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
 #        for (d,dict) in zip(size(array),dicts)
 #            Set(values(dict)) == Set(1:d) || error("Inconsistent values in dict")
