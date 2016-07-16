@@ -68,11 +68,10 @@ end
 import Base: sort, sort!
 function sort!(a::NamedVector; kws...)
     i = sortperm(a.array; kws...)
-    newi = similar(i)
-    newi[i] = 1:size(a,1)
-    n = names(a, 1)
-    for (key, index) in zip(n, newi)
-        a.dicts[1][key] = index
+    newnames = names(a, 1)[i]
+    empty!(a.dicts[1])
+    for (ind, k) in enumerate(newnames)
+        a.dicts[1][k] = ind
     end
     a.array = a.array[i]
     a

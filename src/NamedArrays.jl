@@ -11,6 +11,7 @@ VERSION >= v"0.4.0-dev+6521" && __precompile__()
 module NamedArrays
 
 using Compat
+using DataStructures
 
 export NamedArray, NamedVector, NamedMatrix, Not
 

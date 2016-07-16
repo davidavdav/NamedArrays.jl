@@ -1,5 +1,7 @@
 ## NamedArrays is loaded by runtests.jl
 using Base.Test
+using DataStructures
+using Compat
 
 print("Starting test, no assertions should fail... ")
 
@@ -13,7 +15,7 @@ setnames!(n, ["a", "b", "c", "d"], 2)
 
 a = [1 2 3; 4 5 6]
 n3 = NamedArray(a, (["a","b"],["C","D","E"]))
-n4 = NamedArray(a, (@compat Dict("a"=>1,"b"=>2),@compat Dict("C"=>1,"D"=>2,"E"=>3)))
+n4 = NamedArray(a, (@compat OrderedDict("a"=>1,"b"=>2), @compat OrderedDict("C"=>1,"D"=>2,"E"=>3)))
 
 @test n3.array == n4.array == a
 @test dimnames(n3) == dimnames(n4) == Any[:A,:B]

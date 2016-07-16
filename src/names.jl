@@ -25,10 +25,10 @@ function setnames!(a::NamedArray, v::Vector, d::Int)
     size(a.array,d) == length(v) || error("inconsistent vector length")
     eltype(keys(a.dicts[d])) == eltype(v) || error("inconsistent name type")
     ## a.dicts is a tuple, so we need to replace it as a whole...
-    vdicts = Dict[]
+    vdicts = OrderedDict[]
     for i = 1:length(a.dicts)
         if i==d
-            push!(vdicts, Dict(zip(v, 1:length(v))))
+            push!(vdicts, OrderedDict(zip(v, 1:length(v))))
         else
             push!(vdicts, a.dicts[i])
         end

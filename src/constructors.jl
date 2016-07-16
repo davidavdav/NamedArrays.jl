@@ -16,25 +16,25 @@ end
 
 ## Basic constructor: array, tuple of dicts, tuple
 ## This calls the inner constructor with the appropriate types
-function NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Associative}, dimnames::NTuple{N})
+function NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,OrderedDict}, dimnames::NTuple{N})
     NamedArray{T, N, typeof(a), typeof(names)}(a, names, dimnames) ## inner constructor
 end
 
 ## dimnames created as default, then inner constructor called
-function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Associative})
+function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,OrderedDict})
     dimnames = [Symbol(letter(i)) for i=1:ndims(array)]
     NamedArray{T, N, typeof(array), typeof(names)}(array, names, tuple(dimnames...)) ## inner constructor
 end
 
 ## constructor with array, names and dimnames (dict is created from names)
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
-    dicts = map(names -> Dict(zip(names,1:length(names))), names)
+    dicts = map(names -> OrderedDict(zip(names,1:length(names))), names)
     NamedArray(array, dicts, dimnames)
 end
 
 ## constructor with array, names (dict is created from names), dimnames created as default
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector})
-    dicts = map(names -> Dict(zip(names,1:length(names))), names)
+    dicts = map(names -> OrderedDict(zip(names,1:length(names))), names)
     dimnames = [Symbol(letter(i)) for i=1:length(names)]
     NamedArray(array, dicts, tuple(dimnames...))
 end
@@ -44,10 +44,10 @@ function NamedArray{T,N,VT}(a::AbstractArray{T,N},
                             names::Vector{VT}=[String[string(i) for i=1:d] for d in size(a)],
                             dimnames::Vector = Symbol[Symbol(letter(i)) for i=1:N])
     length(names) == length(dimnames) == N || error("Dimension mismatch")
-    if VT <: Associative
+    if VT <: OrderedDict
         dicts = tuple(names...)
     else
-        dicts = map(names -> Dict(zip(names,1:length(names))), tuple(names...))
+        dicts = map(names -> OrderedDict(zip(names,1:length(names))), tuple(names...))
     end
     NamedArray(a, dicts, tuple(dimnames...))
 end
