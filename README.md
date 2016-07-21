@@ -4,6 +4,7 @@ NamedArrays
 Julia type that implements a drop-in replacement of Array with named dimensions.
 
 [![Build Status](https://travis-ci.org/davidavdav/NamedArrays.jl.png)](https://travis-ci.org/davidavdav/NamedArrays.jl)
+[![Coverage Status](https://coveralls.io/repos/github/davidavdav/NamedArrays.jl/badge.svg?branch=master)](https://coveralls.io/github/davidavdav/NamedArrays.jl?branch=master)
 
 Idea
 ----
