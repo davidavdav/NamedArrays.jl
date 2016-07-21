@@ -3,3 +3,5 @@ language: julia
 julia:
  - 0.4
  - nightly
+after_success:
+  - julia -e 'cd(Pkg.dir("NamedArrays")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
