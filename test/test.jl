@@ -224,6 +224,9 @@ println(NamedArray([]))
 println(n)
 zo = [0,1]
 println(NamedArray(rand(2,2,2), (zo, zo, zo), ("base", "zero", "indexing")))
+for ndim in 1:5
+    println(NamedArray(rand(fill(2,ndim)...)))
+end
 
 println("done!")
 

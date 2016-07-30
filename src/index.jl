@@ -58,11 +58,16 @@ namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer)
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer) = getindex(a.array, i1, i2, i3, i4, i5)
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer, I::Integer...) = getindex(a.array, i1, i2, i3, i4, i5, I...)
 
+## A helper function for namedgetindex.  We want to know the length of the indices of they are arrays,
+## but for a cartesianindex of length N we want a sequence of 1's of length N.
+dimlength{N}(ci::CartesianIndex{N}) = fill(1, N)
+dimlength(i) = length(i)
+
 ## namedgetindex collects the elements from the array, and takes care of the index names
 ## `index` is an integer now, and has been computed by `indices()`
 function namedgetindex(n::NamedArray, index...)
     a = getindex(n.array, index...)
-    dims = map(length, index)
+    dims = vcat(map(dimlength, index)...)
     N = length(dims)
     while dims[N] == 1 && N > 1
         N -= 1
