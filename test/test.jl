@@ -227,6 +227,10 @@ println(NamedArray(rand(2,2,2), (zo, zo, zo), ("base", "zero", "indexing")))
 for ndim in 1:5
     println(NamedArray(rand(fill(2,ndim)...)))
 end
+## various singletons
+println(NamedArray(rand(1,2,2)))
+println(NamedArray(rand(2,1,2)))
+println(NamedArray(rand(2,2,1)))
 
 println("done!")
 

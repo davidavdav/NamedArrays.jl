@@ -58,29 +58,36 @@ namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer)
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer) = getindex(a.array, i1, i2, i3, i4, i5)
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer, I::Integer...) = getindex(a.array, i1, i2, i3, i4, i5, I...)
 
-## A helper function for namedgetindex.  We want to know the length of the indices of they are arrays,
-## but for a cartesianindex of length N we want a sequence of 1's of length N.
-dimlength{N}(ci::CartesianIndex{N}) = fill(1, N)
-dimlength(i) = length(i)
+dimkeepingtype(x) = false
+dimkeepingtype(x::Vector) = true
+dimkeepingtype(x::Range) = true
 
 ## namedgetindex collects the elements from the array, and takes care of the index names
-## `index` is an integer now, and has been computed by `indices()`
+## `index` is an integer now, or an array of integers, or a cartesianindex
+## and has been computed by `indices()`
 function namedgetindex(n::NamedArray, index...)
     a = getindex(n.array, index...)
-    dims = vcat(map(dimlength, index)...)
-    N = length(dims)
-    while dims[N] == 1 && N > 1
-        N -= 1
+    N = length(index)
+    keeping = collect(1:N) ## dimensions that are kept after slicing
+    if VERSION < v"0.5.0-dev"
+        i = N
+        while i > 1 && !dimkeepingtype(index[i])
+            deleteat!(keeping, i)
+            i -= 1
+        end
+    else
+        keeping = filter(i -> dimkeepingtype(index[i]), 1:N)
     end
-    if ndims(a) != N || length(dims) == 1 && ndims(n) > 1
-        return a;               # number of dimension changed
+    if ndims(a) != length(keeping) ## || length(dims) == 1 && ndims(n) > 1
+        warn("Dropped names for ", typeof(n.array), " with index ", index)
+        return a;               # number of dimension changed, this should not happen
     end
     newnames = Any[]
-    for d = 1:N
+    for d in keeping
         sortkeys = names(n, d)
         push!(newnames, eltype(sortkeys)[sortkeys[i] for i in index[d]])
     end
-    NamedArray(a, tuple(newnames...), tuple(n.dimnames[1:N]...))
+    return NamedArray(a, tuple(newnames...), n.dimnames[keeping])
 end
 
 function indices(n::NamedArray, I::Pair...)
