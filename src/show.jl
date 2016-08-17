@@ -1,10 +1,14 @@
 ## show.jl.  show and print methods for NamedArray
-## (c) 2013 David A. van Leeuwen
+## (c) 2013-2016 David A. van Leeuwen
 
 ## Julia type that implements a drop-in replacement of Array with named dimensions.
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
+
+## Displaying things in the REPL drives me crazy, there are all these things
+## like print, show, display, writemime, etc., and I have no clue as to
+## what gets called how in which circumstance.
 
 import Base.print, Base.show, Base.summary, Base.display
 

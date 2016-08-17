@@ -63,7 +63,9 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
     end
 end
 
-import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfact, qrfact!, qrfact, eigfact!, eigvals!, hessfact , schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!, scale, cond, kron, linreg, lyap, sylvester, isposdef
+import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfact, qrfact!, qrfact, eigfact!, eigvals!,
+    hessfact, hessfact!, schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!, scale,
+    cond, kron, linreg, lyap, sylvester, isposdef
 
 
 ## matmul

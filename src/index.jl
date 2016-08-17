@@ -61,6 +61,7 @@ namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer,
 dimkeepingtype(x) = false
 dimkeepingtype(x::Vector) = true
 dimkeepingtype(x::Range) = true
+dimkeepingtype(x::BitVector) = true
 
 ## namedgetindex collects the elements from the array, and takes care of the index names
 ## `index` is an integer now, or an array of integers, or a cartesianindex
@@ -68,8 +69,8 @@ dimkeepingtype(x::Range) = true
 function namedgetindex(n::NamedArray, index...)
     a = getindex(n.array, index...)
     N = length(index)
-    keeping = collect(1:N) ## dimensions that are kept after slicing
     if VERSION < v"0.5.0-dev"
+        keeping = collect(1:N) ## dimensions that are kept after slicing
         i = N
         while i > 1 && !dimkeepingtype(index[i])
             deleteat!(keeping, i)
@@ -84,8 +85,11 @@ function namedgetindex(n::NamedArray, index...)
     end
     newnames = Any[]
     for d in keeping
-        sortkeys = names(n, d)
-        push!(newnames, eltype(sortkeys)[sortkeys[i] for i in index[d]])
+        if dimkeepingtype(index[d])
+            push!(newnames, names(n, d)[index[d]])
+        else
+            push!(newnames, names(n, d)[[index[d]]]) ## for julia-0.4, index[d] could be Integer, but result should be Array
+        end
     end
     return NamedArray(a, tuple(newnames...), n.dimnames[keeping])
 end

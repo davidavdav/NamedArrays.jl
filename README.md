@@ -189,7 +189,7 @@ the names are reinitialized to the default "1", "2", ...
  * Transposition
 
 ```julia
-'
+' ## transpose post-fix operator '
 ctranspose
 transpose
 permutedims

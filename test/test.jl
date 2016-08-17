@@ -49,6 +49,13 @@ end
 ## indexing by pair
 @test n[:B=>"a", :A=>"two"] == n.array[2, 1]
 @test n[:A=>"one", :B=>"d"] == n.array[1, 4]
+## https://github.com/nalimilan/FreqTables.jl/issues/10
+bi = [false, true, false, true] ## Array{Bool}
+for i in 1:2
+    @test n[:, bi].array == n.array[:, bi]
+    @test names(n[:, bi], 2) == ["b", "d"]
+    bi = BitArray(bi)
+end
 
 print("copy, ")
 ## copy
