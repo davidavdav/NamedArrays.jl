@@ -3,7 +3,10 @@ NamedArrays
 
 Julia type that implements a drop-in replacement of Array with named dimensions.
 
-[![Build Status](https://travis-ci.org/davidavdav/NamedArrays.jl.png)](https://travis-ci.org/davidavdav/NamedArrays.jl)
+[![Build Status](https://travis-ci.org/davidavdav/NamedArrays.jl.svg)](https://travis-ci.org/davidavdav/NamedArrays.jl)
+[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.3.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
+[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.4.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
+[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.5.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
 [![Coverage Status](https://coveralls.io/repos/github/davidavdav/NamedArrays.jl/badge.svg?branch=master)](https://coveralls.io/github/davidavdav/NamedArrays.jl?branch=master)
 
 Idea
