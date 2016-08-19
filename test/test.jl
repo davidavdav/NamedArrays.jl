@@ -84,6 +84,9 @@ end
 m[:B=>"c", :A=>"one"] = π
 @test m[1,3] == Float64(π)
 
+print("arithmetic, ")
+include("arithmetic.jl")
+
 print("sum, ")
 ## sum
 @test sum(n) == sum(n.array)
@@ -153,6 +156,7 @@ m2 = NamedArray(rand(10), (letters[1:10],))
 mm = hcat(m, m2)
 @test mm.array == hcat(m.array, m2.array)
 @test names(mm,1) == names(m,1)
+
 print("broadcast, ")
 @test broadcast(-, n, mean(n,1)).array == broadcast(-, n.array, mean(n.array,1))
 

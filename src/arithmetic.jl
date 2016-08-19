@@ -24,10 +24,10 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
     @eval begin
         function ($op){T1<:Number, T2<:Number}(x::NamedArray{T1}, y::NamedArray{T2})
             if allnames(x)==allnames(y) && x.dimnames==y.dimnames
-                NamedArray(($op)(x.array,y.array), x.dicts, x.dimnames)
+                NamedArray(($op)(x.array, y.array), x.dicts, x.dimnames)
             else
                 warn("Dropping mismatching names")
-                ($op)(x.array,y.array)
+                ($op)(x.array, y.array)
             end
         end
         ($op){T1<:Number,T2<:Number,N}(x::NamedArray{T1,N}, y::AbstractArray{T2,N}) = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
@@ -45,12 +45,14 @@ for op in (:+, :-)
 end
 
 ## NamedArray, Number
-for op in (:+, :-, :*, :/, :.+, :.-, :.*, :./, :\ )
+for op in (:+, :-, :*, :.+, :.-, :.*, :./)
     @eval begin
         ($op){T1<:Number,T2<:Number}(x::NamedArray{T1}, y::T2) = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
         ($op){T1<:Number,T2<:Number}(x::T1, y::NamedArray{T2}) = NamedArray(($op)(x, y.array), y.dicts, y.dimnames)
     end
 end
+/{T1<:Number,T2<:Number}(x::NamedArray{T1}, y::T2) = NamedArray(x.array / y, x.dicts, x.dimnames)
+\{T1<:Number,T2<:Number}(x::T1, y::NamedArray{T2}) = NamedArray(x \ y.array, y.dicts, y.dimnames)
 
 ## disambiguation
 -{T1<:Number,T2<:Number}(x::NamedVector{T1}, y::Range{T2}) = NamedArray(x.array - y, x.dicts, x.dimnames)
