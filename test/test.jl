@@ -5,6 +5,12 @@ using Compat
 
 print("Starting test, no assertions should fail... ")
 
+print("arithmetic, ")
+include("arithmetic.jl")
+
+print("convert, ")
+include("convert.jl")
+
 print("construction, ")
 ## constructors
 n1 = NamedArray(Complex64, 5, 8)
@@ -83,9 +89,6 @@ if VERSION >= v"0.4.0-dev"
 end
 m[:B=>"c", :A=>"one"] = π
 @test m[1,3] == Float64(π)
-
-print("arithmetic, ")
-include("arithmetic.jl")
 
 print("sum, ")
 ## sum

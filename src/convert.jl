@@ -10,10 +10,10 @@ import Base.convert,Base.promote_rule
 
 ## to array
 array(a::NamedArray) = a.array
-convert{T,N}(::Type{Array{T,N}}, a::NamedArray{T,N}) = a.array
-convert{T}(::Type{Array{T}}, a::NamedArray{T}) = a.array
-convert(::Type{Array}, a::NamedArray) = a.array
-           
+convert{T,N}(::Type{AbstractArray{T,N}}, a::NamedArray{T,N}) = a.array
+convert{T}(::Type{AbstractArray{T}}, a::NamedArray{T}) = a.array
+convert(::Type{AbstractArray}, a::NamedArray) = a.array
+
 ## to other type
 convert{T}(::Type{NamedArray{T}}, a::NamedArray) = NamedArray(convert(Array{T}, a.array), a.dimnames, a.dicts)
 function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}},::Type{NamedArray{T2,N}})
@@ -29,4 +29,3 @@ if VERSION < v"0.4-dev"
         @eval ($tf)(a::NamedArray) = NamedArray(($tf)(a.array), a.dicts, a.dimnames)
     end
 end
-        

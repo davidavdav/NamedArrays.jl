@@ -66,32 +66,45 @@ dimkeepingtype(x::BitVector) = true
 ## namedgetindex collects the elements from the array, and takes care of the index names
 ## `index` is an integer now, or an array of integers, or a cartesianindex
 ## and has been computed by `indices()`
-function namedgetindex(n::NamedArray, index...)
-    a = getindex(n.array, index...)
-    N = length(index)
-    if VERSION < v"0.5.0-dev"
+if VERSION < v"0.5.0-dev"
+    function namedgetindex(n::NamedArray, index...)
+        a = getindex(n.array, index...)
+        N = length(index)
         keeping = collect(1:N) ## dimensions that are kept after slicing
         i = N
         while i > 1 && !dimkeepingtype(index[i])
             deleteat!(keeping, i)
             i -= 1
         end
-    else
-        keeping = filter(i -> dimkeepingtype(index[i]), 1:N)
-    end
-    if ndims(a) != length(keeping) ## || length(dims) == 1 && ndims(n) > 1
-        warn("Dropped names for ", typeof(n.array), " with index ", index)
-        return a;               # number of dimension changed, this should not happen
-    end
-    newnames = Any[]
-    for d in keeping
-        if dimkeepingtype(index[d])
-            push!(newnames, names(n, d)[index[d]])
-        else
-            push!(newnames, names(n, d)[[index[d]]]) ## for julia-0.4, index[d] could be Integer, but result should be Array
+        if ndims(a) != length(keeping) ## || length(dims) == 1 && ndims(n) > 1
+            warn("Dropped names for ", typeof(n.array), " with index ", index)
+            return a;               # number of dimension changed, this should not happen
         end
+        newnames = Any[]
+        for d in keeping
+            if dimkeepingtype(index[d])
+                push!(newnames, names(n, d)[index[d]])
+            else
+                push!(newnames, names(n, d)[[index[d]]]) ## for julia-0.4, index[d] could be Integer, but result should be Array
+            end
+        end
+        return NamedArray(a, tuple(newnames...), n.dimnames[keeping])
     end
-    return NamedArray(a, tuple(newnames...), n.dimnames[keeping])
+else
+    function namedgetindex(n::NamedArray, index...)
+        a = getindex(n.array, index...)
+        N = length(index)
+        keeping = filter(i -> dimkeepingtype(index[i]), 1:N)
+        if ndims(a) != length(keeping) ## || length(dims) == 1 && ndims(n) > 1
+            warn("Dropped names for ", typeof(n.array), " with index ", index)
+            return a;               # number of dimension changed, this should not happen
+        end
+        newnames = Any[]
+        for d in keeping
+            push!(newnames, names(n, d)[index[d]])
+        end
+        return NamedArray(a, tuple(newnames...), n.dimnames[keeping])
+    end
 end
 
 function indices(n::NamedArray, I::Pair...)
