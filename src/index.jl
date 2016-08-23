@@ -4,7 +4,7 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-import Base.getindex, Base.to_index
+import Base: getindex, to_index
 
 ## ambiguity from abstractarray.jl
 getindex(a::NamedArray, i::Real) = namedgetindex(a, indices(a.dicts[1], i))
