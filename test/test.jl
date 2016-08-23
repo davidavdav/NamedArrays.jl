@@ -35,33 +35,7 @@ if VERSION ≥ v"0.4-dev"
     @test n0[1] == n0.array[1]
 end
 
-print("getindex, ")
-## getindex
-@test [x for x in n] == [x for x in n.array]
-@test n[2,4] == n.array[2,4]
-if VERSION < v"0.4-dev"
-    @test n[2//1,4.0] == n.array[2,4]
-end
-## more indexing
-first = n.array[1,:]
-@test convert(Array, n["one", :]) == first
-@test n[Not("two"), :].array == n.array[1:1,:]
-@test convert(Array, n[1, 2:3]) == n.array[1,2:3]
-if VERSION < v"0.5.0-dev"
-    @test names(n["one", :],1) == ["one"]
-end
-@test names(n[Not("one"), :],1) == ["two"]
-@test names(n[1:1, Not("a")], 2) == ["b", "c", "d"]
-## indexing by pair
-@test n[:B=>"a", :A=>"two"] == n.array[2, 1]
-@test n[:A=>"one", :B=>"d"] == n.array[1, 4]
-## https://github.com/nalimilan/FreqTables.jl/issues/10
-bi = [false, true, false, true] ## Array{Bool}
-for i in 1:2
-    @test n[:, bi].array == n.array[:, bi]
-    @test names(n[:, bi], 2) == ["b", "d"]
-    bi = BitArray(bi)
-end
+include("index.jl")
 
 print("copy, ")
 ## copy
@@ -91,6 +65,11 @@ if VERSION >= v"0.4.0-dev"
 end
 m[:B=>"c", :A=>"one"] = π
 @test m[1,3] == Float64(π)
+m = NamedArray(rand(Int, 10))
+m[2:5] = -1
+m[6:8] = 2:4
+m[[1,9,10]] = 0:2
+@test m == [0, -1, -1, -1, -1, 2, 3, 4, 1, 2]
 
 print("sum, ")
 ## sum
@@ -146,6 +125,7 @@ m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 @test m[1] == m.array[4]
 ## this goes wrong for julia-v0.3
 @test array(m[[4,3,2,1]]) == m.array
+
 print("sort, ")
 m = NamedArray(rand(100))
 for rev in [false, true]

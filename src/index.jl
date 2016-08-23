@@ -7,13 +7,14 @@
 import Base: getindex, to_index
 
 ## ambiguity from abstractarray.jl
-getindex(a::NamedArray, i::Real) = namedgetindex(a, indices(a.dicts[1], i))
-getindex(a::NamedArray, i::AbstractArray) = namedgetindex(a, indices(a.dicts[1], i))
+getindex(n::NamedArray, i::Real) = namedgetindex(n, indices(n.dicts[1], i))
+getindex(n::NamedArray, i::AbstractArray) = namedgetindex(n, indices(n.dicts[1], i))
 ## from subarray.jl
-getindex{T}(a::NamedArray{T,1}, ::Colon) = a
+getindex(n::NamedVector, ::Colon) = n
+getindex(n::NamedArray, ::Colon) = n.array[:]
 
 ## special 0-dimensional case
-getindex{T}(a::NamedArray{T,0}, i::Real) = getindex(a.array, i)
+getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)
 
 getindex(a::NamedArray, i) = namedgetindex(a, indices(a.dicts[1], i))
 getindex(a::NamedArray, i1, i2) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2))
@@ -22,10 +23,7 @@ getindex(a::NamedArray, i1, i2, i3, i4) = namedgetindex(a, indices(a.dicts[1], i
 getindex(a::NamedArray, i1, i2, i3, i4, i5) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5))
 getindex(a::NamedArray, i1, i2, i3, i4, i5, I...) = namedgetindex(a, indices(a.dicts[1], i1), indices(a.dicts[2], i2), indices(a.dicts[3], i3), indices(a.dicts[4], i4), indices(a.dicts[5], i5), [indices(a.dicts[5+i], ind) for (i,ind) in enumerate(I)]...)
 
-## 0.4-dev functions
-if VERSION >= v"0.4.0-dev"
-    getindex(a::NamedArray, it::Base.IteratorsMD.CartesianIndex) = getindex(a.array, it)
-end
+getindex(a::NamedArray, it::Base.IteratorsMD.CartesianIndex) = getindex(a.array, it)
 
 ## indices(::Associative, index) converts any type `index` to Integer
 
@@ -33,11 +31,11 @@ end
 indices{K<:Real,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
 indices{K,V<:Integer}(dict::Associative{K,V}, i::Real) = to_index(i)
 indices{K,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
-if VERSION >= v"0.4.0-dev"
-    ## ambiguity if dict key is CartesionIndex
-    indices{K<:CartesianIndex,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
-    indices(dict::Associative, ci::CartesianIndex) = ci
-end
+
+## ambiguity if dict key is CartesionIndex, this should never happen
+indices{K<:CartesianIndex,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
+indices(dict::Associative, ci::CartesianIndex) = ci
+
 ## multiple indices
 ## the following two lines are partly because of ambiguity
 indices{T<:Integer,V<:Integer}(dict::Associative{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]
