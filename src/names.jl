@@ -6,22 +6,26 @@
 
 import Base.names
 
+## `names` is somewhat loaded, as some of the semantics were transferred tp `fieldnames`
 names(dict::Associative) = collect(keys(dict))
 allnames(a::NamedArray) = [names(dict) for dict in a.dicts]
-names(a::NamedArray, d::Int) = names(a.dicts[d])
+allnames(a::AbstractArray) = [[string(i) for i in 1:size(a, d)] for d in 1:ndims(a)] ## default dimension names
+names(a::NamedArray, d::Integer) = names(a.dicts[d])
 dimnames(a::NamedArray) = [dn for dn in a.dimnames]
-dimnames(a::NamedArray, d::Int) = a.dimnames[d]
+dimnames(a::NamedArray, d::Integer) = a.dimnames[d]
+dimnames(a::AbstractArray) = [letter(i) for i in 1:ndims(a)]
+dimnames(a::AbstractArray, d::Integer) = letter(i)
 
 ## string versions of the above
 strnames(dict::Associative) = map(string, names(dict))
 strnames(a::NamedArray) = [strnames(d) for d in a.dicts]
-strnames(a::NamedArray, d::Int) = strnames(a.dicts[d])
+strnames(a::NamedArray, d::Integer) = strnames(a.dicts[d])
 strdimnames(a::NamedArray) = [string(dn) for dn in a.dimnames]
-strdimnames(a::NamedArray, d::Int) = string(a.dimnames[d])
+strdimnames(a::NamedArray, d::Integer) = string(a.dimnames[d])
 
 
 ## seting names, dimnames
-function setnames!(a::NamedArray, v::Vector, d::Int)
+function setnames!(a::NamedArray, v::Vector, d::Integer)
     size(a.array,d) == length(v) || error("inconsistent vector length")
     eltype(keys(a.dicts[d])) == eltype(v) || error("inconsistent name type")
     ## a.dicts is a tuple, so we need to replace it as a whole...
@@ -36,7 +40,7 @@ function setnames!(a::NamedArray, v::Vector, d::Int)
     a.dicts = tuple(vdicts...)
 end
 
-function setnames!(a::NamedArray, v, d::Int, i::Int)
+function setnames!(a::NamedArray, v, d::Integer, i::Integer)
     @assert 1 <= d <= ndims(a)
     @assert 1 <= i <= size(a, d)
     filter!((k,v) -> v!=i, a.dicts[d]) # remove old name
@@ -46,10 +50,10 @@ end
 function setdimnames!{T,N}(a::NamedArray{T,N}, dn::NTuple{N})
     a.dimnames = dn
 end
-    
+
 setdimnames!(a::NamedArray, dn::Vector) = setdimnames!(a, tuple(dn...))
 
-function setdimnames!{T,N}(a::NamedArray{T,N}, v, d::Int)
+function setdimnames!{T,N}(a::NamedArray{T,N}, v, d::Integer)
     @assert 1 <= d <= N
     vdimnames = Array(Any, N)
     for i=1:N

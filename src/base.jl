@@ -6,7 +6,7 @@
 ## See the file LICENSE.md in this distribution
 
 ## copy
-import Base.copy
+import Base: copy, copy!
 copy{T,N,AT,DT}(a::NamedArray{T,N,AT,DT}) = NamedArray{T,N,AT,DT}(copy(a.array), deepcopy(a.dicts), identity(a.dimnames))
 
 ## from array.jl

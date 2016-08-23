@@ -67,6 +67,8 @@ print("copy, ")
 ## copy
 m = copy(n)
 @test m == n
+copy!(m, n)
+@test m == n
 
 print("setindex, ")
 ## setindex
@@ -119,10 +121,18 @@ end
 print("multi-dimensional, ")
 #multidimensional
 m = NamedArray(rand(2,3,4,3,2,3))
-for i1=1:2 for i2=1:3 for i3=1:4 for i4=1:3 for i5=1:2 for i6=1:3
+for i1=1:2, i2=1:3, i3=1:4, i4=1:3, i5=1:2, i6=1:3
     @test m[i1,i2,i3,i4,i5,i6] == m.array[i1,i2,i3,i4,i5,i6]
     @test m[string(i1), string(i2), string(i3), string(i4), string(i5), string(i6)] == m.array[i1,i2,i3,i4,i5,i6]
-end end end end end end
+end
+m[1, :, 2, :, 2, 3].array == m.array[1, :, 2, :, 2, 3]
+if VERSION >= v"0.5-dev"
+    i = [3 2 4; 1 4 2]
+    @test n[:, i].array == n.array[:, i]
+    @test names(n[:, i], 1) == names(n, 1)
+    @test names(n[:, i], 2) == map(string, 1:2)
+    @test names(n[:, i], 3) == map(string, 1:3)
+end
 
 print("dodgy indices, ")
 ## weird indices
@@ -135,7 +145,7 @@ m[1//4] = 1
 m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 @test m[1] == m.array[4]
 ## this goes wrong for julia-v0.3
-## @test array(m[[4,3,2,1]]) == m.array
+@test array(m[[4,3,2,1]]) == m.array
 print("sort, ")
 m = NamedArray(rand(100))
 for rev in [false, true]

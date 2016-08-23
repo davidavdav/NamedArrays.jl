@@ -59,14 +59,15 @@ namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer,
 namedgetindex(a::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer, I::Integer...) = getindex(a.array, i1, i2, i3, i4, i5, I...)
 
 dimkeepingtype(x) = false
-dimkeepingtype(x::Vector) = true
+dimkeepingtype(x::AbstractArray) = true
 dimkeepingtype(x::Range) = true
-dimkeepingtype(x::BitVector) = true
+dimkeepingtype(x::BitArray) = true
 
 ## namedgetindex collects the elements from the array, and takes care of the index names
 ## `index` is an integer now, or an array of integers, or a cartesianindex
 ## and has been computed by `indices()`
 if VERSION < v"0.5.0-dev"
+    ## in julia pre 0.5, only trailing singleton dimensions are removed
     function namedgetindex(n::NamedArray, index...)
         a = getindex(n.array, index...)
         N = length(index)
@@ -91,19 +92,30 @@ if VERSION < v"0.5.0-dev"
         return NamedArray(a, tuple(newnames...), n.dimnames[keeping])
     end
 else
+    ## in julia post 0.5, all singleton dimensions are removed
     function namedgetindex(n::NamedArray, index...)
         a = getindex(n.array, index...)
         N = length(index)
         keeping = filter(i -> dimkeepingtype(index[i]), 1:N)
-        if ndims(a) != length(keeping) ## || length(dims) == 1 && ndims(n) > 1
+        if ndims(a) < length(keeping) ## || length(dims) == 1 && ndims(n) > 1
             warn("Dropped names for ", typeof(n.array), " with index ", index)
             return a;               # number of dimension changed, this should not happen
         end
         newnames = Any[]
+        newdimnames = []
         for d in keeping
-            push!(newnames, names(n, d)[index[d]])
+            if ndims(index[d]) > 1
+                ## take over the names of the index for this dimension
+                for (name, dimname) in zip(allnames(index[d]), dimnames(index[d]))
+                    push!(newnames, name)
+                    push!(newdimnames, Symbol(string(n.dimnames[d], "_", dimname)))
+                end
+            else
+                push!(newnames, names(n, d)[index[d]])
+                push!(newdimnames, n.dimnames[d])
+            end
         end
-        return NamedArray(a, tuple(newnames...), n.dimnames[keeping])
+        return NamedArray(a, tuple(newnames...), tuple(newdimnames...))
     end
 end
 
