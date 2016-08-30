@@ -53,17 +53,18 @@ end
 
 setdimnames!(a::NamedArray, dn::Vector) = setdimnames!(a, tuple(dn...))
 
-function setdimnames!{T,N}(a::NamedArray{T,N}, v, d::Integer)
-    @assert 1 <= d <= N
+function setdimnames!{T,N}(n::NamedArray{T,N}, v, d::Integer)
+    1 <= d <= N || throw(BoundsError(size(n), d))
     vdimnames = Array(Any, N)
     for i=1:N
         if i==d
             vdimnames[i] = v
         else
-            vdimnames[i] = a.dimnames[i]
+            vdimnames[i] = n.dimnames[i]
         end
     end
-    a.dimnames = tuple(vdimnames...)
+    n.dimnames = tuple(vdimnames...)
 end
 
-defaultnames(n::NamedArray, dim::Integer) = [string(i) for i=1:size(n,dim)]
+defaultnames(a::AbstractArray, dim::Integer) = [string(i) for i=1:size(a, dim)]
+defaultnames(a::AbstractArray) = [defaultnames(d) for d in size(a)]

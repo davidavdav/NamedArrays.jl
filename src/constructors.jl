@@ -8,6 +8,11 @@
 
 @compat letter(i) = string(Char((64+i) % 256))
 
+## helpers for constructing names dictionaries
+defaultnamesdict(names::Vector) = OrderedDict(zip(names, 1:length(names)))
+defaultnamesdict(dim::Integer) = defaultnamesdict([string(i) for i in 1:dim])
+defaultnamesdict(dims::NTuple) = map(defaultnamesdict, dims)
+
 ## disambiguation (Argh...)
 if VERSION ≥ v"0.4-dev"
     NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
@@ -28,13 +33,13 @@ end
 
 ## constructor with array, names and dimnames (dict is created from names)
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
-    dicts = map(names -> OrderedDict(zip(names,1:length(names))), names)
+    dicts = defaultnamesdict(names)
     NamedArray(array, dicts, dimnames)
 end
 
 ## constructor with array, names (dict is created from names), dimnames created as default
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector})
-    dicts = map(names -> OrderedDict(zip(names,1:length(names))), names)
+    dicts = defaultnamesdict(names)
     dimnames = [Symbol(letter(i)) for i=1:length(names)]
     NamedArray(array, dicts, tuple(dimnames...))
 end
@@ -47,7 +52,7 @@ function NamedArray{T,N,VT}(a::AbstractArray{T,N},
     if VT <: OrderedDict
         dicts = tuple(names...)
     else
-        dicts = map(names -> OrderedDict(zip(names,1:length(names))), tuple(names...))
+        dicts = defaultnamesdict(tuple(names...))
     end
     NamedArray(a, dicts, tuple(dimnames...))
 end

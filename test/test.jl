@@ -1,39 +1,13 @@
 ## NamedArrays is loaded by runtests.jl
-using Base.Test
-using DataStructures
-using Compat
 
 print("Starting test, no assertions should fail... ")
 
-print("arithmetic, ")
+include("constructors.jl")
+
 include("arithmetic.jl")
 
 print("convert, ")
 include("convert.jl")
-
-print("construction, ")
-## constructors
-n1 = NamedArray(Complex64, 5, 8)
-n2 = NamedArray(rand(2,3), (["s", "t"],[:a, :b, :c]), ("string", :symbol))
-n = NamedArray(rand(2,4))
-setnames!(n, ["one", "two"], 1)
-setnames!(n, ["a", "b", "c", "d"], 2)
-
-a = [1 2 3; 4 5 6]
-n3 = NamedArray(a, (["a","b"],["C","D","E"]))
-n4 = NamedArray(a, (@compat OrderedDict("a"=>1,"b"=>2), @compat OrderedDict("C"=>1,"D"=>2,"E"=>3)))
-
-@test n3.array == n4.array == a
-@test dimnames(n3) == dimnames(n4) == Any[:A,:B]
-@test names(n3,1) == names(n4,1) == ["a","b"]
-@test names(n3,2) == names(n4,2) == ["C","D","E"]
-
-## 0-dim case #21
-if VERSION ≥ v"0.4-dev"
-    n0 = NamedArray(Array{Int}())
-    @test size(n0) == ()
-    @test n0[1] == n0.array[1]
-end
 
 include("index.jl")
 
@@ -170,6 +144,9 @@ for m in (NamedArray(rand(4)), NamedArray(rand(4,3)))
     @test isapprox(m' * n', m.array' * n')
     @test isapprox(m.array' * n', m.array' * n.array')
 end
+## bug #34
+@test unique(allnames(n * n'))[1] == names(n,1)
+@test unique(allnames(n' * n))[1] == names(n,2)
 
 print("re-arrange, ")
 ## rearranging

@@ -1,4 +1,13 @@
+## (c) 2016 David A. van Leeuwen
+
+## Unit tests for ../src/arithmetic.jl
+
+## This code is licensed under the MIT license
+## See the file LICENSE.md in this distribution
+
 ## test arithmetic operations
+print("arithmetic, ")
+
 x = NamedArray(randn(5, 10))
 @test (-x).array == -(x.array)
 for op in (:+, :-, :*, :.+, :.-, :.*, :./)

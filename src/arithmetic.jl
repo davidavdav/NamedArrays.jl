@@ -65,10 +65,40 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
     end
 end
 
+import Base: A_mul_B!, A_mul_Bc!, A_mul_Bc, A_mul_Bt!, A_mul_Bt, Ac_mul_B, Ac_mul_B!, Ac_mul_Bc, Ac_mul_Bc!, At_mul_B, At_mul_B!, At_mul_Bt, At_mul_Bt!
+
+if VERSION >= v"0.5.0-dev" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
+    ## Assume dimensions/names are correct
+    for op in (:A_mul_B!, :A_mul_Bc!, :A_mul_Bt!, :Ac_mul_B!, :Ac_mul_Bc!, :At_mul_B!, :At_mul_Bt!)
+        @eval ($op)(C::NamedMatrix, A::AbstractMatrix, B::AbstractMatrix) = ($op)(C.array, A, array, B.array)
+    end
+end
+
+for op in (:A_mul_Bc, :A_mul_Bt)
+    @eval ($op)(A::NamedMatrix, B::NamedMatrix) = NamedArray(($op)(A.array, B.array), (A.dicts[1], B.dicts[1]), (A.dimnames[1], B.dimnames[1]))
+    for T in [Union{Base.LinAlg.QRCompactWYQ, Base.LinAlg.QRPackedQ}, StridedMatrix, AbstractMatrix] ## v0.4 ambiguity-hell
+        @eval ($op)(A::NamedMatrix, B::$T) = NamedArray(($op)(A.array, B), (A.dicts[1], defaultnamesdict(size(B,1))), (A.dimnames[1], :B))
+        @eval ($op)(A::$T, B::NamedMatrix) = NamedArray(($op)(A, B.array), (defaultnamesdict(size(A,1)), B.dicts[1]), (:A, B.dimnames[1]))
+    end
+end
+for op in (:Ac_mul_B, :At_mul_B)
+    @eval ($op)(A::NamedMatrix, B::NamedMatrix) = NamedArray(($op)(A.array, B.array), (A.dicts[2], B.dicts[2]), (A.dimnames[2], B.dimnames[2]))
+    for T in [StridedMatrix, AbstractMatrix] ## v0.4 ambiguity-hell
+        @eval ($op)(A::NamedMatrix, B::$T) = NamedArray(($op)(A.array, B), (A.dicts[2], defaultnamesdict(size(B,2))), (A.dimnames[2], :B))
+        @eval ($op)(A::$T, B::NamedMatrix) = NamedArray(($op)(A, B.array), (defaultnamesdict(size(A,2)), B.dicts[2]), (:A, B.dimnames[2]))
+    end
+end
+for op in (:Ac_mul_Bc, :At_mul_Bt)
+    @eval ($op)(A::NamedMatrix, B::NamedMatrix) = NamedArray(($op)(A.array, B.array), (A.dicts[2], B.dicts[1]), (A.dimnames[2], B.dimnames[1]))
+    for T in [StridedMatrix, AbstractMatrix] ## v0.4 ambiguity-hell
+        @eval ($op)(A::NamedMatrix, B::$T) = NamedArray(($op)(A.array, B), (A.dicts[2], defaultnamesdict(size(B,1))), (A.dimnames[2], :B))
+        @eval ($op)(A::$T, B::NamedMatrix) = NamedArray(($op)(A, B.array), (defaultnamesdict(size(A,2)), B.dicts[1]), (:A, B.dimnames[1]))
+    end
+end
+
 import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfact, qrfact!, qrfact, eigfact!, eigvals!,
     hessfact, hessfact!, schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!, scale,
     cond, kron, linreg, lyap, sylvester, isposdef
-
 
 ## matmul
 ## ambiguity, this can somtimes be a pain to resolve...
@@ -79,17 +109,21 @@ for t in (:Tridiagonal, :AbstractTriangular, :Givens, :Bidiagonal)
     @eval *(x::$t, y::NamedVector) = x*y.array
 end
 
+## There is no such thing as a A_mul_B
 ## Named * Named
-*(x::NamedMatrix, y::NamedMatrix) = NamedArray(x.array*y.array, (names(x,1),names(y,2)), (x.dimnames[1], y.dimnames[2]))
-*(x::NamedMatrix, y::NamedVector) = NamedArray(x.array*y.array, (names(x,1),), (x.dimnames[1],))
-
+*(A::NamedMatrix, B::NamedMatrix) = NamedArray(A.array * B.array, (A.dicts[1], B.dicts[2]), (A.dimnames[1], B.dimnames[2]))
+*(A::NamedMatrix, B::NamedVector) = NamedArray(A.array * B.array, (A.dicts[1],), (B.dimnames[1],))
 ## Named * Abstract
-*(x::NamedMatrix, y::AbstractMatrix) = NamedArray(x.array*y, (names(x,1),[string(i) for i in 1:size(y,2)]), x.dimnames)
-*(x::AbstractMatrix, y::NamedMatrix) = NamedArray(x*y.array, ([string(i) for i in 1:size(x,1)],names(y,2)), y.dimnames)
-*(x::NamedMatrix, y::AbstractVector) = NamedArray(x.array*y, (names(x,1),), (x.dimnames[1],))
-*(x::AbstractMatrix, y::NamedVector) = x*y.array
+*(A::NamedMatrix, B::AbstractMatrix) = NamedArray(A.array * B, (A.dicts[1], defaultnamesdict(size(B,2))), A.dimnames)
+*(A::AbstractMatrix, B::NamedMatrix) = NamedArray(A * B.array, (defaultnamesdict(size(A,1)), B.dicts[2]), B.dimnames)
+*(A::NamedMatrix, B::AbstractVector) = NamedArray(A.array * B, (A.dicts[1],), (A.dimnames[1],))
+*(A::AbstractMatrix, B::NamedVector) = A * B.array
+
+if false
 
 Base.Ac_mul_Bc!(A::Matrix, B::NamedMatrix, C::Matrix) = Ac_mul_Bc!(A, B.array, C)
+
+end
 
 ## \ --- or should we overload A_div_B?
 ## Named \ Named
