@@ -160,7 +160,7 @@ function show(io::IO, v::NamedVector, maxnrow::Int)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, v.array[i]) for i=totrowrange]
     colwidth = maximum(map(length,s))
-    rownamewidth = maximum(map(length, rownames))
+    rownamewidth = max(maximum(map(length, rownames)), 1+length(strdimnames(v)[1]))
     ## header
     println(io, string(leftalign(strdimnames(v, 1), rownamewidth), " │ "))
     print(io, "─"^(rownamewidth+1), "┼", "─"^(colwidth+1))
