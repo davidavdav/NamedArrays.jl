@@ -25,6 +25,7 @@ n7 = NamedArray(a)
 
 n1 = NamedArray(Complex64, 5, 8)
 n2 = NamedArray(a, (["s", "t"],[:a, :b, :c]), ("string", :symbol))
+
 n = NamedArray(rand(2,4))
 setnames!(n, ["one", "two"], 1)
 setnames!(n, ["a", "b", "c", "d"], 2)

@@ -28,24 +28,30 @@ end
 ## ndims==1 is dispatched below
 function show(io::IO, a::NamedArray)
     print(io, summary(a))
+    s = size(a)
     if ndims(a) == 2
-        (nr,nc) = size(a)
         maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
         println(io)
-        show(io, a, min(maxnrow, nr))
-    elseif ndims(a) != 0
-        s = size(a)
+        show(io, a, min(maxnrow, s[1]))
+    elseif ndims(a) != 0 ## effectively > 2
         nlinesneeded = prod(s[3:end]) * (s[1] + 3) + 1
         if nlinesneeded > displaysize(io)[1]
             maxnrow = clamp((displaysize(io)[1] - 3) ÷ (prod(s[3:end])) - 3, 3, s[1])
         else
             maxnrow = s[1]
         end
+        maxrepeat = displaysize(io)[1] ÷ (maxnrow + 4)
+        i = 1
         for idx in CartesianRange(size(a)[3:end])
+            if i > maxrepeat
+                print(io, "\n⋮")
+                break
+            end
             cartnames = [string(strdimnames(a, 2+i), "=", strnames(a, 2+i)[ind]) for (i, ind) in enumerate(idx.I)]
             println(io, "\n")
             println(io, "[:, :, ", join(cartnames, ", "), "] =")
             show(io, a[:, :, idx], maxnrow)
+            i += 1
         end
     end
 end
