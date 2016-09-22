@@ -7,9 +7,9 @@
 
 ## this does ' as well '
 import Base.ctranspose
-function ctranspose(a::NamedArray) 
-    @assert ndims(a)<=2
-    if ndims(a)==1
+function ctranspose(a::NamedArray)
+    ndims(a) ≤ 2 || error("Number of dimension must be ≤ 2")
+    if ndims(a) == 1
         NamedArray(a.array', (["1"], names(a,1)), ("'", a.dimnames[1]))
     else
         NamedArray(a.array', reverse(a.dicts), reverse(a.dimnames))
@@ -50,24 +50,24 @@ import Base.vec
 vec(a::NamedArray) = vec(a.array)
 
 import Base.rotl90, Base.rot180, Base.rotr90
-rotr90(a::NamedArray) = transpose(flipud(a))
-rotl90(a::NamedArray) = transpose(fliplr(a))
-rot180(a::NamedArray) = fliplr(flipud(a))
+rotr90(n::NamedArray) = transpose(flipdim(n, 1))
+rotl90(n::NamedArray) = transpose(flipdim(n, 2))
+rot180(n::NamedArray) = NamedArray(rot180(n.array), tuple([reverse(name) for name in allnames(n)]...), n.dimnames)
 
-import Base.nthperm, Base.nthperm!, Base.permute!, Base.ipermute!, Base.shuffle, Base.shuffle!, Base.reverse, Base.reverse!
+import Combinatorics.nthperm, Combinatorics.nthperm!, Base.permute!, Base.ipermute!, Base.shuffle, Base.shuffle!, Base.reverse, Base.reverse!
 function nthperm(v::NamedVector, n::Int)
     newnames = nthperm(names(v,1), n)
     NamedArray(nthperm(v.array,n), (newnames,), v.dimnames)
 end
-function nthperm!(v::NamedVector, n::Int) 
+function nthperm!(v::NamedVector, n::Int)
     setnames!(v, nthperm(names(v,1), n), 1)
     nthperm!(v.array, n)
-    v
+    return v
 end
 function permute!(v::NamedVector, perm::AbstractVector)
     setnames!(v, names(v,1)[perm], 1)
     permute!(v.array, perm)
-    v
+    return v
 end
 ipermute!(v::NamedVector, perm::AbstractVector) = permute!(v, invperm(perm))
 shuffle(v::NamedVector) = permute!(copy(v), randperm(length(v)))
@@ -78,4 +78,3 @@ function reverse!(v::NamedVector, start=1, stop=length(v))
     reverse!(v.array, start, stop)
     v
 end
-           

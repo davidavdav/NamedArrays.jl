@@ -17,9 +17,7 @@ for i in 1:5
 	end
 end
 
-n = NamedArray(rand(2,4))
-setnames!(n, ["one", "two"], 1)
-setnames!(n, ["a", "b", "c", "d"], 2)
+include("init-namedarrays.jl")
 
 @test n[:] == n.array[:]
 n1 = NamedArray(rand(10))
