@@ -1,6 +1,8 @@
 ## (c) 2016 David A. van Leeuwen
 ## tests for ../src/index.jl
 
+import Base.indices
+
 print("getindex, ")
 ## getindex
 ## Test Integer indices up to 5 dimensions, as well as CartesianIndexes

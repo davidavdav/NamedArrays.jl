@@ -45,3 +45,7 @@ if VERSION ≥ v"0.4-dev"
     @test size(n0) == ()
     @test n0[1] == n0.array[1]
 end
+
+## Calling constructors through convert, #38
+@test convert(NamedArray, n.array) == NamedArray(n.array)
+@test convert(NamedVector, [1, 2, 3]) == NamedArray([1, 2, 3])
