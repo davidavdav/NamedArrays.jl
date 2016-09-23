@@ -17,6 +17,8 @@ m = copy(n)
 @test m == n
 copy!(m, n)
 @test m == n
+m = deepcopy(n)
+@test m == n
 
 print("setindex, ")
 ## setindex
@@ -148,44 +150,7 @@ end
 @test unique(allnames(n * n'))[1] == names(n,1)
 @test unique(allnames(n' * n))[1] == names(n,2)
 
-print("re-arrange, ")
-## rearranging
-@test n'.array == n.array'
-for dim=1:2
-    @test flipdim(n,dim).array == flipdim(n.array,dim)
-    @test names(flipdim(n,dim),dim) == reverse(names(n,dim))
-end
-
-p = randperm(ndims(n))
-@test permutedims(n, p).array == permutedims(n.array, p)
-
-v = NamedArray(rand(10))
-p = rand(1:factorial(length(v)))
-@test nthperm(v,p).array == nthperm(v.array, p)
-@test names(nthperm(v,p),1) == nthperm(names(v,1), p)
-vv = copy(v)
-nthperm!(vv, p)
-@test vv == nthperm(v, p)
-
-p = randperm(length(v))
-vv = copy(v)
-permute!(vv, p)
-a = copy(v.array)
-nm = copy(names(v,1))
-permute!(a, p)
-permute!(nm, p)
-@test vv.array == a
-@test names(vv,1) == nm
-ipermute!(vv, p)
-@test vv == v
-
-vv = shuffle(v)
-shuffle!(vv)
-@test reverse(v).array == reverse(v.array)
-@test names(reverse(v),1) == reverse(names(v,1))
-vv = copy(v)
-reverse!(vv)
-@test vv == reverse(v)
+include("rearrange.jl")
 
 if VERSION >= v"0.4.0-dev"
     print("eachindex, ")

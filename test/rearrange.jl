@@ -46,4 +46,33 @@ for i in 1:10
 	p = rand(1:factorial(length(v)))
 	@test nthperm(v, p).array == nthperm(v.array, p)
 	@test names(nthperm(v, p), 1) == nthperm(names(v, 1), p)
+	v1 = deepcopy(v)
+	a1 = deepcopy(v.array)
+	nthperm!(v1, p)
+	nthperm!(a1, p)
+	@test v1.array == a1
+	perm = nthperm(collect(1:length(v)), p)
+	v1 = deepcopy(v)
+	a1 = deepcopy(v.array)
+	permute!(v1, perm)
+	permute!(a1, perm)
+	name = copy(names(v, 1))
+	permute!(name, perm)
+	@test v1.array == a1
+	@test names(v1, 1) == name
+	ipermute!(v1, perm)
+	@test v1.array == v.array
+	@test names(v1, 1) == names(v, 1)
+	vs = shuffle(v)
+	@test vs[sortperm(names(vs, 1))] == v
+	shuffle!(v1)
+	@test v1[sortperm(names(v1, 1))] == v
+	start, stop = sort(perm[1:2])
+	r = reverse(v, start, stop)
+	@test r.array == reverse(v.array, start, stop)
+	@test names(r, 1) == reverse(names(v, 1), start, stop)
+	r = deepcopy(v)
+	reverse!(r, start, stop)
+	@test r.array == reverse(v.array, start, stop)
+	@test names(r, 1) == reverse(names(v, 1), start, stop)
 end
