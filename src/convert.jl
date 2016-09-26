@@ -8,7 +8,7 @@
 
 import Base: convert, promote_rule
 
-## from array to namedaraay, the fallback constructor
+## from array to namedarray, the fallback constructor
 convert(::Type{NamedArray}, a::AbstractArray) = NamedArray(a)
 convert(::Type{NamedVector}, a::AbstractArray) = NamedArray(a)
 

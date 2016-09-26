@@ -58,19 +58,12 @@ end
 -{T1<:Number,T2<:Number}(x::NamedVector{T1}, y::Range{T2}) = NamedArray(x.array - y, x.dicts, x.dimnames)
 -{T1,T2}(x::NamedArray{T1}, y::Range{T2}) = NamedArray(x.array - y, x.dicts, x.dimnames)
 
-## NamedArray, AbstractArray, same dimensions
-for op in (:+, :-, :.+, :.-, :.*, :./)
-    @eval begin
-        ($op)(x::NamedArray, y::AbstractArray) = NamedArray(($op)(x,y), x.dicts, x.dimnames)
-    end
-end
-
 import Base: A_mul_B!, A_mul_Bc!, A_mul_Bc, A_mul_Bt!, A_mul_Bt, Ac_mul_B, Ac_mul_B!, Ac_mul_Bc, Ac_mul_Bc!, At_mul_B, At_mul_B!, At_mul_Bt, At_mul_Bt!
 
 if VERSION >= v"0.5.0-dev" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
     ## Assume dimensions/names are correct
     for op in (:A_mul_B!, :A_mul_Bc!, :A_mul_Bt!, :Ac_mul_B!, :Ac_mul_Bc!, :At_mul_B!, :At_mul_Bt!)
-        @eval ($op)(C::NamedMatrix, A::AbstractMatrix, B::AbstractMatrix) = ($op)(C.array, A, array, B.array)
+        @eval ($op)(C::NamedMatrix, A::AbstractMatrix, B::AbstractMatrix) = ($op)(C.array, A, B)
     end
 end
 
@@ -118,12 +111,6 @@ end
 *(A::AbstractMatrix, B::NamedMatrix) = NamedArray(A * B.array, (defaultnamesdict(size(A,1)), B.dicts[2]), B.dimnames)
 *(A::NamedMatrix, B::AbstractVector) = NamedArray(A.array * B, (A.dicts[1],), (A.dimnames[1],))
 *(A::AbstractMatrix, B::NamedVector) = A * B.array
-
-if false
-
-Base.Ac_mul_Bc!(A::Matrix, B::NamedMatrix, C::Matrix) = Ac_mul_Bc!(A, B.array, C)
-
-end
 
 ## \ --- or should we overload A_div_B?
 ## Named \ Named
