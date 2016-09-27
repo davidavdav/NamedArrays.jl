@@ -14,9 +14,10 @@ import Base: +, -, *, /, .+, .-, .*, ./, \
 .*{N}(n::NamedArray{Bool,N}, b::BitArray{N}) = NamedArray(n.array .* b, n.dicts, n.dimnames)
 .*{N}(b::BitArray{N}, n::NamedArray{Bool,N}) = n .* b
 
-## disambiguation (Argh...)
+# disambiguation (Argh...)
 for op in (:+, :-)
-    @eval ($op){T1<:Number,T2<:Number}(x::Range{T1}, y::NamedVector{T2}) = NamedArray(($op)(x,y.array), y.dicts, y.dimnames)
+    @eval ($op){T1<:Number,T2<:Number}(x::Range{T1}, y::NamedVector{T2}) = NamedArray(($op)(x, y.array), y.dicts, y.dimnames)
+    @eval ($op){T1<:Number,T2<:Number}(x::NamedVector{T1}, y::Range{T2}) = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
 end
 
 for op in (:+, :-, :.+, :.-, :.*, :./)
@@ -54,10 +55,6 @@ end
 /{T1<:Number,T2<:Number}(x::NamedArray{T1}, y::T2) = NamedArray(x.array / y, x.dicts, x.dimnames)
 \{T1<:Number,T2<:Number}(x::T1, y::NamedArray{T2}) = NamedArray(x \ y.array, y.dicts, y.dimnames)
 
-## disambiguation
--{T1<:Number,T2<:Number}(x::NamedVector{T1}, y::Range{T2}) = NamedArray(x.array - y, x.dicts, x.dimnames)
--{T1,T2}(x::NamedArray{T1}, y::Range{T2}) = NamedArray(x.array - y, x.dicts, x.dimnames)
-
 import Base: A_mul_B!, A_mul_Bc!, A_mul_Bc, A_mul_Bt!, A_mul_Bt, Ac_mul_B, Ac_mul_B!, Ac_mul_Bc, Ac_mul_Bc!, At_mul_B, At_mul_B!, At_mul_Bt, At_mul_Bt!
 
 if VERSION >= v"0.5.0-dev" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
@@ -89,8 +86,8 @@ for op in (:Ac_mul_Bc, :At_mul_Bt)
     end
 end
 
-import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfact, qrfact!, qrfact, eigfact!, eigvals!,
-    hessfact, hessfact!, schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!, scale,
+import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfact, qrfact!, qrfact, eigfact!, eigfact, eigvals!,
+    eigvals, hessfact, hessfact!, schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!, scale,
     cond, kron, linreg, lyap, sylvester, isposdef
 
 ## matmul
@@ -147,12 +144,10 @@ end
 ## tril, triu
 Base.tril!(n::NamedMatrix, k::Integer) = (tril!(n.array, k); n)
 Base.triu!(n::NamedMatrix, k::Integer) = (triu!(n.array, k); n)
-Base.triu(n::NamedMatrix, k::Integer) = triu!(copy(n), k)
-Base.tril(n::NamedMatrix, k::Integer) = tril!(copy(n), k)
 
 ## LU factorization
-function lufact!{T}(n::NamedArray{T}; pivot=true)
-    luf = lufact!(n.array; pivot=pivot)
+function lufact!{T}(n::NamedArray{T}, pivot::Union{Type{Val{false}}, Type{Val{true}}} = Val{true})
+    luf = lufact!(n.array, pivot)
     LU{T,typeof(n),}(n, luf.ipiv, luf.info)
 end
 
@@ -184,50 +179,46 @@ function Base.getindex{T,DT,AT}(A::LU{T,NamedArray{T,2,AT,DT}}, d::Symbol)
     throw(KeyError(d))
 end
 
-## TODO: wait until Cholesky and CholeskyPivoted contain abstractmatrix types
-function cholfact!{T<:BlasFloat}(n::NamedArray{T}, uplo::Symbol=:U; pivot=false, tol=0.0)
-    uplochar = string(uplo)[1]
-    if pivot
-        A, piv, rank, info = LAPACK.pstrf!(uplochar, n.array, tol)
-        return CholeskyPivoted{T}(A, uplochar, piv, rank, tol, info)
-    else
-        C, info = LAPACK.potrf!(uplochar, n.array)
-        return info==0 ?  Cholesky(C, uplochar) : throw(PosDefException(info))
-    end
+
+function cholfact!{T<:BlasFloat}(n::NamedArray{T}, uplo::Symbol=:U)
+    ishermitian(n) || LinAlg.non_hermitian_error("cholfact!")
+    return cholfact!(Hermitian(n, uplo))
 end
 
-cholfact{T<:BlasFloat}(n::NamedArray{T}, uplo::Symbol=:U; pivot=false, tol=0.0) = cholfact!(copy(n), uplo, pivot=pivot, tol=tol)
+cholfact{T<:BlasFloat}(n::NamedArray{T}, uplo::Symbol=:U) = cholfact!(copy(n), uplo)
 
 ## ldlt skipped
 
-## TODO: Wait for factorization.jl to change type of QR: AbstractMatrix
 ## from factorization
-qrfact!{T<:BlasFloat}(n::NamedMatrix{T}; pivot=false) = pivot ? QRPivoted{T}(LAPACK.geqp3!(n.array)...) : QRCompactWY(LAPACK.geqrt!(n.array, min(minimum(size(A)), 36))...)
-qrfact{T<:Base.LinAlg.BlasFloat}(n::NamedMatrix{T}; pivot=false) = qrfact!(copy(n.array),pivot=pivot)
+function qrfact!{T<:BlasFloat}(n::NamedMatrix{T}, pivot::Union{Type{Val{false}}, Type{Val{true}}} = Val{false})
+    qr = qrfact!(n.array, pivot)
+    LinAlg.QRCompactWY(NamedArray(qr.factors, n.dicts, n.dimnames), qr.T)
+end
+
+qrfact{T<:BlasFloat}(n::NamedMatrix{T}, pivot::Union{Type{Val{false}}, Type{Val{true}}} = Val{false}) = qrfact!(copy(n), pivot)
 
 eigfact!(n::NamedMatrix; permute::Bool=true, scale::Bool=true) = eigfact!(n.array, permute=permute, scale=scale)
+eigfact(n::NamedMatrix; permute::Bool=true, scale::Bool=true) = eigfact!(copy(n.array), permute=permute, scale=scale)
 
 eigvals!(n::NamedMatrix; permute::Bool=true, scale::Bool=true) = eigvals!(n.array, permute=permute, scale=scale)
+eigvals(n::NamedMatrix; permute::Bool=true, scale::Bool=true) = eigvals!(copy(n.array), permute=permute, scale=scale)
 
 hessfact!(n::NamedMatrix) = hessfact!(n.array)
+hessfact(n::NamedMatrix) = hessfact(copy(n.array))
 
 schurfact!(n::NamedMatrix) = schurfact!(n.array)
-schurfact(n::NamedMatrix) = schurfact!(copy(n))
+schurfact(n::NamedMatrix) = schurfact!(copy(n.array))
 schurfact(A::NamedMatrix, B::AbstractMatrix) = schurfact!(A.array, B)
 
 svdfact!(n::NamedMatrix; thin::Bool=true) = svdfact!(n.array; thin=thin)
-svdfact{T<:BlasFloat}(A::NamedMatrix{T};thin=true) = svdfact!(copy(A),thin=thin)
+svdfact{T<:BlasFloat}(A::NamedMatrix{T}; thin=true) = svdfact!(copy(A), thin=thin)
 
 svdvals!(n::NamedArray) = svdvals!(n.array)
-svdvals(n::NamedArray) = svdvals(n.array)
+svdvals(n::NamedArray) = svdvals(copy(n.array))
 
 diag(n::NamedMatrix) = NamedArray(diag(n.array), n.dicts[1:1], n.dimnames[1:1])
 
 diagm(n::NamedVector) = NamedArray(diagm(n.array), n.dicts[[1,1]], n.dimnames[[1,1]])
-
-scale!(C::NamedMatrix, b::AbstractVector, A::AbstractMatrix) = (scale!(C.array, b, A); C)
-scale(A::NamedMatrix, b::AbstractVector) = NamedArray(scale(A.array, b), A.dicts, A.dimnames)
-scale(b::AbstractVector, A::NamedMatrix) = NamedArray(scale(b, A.array), A.dicts, A.dimnames)
 
 # rank, vecnorm, norm, condskeel, trace, det, logdet OK
 cond(n::NamedArray) = cond(n.array)
@@ -249,8 +240,7 @@ function kron(a::NamedArray, b::NamedArray)
     NamedArray(kron(a.array, b.array), tuple(n...), tuple(dn...))
 end
 
-linreg(x::NamedVecOrMat, y::AbstractVector) = linreg(x.array, y)
-linreg(x::NamedVecOrMat, y::AbstractVector, w::AbstractVector) = linreg(x.array, y, w)
+# linreg(x::NamedVector, y::AbstractVector) = linreg(x.array, y)
 
 lyap(A::NamedMatrix, C::AbstractMatrix) = NamedArray(lyap(A.array,C), A.dicts, A.dimnames)
 

@@ -135,21 +135,6 @@ for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos,
     @eval @test ($f)(n).array == ($f)(n.array)
 end
 
-print("matmul, ")
-## matmul
-for m in (NamedArray(rand(4)), NamedArray(rand(4,3)))
-    m * m'
-    m' * m
-    @test n * m == n * m.array == n.array * m == n.array * m.array
-    ## the first expression dispatches Ac_mul_Bc!:
-    @test isapprox(m' * n.array', m' * n')
-    @test isapprox(m' * n', m.array' * n')
-    @test isapprox(m.array' * n', m.array' * n.array')
-end
-## bug #34
-@test unique(allnames(n * n'))[1] == names(n,1)
-@test unique(allnames(n' * n))[1] == names(n,2)
-
 include("rearrange.jl")
 
 if VERSION >= v"0.4.0-dev"
