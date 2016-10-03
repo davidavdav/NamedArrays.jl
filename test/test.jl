@@ -2,14 +2,17 @@
 
 print("Starting test, no assertions should fail... ")
 
+include("base.jl")
+
 include("constructors.jl")
 
 include("arithmetic.jl")
 
-print("convert, ")
 include("convert.jl")
 
 include("index.jl")
+
+include("keepnames.jl")
 
 print("copy, ")
 ## copy
@@ -118,14 +121,6 @@ for rev in [false, true]
     end
 end
 
-print("hcat, ")
-letters = [string(@compat Char(96+i)) for i=1:26]
-m = NamedArray(rand(10), (letters[1:10],))
-m2 = NamedArray(rand(10), (letters[1:10],))
-mm = hcat(m, m2)
-@test mm.array == hcat(m.array, m2.array)
-@test names(mm,1) == names(m,1)
-
 print("broadcast, ")
 @test broadcast(-, n, mean(n,1)).array == broadcast(-, n.array, mean(n.array,1))
 
@@ -147,21 +142,7 @@ end
 
 include("matrixops.jl")
 
-println("show")
-if VERSION >= v"0.4.0-dev"
-    println(NamedArray(Array{Int}()))
-end
-println(NamedArray([]))
-println(n)
-zo = [0,1]
-println(NamedArray(rand(2,2,2), (zo, zo, zo), ("base", "zero", "indexing")))
-for ndim in 1:5
-    println(NamedArray(rand(fill(2,ndim)...)))
-end
-## various singletons
-println(NamedArray(rand(1,2,2)))
-println(NamedArray(rand(2,1,2)))
-println(NamedArray(rand(2,2,1)))
+include("show.jl")
 
 println("done!")
 

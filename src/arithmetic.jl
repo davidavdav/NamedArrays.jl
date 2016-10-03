@@ -40,8 +40,8 @@ end
 ## disambiguate
 for op in (:+, :-)
     @eval begin
-        ($op)(x::NamedArray{Bool}, y::Bool) = NamedArray(($op)(x.array, y), x.dimnames, x.dicts)
-        ($op)(x::Bool, y::NamedArray{Bool}) = NamedArray(($op)(x, y.array), y.dimnames, y.dicts)
+        ($op)(x::NamedArray{Bool}, y::Bool) = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
+        ($op)(x::Bool, y::NamedArray{Bool}) = NamedArray(($op)(x, y.array), y.dicts, y.dimnames)
     end
 end
 
@@ -94,7 +94,7 @@ import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfa
 ## ambiguity, this can somtimes be a pain to resolve...
 *{Tx,TiA,Ty}(x::SparseMatrixCSC{Tx,TiA},y::NamedMatrix{Ty}) = x*y.array
 *{Tx,S,Ty}(x::SparseMatrixCSC{Tx,S},y::NamedVector{Ty}) = x*y.array
-for t in (:Tridiagonal, :AbstractTriangular, :Givens, :Bidiagonal)
+for t in (:Tridiagonal, :(LinAlg.AbstractTriangular), :Givens, :Bidiagonal)
     @eval *(x::$t, y::NamedMatrix) = NamedArray(x*y.array, ([string(i) for i in 1:size(x,1)],names(y,2)), y.dimnames)
     @eval *(x::$t, y::NamedVector) = x*y.array
 end
@@ -123,8 +123,8 @@ end
 ## Abstract \ Named
 ## ambiguity
 \{Tx<:Number,Ty<:Number}(x::Diagonal{Tx}, y::NamedVector{Ty}) = x \ y.array
-@compat \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},AbstractTriangular{Tx}}, y::NamedVector{Ty}) = x \ y.array
-@compat \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},AbstractTriangular{Tx}}, y::NamedMatrix{Ty}) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
+@compat \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedVector{Ty}) = x \ y.array
+@compat \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedMatrix{Ty}) = NamedArray(x \ y.array, (defaultnamesdict(size(x,1)), y.dicts[2]), (:A, y.dimnames[2]))
 if VERSION >= v"0.4.0-dev"
     \(x::Bidiagonal,y::NamedVector) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
     \(x::Bidiagonal,y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
@@ -208,7 +208,8 @@ hessfact(n::NamedMatrix) = hessfact(copy(n.array))
 
 schurfact!(n::NamedMatrix) = schurfact!(n.array)
 schurfact(n::NamedMatrix) = schurfact!(copy(n.array))
-schurfact(A::NamedMatrix, B::AbstractMatrix) = schurfact!(A.array, B)
+schurfact(A::NamedMatrix, B::AbstractMatrix) = schurfact(A.array, B)
+schurfact!(A::NamedMatrix, B::AbstractMatrix) = schurfact!(A.array, B)
 
 svdfact!(n::NamedMatrix; thin::Bool=true) = svdfact!(n.array; thin=thin)
 svdfact{T<:BlasFloat}(A::NamedMatrix{T}; thin=true) = svdfact!(copy(A), thin=thin)

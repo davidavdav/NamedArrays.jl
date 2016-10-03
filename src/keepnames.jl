@@ -6,19 +6,45 @@
 ## See the file LICENSE.md in this distribution
 
 # Keep names for consistently named vectors, or drop them
-function Base.hcat{T}(V::NamedVector{T}...)
+function Base.hcat(N::NamedVecOrMat...)
     keepnames=true
-    V1=V[1]
-    firstnames = names(V1,1)
-    for i=2:length(V)
-        keepnames &= names(V[i],1)==firstnames
+    N1=N[1]
+    firstnames = names(N1,1)
+    for i=2:length(N)
+        keepnames &= names(N[i],1)==firstnames
     end
-    a = hcat(map(a -> a.array, V)...)
+    a = hcat(map(a -> a.array, N)...)
     if keepnames
-        colnames = [string(i) for i=1:size(a,2)]
-        NamedArray(a, (firstnames, colnames), (V1.dimnames[1], "hcat"))
+        colnames = defaultnamesdict(size(a,2))
+        NamedArray(a, (N1.dicts[1], colnames), (N1.dimnames[1], :hcat))
     else
         NamedArray(a)
+    end
+end
+
+function Base.vcat(N::NamedMatrix...)
+    keepnames=true
+    N1=N[1]
+    firstnames = names(N1,2)
+    for i=2:length(N)
+        keepnames &= names(N[i],2)==firstnames
+    end
+    a = vcat(map(a -> a.array, N)...)
+    if keepnames
+        rownames = defaultnamesdict(size(a,1))
+        NamedArray(a, (rownames, N1.dicts[2]), (:vcat, N1.dimnames[2]))
+    else
+        NamedArray(a)
+    end
+end
+
+function Base.vcat(N::NamedVector...)
+    a = vcat(map(n -> n.array, N)...)
+    anames = vcat(map(n -> names(n, 1), N)...)
+    if length(unique(anames)) == length(a)
+        return NamedArray(a, (anames,), (:vcat,))
+    else
+        return NamedArray(a, (defaultnamesdict(length(a)),), (:vcat,))
     end
 end
 

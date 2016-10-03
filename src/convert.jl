@@ -6,7 +6,7 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-import Base: convert, promote_rule
+import Base: convert
 
 ## from array to namedarray, the fallback constructor
 convert(::Type{NamedArray}, a::AbstractArray) = NamedArray(a)
@@ -20,11 +20,12 @@ array(n::NamedArray) = n.array
 
 ## to other type
 convert{T}(::Type{NamedArray{T}}, n::NamedArray) = NamedArray(convert(Array{T}, n.array), n.dicts, n.dimnames)
-function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}}, ::Type{NamedArray{T2,N}})
+
+#function promote_rule{T1<:Real,T2<:Real,N}(::Type{Array{T1,N}}, ::Type{NamedArray{T2,N}})
 #    println("my rule")
-    t = promote_type(T1,T2)
-    Array{t,N}
-end
+#    t = promote_type(T1,T2)
+#    Array{t,N}
+#end
 
 ## convenience functions
 ##if VERSION < v"0.4-dev"

@@ -44,9 +44,22 @@ end
 
 include("init-namedarrays.jl")
 
+for op in [:.*, :+, .-]
+	@eval for b in NamedArray[bv, bm] ## NamedArray[] for julia-0.4
+		@test (($op)(b, BitArray(b))).array == ($op)(b.array, BitArray(b))
+		@test allnames(($op)(b, BitArray(b))) == allnames(b)
+		@test ($op)(BitArray(b), b).array == ($op)(BitArray(b), b.array)
+		@test allnames(($op)(BitArray(b), b)) == allnames(b)
+		@test ($op)(b, true).array == ($op)(b.array, true)
+		@test ($op)(true, b).array == ($op)(true, b.array)
+	end
+end
+
+
 @test n / π == π \ n
 
 @test (v - (1:6)).array == v.array - (1:6)
+@test ((1:6) - v).array == (1:6) - v.array
 
 ## matmul
 if VERSION >= v"0.5.0-dev" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
@@ -147,20 +160,28 @@ end
 
 for field in [:values, :vectors]
 	@test isapprox(eigfact(s)[field], eigfact(s.array)[field])
+	@test eigfact!(copy(s))[field] == eigfact(s)[field]
 end
+@test eigvals(s) == eigvals!(copy(s)) == eigvals(s.array)
 
 @test isapprox(hessfact(s).factors, hessfact(s.array).factors)
 @test isapprox(hessfact(s).τ, hessfact(s.array).τ)
+@test isapprox(hessfact!(copy(s)).factors, hessfact(s.array).factors)
+@test isapprox(hessfact!(copy(s)).τ, hessfact(s.array).τ)
 
+s2 = randn(10,10)
 for field in [:T, :Z, :values]
 	@test isapprox(schurfact(s)[field], schurfact(s.array)[field])
+	@test isapprox(schurfact!(copy(s))[field], schurfact(s.array)[field])
+	@test isapprox(schurfact(s, s2)[field], schurfact(s.array, s2)[field])
+	@test isapprox(schurfact!(copy(s), copy(s2))[field], schurfact(s.array, s2)[field])
 end
 
 for field in [:U, :S, :Vt]
 	@test isapprox(svdfact(s)[field], svdfact(s.array)[field])
 end
 
-@test svdvals(s) == svdvals(s.array)
+@test svdvals(s) == svdvals!(copy(s)) == svdvals(s.array)
 
 @test diag(s).array == diag(s.array)
 @test names(diag(s), 1) == names(s, 1)

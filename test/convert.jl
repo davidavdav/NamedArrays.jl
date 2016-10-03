@@ -1,3 +1,5 @@
+print("convert, ")
+
 n = NamedArray(randn(5, 10))
 
 @test array(n) == n.array
