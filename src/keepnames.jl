@@ -114,7 +114,7 @@ function sort(a::NamedArray, dim::Integer; kws...)
     if ndims(a)==1 && dim==1
         return sort(a; kws...)
     else
-        n = allnames(a)
+        n = names(a)
         n[dim] = [string(i) for i in 1:size(a,dim)]
         return NamedArray(sort(a.array, dim; kws...), tuple(n...), a.dimnames)
     end

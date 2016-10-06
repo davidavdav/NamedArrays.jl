@@ -10,6 +10,6 @@ bv = NamedArray(rand(Bool, 25))
 bm = NamedArray(rand(Bool, 10, 10))
 
 if !isdefined(:namesanddim)
-	namesanddim(n::NamedArray) = (allnames(n), dimnames(n))
+	namesanddim(n::NamedArray) = (names(n), dimnames(n))
 	namesanddim(n::NamedArray, d::Int) = (names(n, d), dimnames(n, d))
 end

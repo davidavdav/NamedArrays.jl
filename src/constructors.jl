@@ -9,9 +9,14 @@
 @compat letter(i) = string(Char((64+i) % 256))
 
 ## helpers for constructing names dictionaries
+defaultnames(dim::Integer) = map(string, 1:dim)
 defaultnamesdict(names::Vector) = OrderedDict(zip(names, 1:length(names)))
-defaultnamesdict(dim::Integer) = defaultnamesdict([string(i) for i in 1:dim])
+defaultnamesdict(dim::Integer) = defaultnamesdict(defaultnames(dim))
 defaultnamesdict(dims::NTuple) = map(defaultnamesdict, dims)
+
+defaultdimname(dim::Integer) = Symbol(letter(dim))
+defaultdimnames(ndim::Integer) = map(defaultdimname, tuple(1:ndim...))
+defaultdimnames(a::AbstractArray) = defaultdimnames(ndims(a))
 
 ## disambiguation (Argh...)
 if VERSION ≥ v"0.4-dev"
@@ -27,34 +32,26 @@ end
 
 ## dimnames created as default, then inner constructor called
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,OrderedDict})
-    dimnames = [Symbol(letter(i)) for i=1:ndims(array)]
-    NamedArray{T, N, typeof(array), typeof(names)}(array, names, tuple(dimnames...)) ## inner constructor
+    NamedArray{T, N, typeof(array), typeof(names)}(array, names, defaultdimnames(array)) ## inner constructor
 end
 
 ## constructor with array, names and dimnames (dict is created from names)
-function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
+function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N}=defaultdimnames(array))
     dicts = defaultnamesdict(names)
     NamedArray(array, dicts, dimnames)
 end
 
-## constructor with array, names (dict is created from names), dimnames created as default
-function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector})
-    dicts = defaultnamesdict(names)
-    dimnames = [Symbol(letter(i)) for i=1:length(names)]
-    NamedArray(array, dicts, tuple(dimnames...))
-end
-
-## vectors instead of tuples, with defaults
-function NamedArray{T,N,VT}(a::AbstractArray{T,N},
-                            names::Vector{VT}=[String[string(i) for i=1:d] for d in size(a)],
-                            dimnames::Vector = Symbol[Symbol(letter(i)) for i=1:N])
+## vectors instead of tuples, with defaults (incl. no names or dimnames at all)
+function NamedArray{T,N,VT}(array::AbstractArray{T,N},
+                            names::Vector{VT}=[String[string(i) for i=1:d] for d in size(array)],
+                            dimnames::Vector = [defaultdimname(i) for i in 1:ndims(array)])
     length(names) == length(dimnames) == N || error("Dimension mismatch")
     if VT <: OrderedDict
         dicts = tuple(names...)
     else
         dicts = defaultnamesdict(tuple(names...))
     end
-    NamedArray(a, dicts, tuple(dimnames...))
+    NamedArray(array, dicts, tuple(dimnames...))
 end
 
 

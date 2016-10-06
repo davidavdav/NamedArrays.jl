@@ -4,7 +4,7 @@ print("re-arrange, ")
 
 ## ctranspose
 @test n'.array == n.array'
-@test allnames(n') == reverse(allnames(n))
+@test names(n') == reverse(names(n))
 @test dimnames(n') == reverse(dimnames(n))
 
 @test v'.array == v.array'
@@ -21,7 +21,7 @@ end
 for i in 1:10
 	p = randperm(6)
 	@test permutedims(m, p).array == permutedims(m.array, p)
-	@test allnames(permutedims(m, p)) == allnames(m)[p]
+	@test names(permutedims(m, p)) == names(m)[p]
 	@test dimnames(permutedims(m, p)) == dimnames(m)[p]
 end
 @test transpose(n) == permutedims(n, [2,1])
@@ -39,7 +39,7 @@ end
 @test dimnames(rotr90(n)) == reverse(dimnames(n))
 
 @test rot180(n).array == rot180(n.array)
-@test allnames(rot180(n)) == [reverse(name) for name in allnames(n)]
+@test names(rot180(n)) == [reverse(name) for name in names(n)]
 @test dimnames(rot180(n)) == dimnames(n)
 
 for i in 1:10

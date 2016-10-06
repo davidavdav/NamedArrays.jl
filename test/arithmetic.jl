@@ -15,10 +15,10 @@ for op in (:+, :-, :*, :.+, :.-, :.*, :./)
 		for y in (true, Int8(3), Int16(3), Int32(3), Int64(3), Float32(π), Float64(π), BigFloat(π))
 			z = ($op)(x, y)
 			@test z.array == ($op)(x.array, y)
-			@test allnames(z) == allnames(x)
+			@test names(z) == names(x)
 			z = ($op)(y, x)
 			@test z.array == ($op)(y, x.array)
-			@test allnames(z) == allnames(x)
+			@test names(z) == names(x)
 		end
 	end
 end
@@ -27,16 +27,16 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
 		@eval begin
 			z = ($op)(x, x)
 			@test z.array == ($op)(x.array, x.array)
-			@test allnames(z) == allnames(x)
+			@test names(z) == names(x)
 			@test dimnames(z) == dimnames(x)
 			y = rand($T, 5, 10)
 			z = ($op)(x, y)
 			@test z.array == ($op)(x.array, y)
-			@test allnames(z) == allnames(x)
+			@test names(z) == names(x)
 			@test dimnames(z) == dimnames(x)
 			z = ($op)(y, x)
 			@test z.array == ($op)(y, x.array)
-			@test allnames(z) == allnames(x)
+			@test names(z) == names(x)
 			@test dimnames(z) == dimnames(x)
 		end
 	end
@@ -47,9 +47,9 @@ include("init-namedarrays.jl")
 for op in [:.*, :+, .-]
 	@eval for b in NamedArray[bv, bm] ## NamedArray[] for julia-0.4
 		@test (($op)(b, BitArray(b))).array == ($op)(b.array, BitArray(b))
-		@test allnames(($op)(b, BitArray(b))) == allnames(b)
+		@test names(($op)(b, BitArray(b))) == names(b)
 		@test ($op)(BitArray(b), b).array == ($op)(BitArray(b), b.array)
-		@test allnames(($op)(BitArray(b), b)) == allnames(b)
+		@test names(($op)(BitArray(b), b)) == names(b)
 		@test ($op)(b, true).array == ($op)(b.array, true)
 		@test ($op)(true, b).array == ($op)(true, b.array)
 	end
@@ -83,8 +83,8 @@ for m in (NamedArray(rand(4)), NamedArray(rand(4,3)))
     @test isapprox(m.array' * n', m.array' * n.array')
 end
 ## bug #34
-@test unique(allnames(n * n'))[1] == names(n,1)
-@test unique(allnames(n' * n))[1] == names(n,2)
+@test unique(names(n * n'))[1] == names(n,1)
+@test unique(names(n' * n))[1] == names(n,2)
 
 ## \
 v = NamedArray(randn(2))
@@ -123,7 +123,7 @@ m = NamedArray((x = randn(100, 10); x'x))
 for f in (:inv, :chol, :sqrtm, :pinv, :expm)
 	@eval fm = ($f)(m)
 	@test @eval fm.array == ($f)(m.array)
-	@test allnames(fm) == allnames(m)
+	@test names(fm) == names(m)
 	@test dimnames(fm) == dimnames(m)
 end
 
@@ -188,7 +188,7 @@ end
 @test dimnames(diag(s), 1) == dimnames(s, 1)
 
 @test diagm(v).array == diagm(v.array)
-@test allnames(diagm(v)) == allnames(v)[[1,1]]
+@test names(diagm(v)) == names(v)[[1,1]]
 
 @test cond(n) == cond(n.array)
 

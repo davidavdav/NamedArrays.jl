@@ -24,7 +24,7 @@ for op in (:+, :-, :.+, :.-, :.*, :./)
     ## named %op% named
     @eval begin
         function ($op){T1<:Number, T2<:Number}(x::NamedArray{T1}, y::NamedArray{T2})
-            if allnames(x)==allnames(y) && x.dimnames==y.dimnames
+            if names(x) == names(y) && x.dimnames == y.dimnames
                 NamedArray(($op)(x.array, y.array), x.dicts, x.dimnames)
             else
                 warn("Dropping mismatching names")

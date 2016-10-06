@@ -12,6 +12,8 @@ include("convert.jl")
 
 include("index.jl")
 
+include("names.jl")
+
 include("keepnames.jl")
 
 print("copy, ")
@@ -161,7 +163,7 @@ t1 = t2 = t3 = 0.0
 for j = 1:2
     t1 = @elapsed sgetindex(n)
     t2 = @elapsed sgetindex(n.array)
-    si, sj = allnames(n)
+    si, sj = names(n)
     t3 = @elapsed sgetindex(n, si, sj)
 end
 println("Timing named index: ", t1, ", array index: ", t2, ", named key: ", t3)

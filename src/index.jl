@@ -104,7 +104,7 @@ else
         for d in keeping
             if ndims(index[d]) > 1
                 ## take over the names of the index for this dimension
-                for (name, dimname) in zip(allnames(index[d]), dimnames(index[d]))
+                for (name, dimname) in zip(defaultnames(index[d]), dimnames(index[d]))
                     push!(newnames, name)
                     push!(newdimnames, Symbol(string(n.dimnames[d], "_", dimname)))
                 end
