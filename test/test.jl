@@ -25,33 +25,6 @@ copy!(m, n)
 m = deepcopy(n)
 @test m == n
 
-print("setindex, ")
-## setindex
-m[1,1] = 0
-m[2,:] = 1:4
-m[:,"c"] = -1
-m[1,[2,3]] = [10,20]
-if VERSION < v"0.4-dev"
-    m["one", 4//1] = 5
-else
-    m["one", 4] = 5
-end
-@test m.array == [0. 10 20 5; 1 2 -1 4]
-if VERSION >= v"0.4.0-dev"
-    m2 = copy(m)
-    for i in eachindex(m)
-        m[i] = 2*m[i]
-    end
-    @test 2*(m2.array) == m.array
-end
-m[:B=>"c", :A=>"one"] = π
-@test m[1,3] == Float64(π)
-m = NamedArray(rand(Int, 10))
-m[2:5] = -1
-m[6:8] = 2:4
-m[[1,9,10]] = 0:2
-@test m == [0, -1, -1, -1, -1, 2, 3, 4, 1, 2]
-
 print("sum, ")
 ## sum
 @test sum(n) == sum(n.array)
@@ -127,9 +100,24 @@ print("broadcast, ")
 @test broadcast(-, n, mean(n,1)).array == broadcast(-, n.array, mean(n.array,1))
 
 print("vectorized, ")
+
 ## a selection of vectorized functions
 for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos, :atan, :sinc, :cosc, :deg2rad, :log, :log2, :log10, :log1p, :exp, :exp2, :exp10, :expm1, :abs, :abs2, :sign, :sqrt,  :erf, :erfc, :erfcx, :erfi, :dawson, :erfinv, :erfcinv, :gamma, :lgamma, :digamma, :invdigamma, :trigamma, :besselj0, :besselj1, :bessely0, :bessely1, :eta, :zeta)
-    @eval @test ($f)(n).array == ($f)(n.array)
+    if VERSION < v"0.5.0-dev"
+        @eval @test ($f)(n).array == ($f)(n.array)
+    else
+        @eval begin
+            m = ($f).(n)
+            @test m.array == ($f).(n.array)
+            @test namesanddim(m) == namesanddim(n)
+        end
+    end
+end
+#39
+if VERSION >= v"0.5.0-dev"
+    v = n[1,:]
+    @test sin.(v).array == sin.(v.array)
+    @test namesanddim(sin.(v)) == namesanddim(v)
 end
 
 include("rearrange.jl")

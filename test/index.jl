@@ -6,7 +6,7 @@ import Base.indices
 print("getindex, ")
 ## getindex
 ## Test Integer indices up to 5 dimensions, as well as CartesianIndexes
-for i in 1:5
+for i in 1:7
 	dims = fill(3, i)
 	n1 = NamedArray(rand(dims...))
 	for i in CartesianRange(tuple(dims...))
@@ -45,3 +45,36 @@ for i in 1:2
     @test names(n[:, bi], 2) == ["b", "d"]
     bi = BitArray(bi)
 end
+
+m = copy(n)
+print("setindex, ")
+## setindex
+m[1,1] = 0
+m[2,:] = 1:4
+m[:,"c"] = -1
+m[1,[2,3]] = [10,20]
+m["one", 4] = 5
+
+@test m.array == [0. 10 20 5; 1 2 -1 4]
+m2 = copy(m)
+for i in eachindex(m)
+	m[i] = 2*m[i]
+end
+@test 2*(m2.array) == m.array
+
+m[:B=>"c", :A=>"one"] = π
+@test m[1,3] == Float64(π)
+m[:] = n
+@test m == n
+
+m[:] = 1:8
+@test m[:] == collect(1:8)
+
+m = NamedArray(rand(Int, 10))
+m[2:5] = -1
+m[6:8] = 2:4
+m[[1,9,10]] = 0:2
+@test m == [0, -1, -1, -1, -1, 2, 3, 4, 1, 2]
+
+n[] = π
+@test n.array[] == Float64(π)

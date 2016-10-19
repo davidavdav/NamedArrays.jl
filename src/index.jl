@@ -151,6 +151,9 @@ setindex!{T}(a::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real, i5::Re
 # n[1:4] = 5
 setindex!{T<:Real}(A::NamedArray, x, I::AbstractVector{T}) = setindex!(A.array, x, I)
 
+# n[:] = m
+setindex!(n::NamedArray, x, ::Colon) = setindex!(n.array, x, :)
+
 # n[1:4] = 1:4
 ## shamelessly copied from array.jl
 function setindex!{T}(A::NamedArray{T}, X::ArrayOrNamed{T}, I::Range{Int})

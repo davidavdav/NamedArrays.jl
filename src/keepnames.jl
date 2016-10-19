@@ -48,74 +48,45 @@ function Base.vcat(N::NamedVector...)
     end
 end
 
-## helper function for broadcast
-function verify_names(a::NamedArray...)
-    nargs = length(a)
-    @assert nargs>1
-    bigi = indmax(map(length, a)) # find biggest dimension
-    big = a[bigi]
-    for i in setdiff(bigi, 1:nargs)
-        println("i ", i)
-        for d=1:ndims(a[i])
-            println("d ", d)
-            if size(a[i],d) > 1
-                @assert names(big,d) == names(a(i),d)
-            end
-        end
-    end
-    return bigi::Int, big
-end
-
 ## broadcast
-import Base.broadcast, Base.broadcast!
-function broadcast(f::Function, a::NamedArray...)
-    ## verify that the names are consistent
-    bigi, big = verify_names(a...)
-    arrays = map(x->x.array, a)
-    NamedArray(broadcast(f, arrays...), big.dicts, big.dimnames)
-end
-
-function broadcast!(f::Function, dest::NamedArray, a::NamedArray, b::NamedArray...)
-    ab = tuple(a, b...)
-    ## verify that the names are consistent, we assume dest is the right size
-    bigi, big = verify_names(ab...)
-    arrays = map(x->x.array, ab)
-    broadcast!(f, dest.array, arrays...)
-    dest
+if VERSION < v"0.5.0-dev"
+    Base.Broadcast.broadcast(f, n::NamedArray, As...) = broadcast!(f, similar(n, Base.Broadcast.broadcast_shape(n, As...)), n, As...)
+else
+    Base.Broadcast.broadcast_t(f, T, n::NamedArray, As...) = broadcast!(f, similar(n, T, Base.Broadcast.broadcast_shape(n, As...)), n, As...)
 end
 
 ## keep names intact
-for f in (:sin, :cos, :tan, :sind, :cosd, :tand, :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos, :atan, :asind, :acosd, :sec, :csc, :cot, :secd, :cscd, :cotd, :asec, :acsc, :asecd, :acscd, :acotd, :sech, :csch, :coth, :asinh, :acosh, :atanh, :asech, :acsch, :acoth, :sinc, :cosc, :deg2rad, :log, :log2, :log10, :log1p, :exp, :exp2, :exp10, :expm1, :ceil, :floor, :trunc, :round, :abs, :abs2, :sign, :signbit, :sqrt, :isqrt, :cbrt, :erf, :erfc, :erfcx, :erfi, :dawson, :erfinv, :erfcinv, :real, :imag, :conj, :angle, :cis, :gamma, :lgamma, :digamma, :invdigamma, :trigamma, :airyai, :airyprime, :airyaiprime, :airybi, :airybiprime, :besselj0, :besselj1, :bessely0, :bessely1, :eta, :zeta)
-    eval(Expr(:import, :Base, f))
-    @eval ($f)(a::NamedArray) = NamedArray(($f)(a.array), a.dicts, a.dimnames)
+if VERSION < v"0.5-dev"
+    for f in (:sin, :cos, :tan, :sind, :cosd, :tand, :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos, :atan, :asind, :acosd, :sec, :csc, :cot, :secd, :cscd, :cotd, :asec, :acsc, :asecd, :acscd, :acotd, :sech, :csch, :coth, :asinh, :acosh, :atanh, :asech, :acsch, :acoth, :sinc, :cosc, :deg2rad, :log, :log2, :log10, :log1p, :exp, :exp2, :exp10, :expm1, :ceil, :floor, :trunc, :round, :abs, :abs2, :sign, :signbit, :sqrt, :isqrt, :cbrt, :erf, :erfc, :erfcx, :erfi, :dawson, :erfinv, :erfcinv, :real, :imag, :conj, :angle, :cis, :gamma, :lgamma, :digamma, :invdigamma, :trigamma, :airyai, :airyprime, :airyaiprime, :airybi, :airybiprime, :besselj0, :besselj1, :bessely0, :bessely1, :eta, :zeta)
+        eval(Expr(:import, :Base, f))
+        @eval ($f)(a::NamedArray) = NamedArray(($f)(a.array), a.dicts, a.dimnames)
+    end
 end
 
 ## reorder names
 import Base: sort, sort!
-function sort!(a::NamedVector; kws...)
-    i = sortperm(a.array; kws...)
-    newnames = names(a, 1)[i]
-    empty!(a.dicts[1])
+function sort!(v::NamedVector; kws...)
+    i = sortperm(v.array; kws...)
+    newnames = names(v, 1)[i]
+    empty!(v.dicts[1])
     for (ind, k) in enumerate(newnames)
-        a.dicts[1][k] = ind
+        v.dicts[1][k] = ind
     end
-    a.array = a.array[i]
-    a
+    v.array = v.array[i]
+    return v
 end
 
-function sort(a::NamedVector; kws...)
-    return sort!(copy(a); kws...)
-end
+sort(v::NamedVector; kws...) = sort!(copy(v); kws...)
 
 ## Note: I can't think of a sensible way to define sort!(a::NamedArray, dim>1)
 
 ## drop name of sorted dimension, as each index along that dimension is sorted individually
-function sort(a::NamedArray, dim::Integer; kws...)
-    if ndims(a)==1 && dim==1
-        return sort(a; kws...)
+function sort(n::NamedArray, dim::Integer; kws...)
+    if ndims(n)==1 && dim==1
+        return sort(n; kws...)
     else
-        n = names(a)
-        n[dim] = [string(i) for i in 1:size(a,dim)]
-        return NamedArray(sort(a.array, dim; kws...), tuple(n...), a.dimnames)
+        nms = names(n)
+        nms[dim] = [string(i) for i in 1:size(n, dim)]
+        return NamedArray(sort(n.array, dim; kws...), tuple(nms...), n.dimnames)
     end
 end

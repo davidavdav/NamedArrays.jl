@@ -67,3 +67,7 @@ function NamedArray(T::DataType, dims::Int...)
     a = Array(T, dims...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
+
+if VERSION >= v"0.5.0-dev"
+    include("typedconstructor.jl")
+end

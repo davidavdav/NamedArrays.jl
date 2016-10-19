@@ -26,6 +26,8 @@ end
 
 setdimnames!(n, ("thing1", :thing2))
 @test dimnames(n) == ["thing1", :thing2]
+setdimnames!(n, ["magnificent", 7])
+@test dimnames(n) == ["magnificent", 7]
 
 println(n)
 
