@@ -6,7 +6,7 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-@compat letter(i) = string(Char((64+i) % 256))
+letter(i) = string(Char((64+i) % 256))
 
 ## helpers for constructing names dictionaries
 defaultnames(dim::Integer) = map(string, 1:dim)
@@ -43,7 +43,7 @@ end
 
 ## vectors instead of tuples, with defaults (incl. no names or dimnames at all)
 function NamedArray{T,N,VT}(array::AbstractArray{T,N},
-                            names::Vector{VT}=[String[string(i) for i=1:d] for d in size(array)],
+                            names::Vector{VT}=[defaultnames(d) for d in size(array)],
                             dimnames::Vector = [defaultdimname(i) for i in 1:ndims(array)])
     length(names) == length(dimnames) == N || error("Dimension mismatch")
     if VT <: OrderedDict

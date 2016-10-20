@@ -16,7 +16,20 @@ nn = similar(n)
 nn = similar(n, Int)
 @test namesanddim(nn) == namesanddim(n)
 nn = similar(n, 3, 5)
-@test all(Bool[names(nn, d) != names(n, d) for d in 1:ndims(n)]) ## Bool[] for julia-0.4
+@test hasdefaultnames(nn)
+nn = similar(n, 2)
+@test namesanddim(nn, 1) == namesanddim(n, 1)
+nn = similar(n, 2, 10)
+@test namesanddim(nn, 1) == namesanddim(n, 1)
+@test hasdefaultnames(nn, 2)
+@test hasdefaultdimnames(nn, 2)
+nn = similar(n, 10, 4, 5)
+@test namesanddim(nn, 2) == namesanddim(n, 2)
+for i in [1,3]
+	@test hasdefaultnames(nn, i)
+	@test hasdefaultdimnames(nn, i)
+end
+
 
 @test ind2sub(n, 4) == ("two", "b")
 @test_throws BoundsError ind2sub(n, 0)
