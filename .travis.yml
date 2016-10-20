@@ -3,5 +3,7 @@ language: julia
 julia:
  - 0.4
  - 0.5
+script:
+ - julia --check-bounds=yes --inline=yes --code-coverage=user -e 'versioninfo(); Pkg.init(); Pkg.clone(pwd()); Pkg.build("NamedArrays"); Pkg.test("NamedArrays", coverage=true)'
 after_success:
   - julia -e 'cd(Pkg.dir("NamedArrays")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
