@@ -11,13 +11,14 @@ VERSION >= v"0.4.0-dev+6521" && __precompile__()
 module NamedArrays
 
 using Compat
+using DataStructures
 
 export NamedArray, NamedVector, NamedMatrix, Not
 
 ## type definition
 include("namedarraytypes.jl")
 
-export allnames, dimnames, setnames!, setdimnames!, array
+export names, dimnames, defaultnames, setnames!, setdimnames!, array
 
 include("compat.jl")
 include("constructors.jl")

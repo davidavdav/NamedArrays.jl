@@ -1,10 +1,14 @@
 ## show.jl.  show and print methods for NamedArray
-## (c) 2013 David A. van Leeuwen
+## (c) 2013-2016 David A. van Leeuwen
 
 ## Julia type that implements a drop-in replacement of Array with named dimensions.
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
+
+## Displaying things in the REPL drives me crazy, there are all these things
+## like print, show, display, writemime, etc., and I have no clue as to
+## what gets called how in which circumstance.
 
 import Base.print, Base.show, Base.summary, Base.display
 
@@ -24,24 +28,30 @@ end
 ## ndims==1 is dispatched below
 function show(io::IO, a::NamedArray)
     print(io, summary(a))
+    s = size(a)
     if ndims(a) == 2
-        (nr,nc) = size(a)
         maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
         println(io)
-        show(io, a, min(maxnrow, nr))
-    elseif ndims(a) != 0
-        s = size(a)
+        show(io, a, min(maxnrow, s[1]))
+    elseif ndims(a) != 0 ## effectively > 2
         nlinesneeded = prod(s[3:end]) * (s[1] + 3) + 1
         if nlinesneeded > displaysize(io)[1]
             maxnrow = clamp((displaysize(io)[1] - 3) ÷ (prod(s[3:end])) - 3, 3, s[1])
         else
             maxnrow = s[1]
         end
+        maxrepeat = displaysize(io)[1] ÷ (maxnrow + 4)
+        i = 1
         for idx in CartesianRange(size(a)[3:end])
+            if i > maxrepeat
+                print(io, "\n⋮")
+                break
+            end
             cartnames = [string(strdimnames(a, 2+i), "=", strnames(a, 2+i)[ind]) for (i, ind) in enumerate(idx.I)]
             println(io, "\n")
             println(io, "[:, :, ", join(cartnames, ", "), "] =")
             show(io, a[:, :, idx], maxnrow)
+            i += 1
         end
     end
 end
@@ -156,7 +166,7 @@ function show(io::IO, v::NamedVector, maxnrow::Int)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, v.array[i]) for i=totrowrange]
     colwidth = maximum(map(length,s))
-    rownamewidth = maximum(map(length, rownames))
+    rownamewidth = max(maximum(map(length, rownames)), 1+length(strdimnames(v)[1]))
     ## header
     println(io, string(leftalign(strdimnames(v, 1), rownamewidth), " │ "))
     print(io, "─"^(rownamewidth+1), "┼", "─"^(colwidth+1))

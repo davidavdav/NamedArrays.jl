@@ -6,7 +6,7 @@
 ## See the file LICENSE.md in this distribution
 
 ## copy
-import Base.copy
+import Base: copy, copy!
 copy{T,N,AT,DT}(a::NamedArray{T,N,AT,DT}) = NamedArray{T,N,AT,DT}(copy(a.array), deepcopy(a.dicts), identity(a.dimnames))
 
 ## from array.jl
@@ -27,16 +27,21 @@ size(a::NamedArray) = size(a.array)
 size(a::NamedArray, d) = size(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
-function Base.similar(a::NamedArray, t::Type, dims::Base.Dims)
-    if size(a) != dims
-        return NamedArray(t, dims...) # re-initialize names arrays...
-    else
-        return NamedArray(similar(a.array, t), a.dicts, a.dimnames)
+function Base.similar(n::NamedArray, t::Type, dims::Base.Dims)
+    nd = length(dims)
+    dicts = Array{Any}(nd)
+    dimnames = Array{Any}(nd)
+    for d in 1:length(dims)
+        if d ≤ ndims(n) && dims[d] == size(n, d)
+            dicts[d] = n.dicts[d]
+            dimnames[d] = n.dimnames[d]
+        else
+            dicts[d] = defaultnamesdict(dims[d])
+            dimnames[d] = letter(d)
+        end
     end
+    return NamedArray(similar(n.array, t, dims), tuple(dicts...), tuple(dimnames...))
 end
-#similar(A::NamedArray, t::DataType, dims::Int...) = similar(A, t, dims)
-#similar(A::NamedArray, t::DataType) = similar(A, t, size(A.array))
-#similar(A::NamedArray) = similar(A, eltype(A.array), size(A.array))
 
 ## our own interpretation of ind2sub
 Base.ind2sub(n::NamedArray, index::Integer) = tuple(map(x -> names(n, x[1])[x[2]], enumerate(ind2sub(size(n), index)))...)

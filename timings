@@ -1,0 +1,22 @@
+macro timeit(ex)
+# like @time, but returning the timing rather than the computed value
+  return quote
+    #gc_disable()
+    local val = $ex # compile
+    local t0 = time()
+    for i in 1:1e4 val = $ex end
+    local t1 = time()
+    #gc_enable()
+    t1-t0
+  end
+end
+
+n2 = NamedArray(rand(1000, 1000))
+
+# With master
+julia> @timeit n2[1:100, 1:100]
+2.445374011993408
+
+# With this PR
+julia> @timeit n2[1:100, 1:100]
+0.5610759258270264

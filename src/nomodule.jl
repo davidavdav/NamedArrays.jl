@@ -1,4 +1,5 @@
 using Compat
+using DataStructures
 
 include("compat.jl")
 if !isdefined(:NamedArray)

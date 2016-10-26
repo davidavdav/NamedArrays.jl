@@ -11,8 +11,8 @@ for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     eval(Expr(:import, :Base, f))
     @eval function ($f)(a::NamedArray, d::Dims)
         s = ($f)(a.array, d)
-        newnames = [issubset(i,d) ? [string($f,"(",a.dimnames[i],")")] : names(a,i) for i=1:ndims(a)]
-        NamedArray(s, tuple(newnames...), tuple(a.dimnames...))
+        dicts = [issubset(i,d) ? OrderedDict(string($f,"(",a.dimnames[i],")") => 1) : a.dicts[i] for i=1:ndims(a)]
+        NamedArray(s, tuple(dicts...), a.dimnames)
     end
     @eval ($f)(a::NamedArray, d::Int) = ($f)(a, (d,))
 end

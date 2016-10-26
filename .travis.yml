@@ -2,4 +2,10 @@ sudo: false
 language: julia
 julia:
  - 0.4
- - nightly
+ - 0.5
+before_install:
+ - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+script:
+ - julia --check-bounds=yes --inline=yes --code-coverage=user -e 'versioninfo(); Pkg.init(); Pkg.clone(pwd()); Pkg.build("NamedArrays"); Pkg.test("NamedArrays", coverage=true)'
+after_success:
+  - julia -e 'cd(Pkg.dir("NamedArrays")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
