@@ -13,27 +13,30 @@
 import Base.print, Base.show, Base.summary, Base.display
 
 ## fallback
-function summary{T,N,AT}(a::NamedArray{T,N,AT})
-    return Base.dims2string(size(a)) * string(" Named ", AT)
+function summary{T,N,AT}(n::NamedArray{T,N,AT})
+    return Base.dims2string(size(n)) * string(" Named ", AT)
 end
 
-print(a::NamedArray) = print(a.array)
+print(n::NamedArray) = print(n.array)
 
 ## This seems to be the essential function to overload for displaying in REPL:
-Base.show(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
+Base.show(io::IO, ::MIME"text/plain", n::NamedArray) = show(io, n)
 if VERSION < v"0.5.0-dev+4356"
-    Base.writemime(io::IO, ::MIME"text/plain", a::NamedArray) = show(io, a)
+    Base.writemime(io::IO, ::MIME"text/plain", n::NamedArray) = show(io, n)
 end
 
 ## ndims==1 is dispatched below
-function show(io::IO, a::NamedArray)
-    print(io, summary(a))
-    s = size(a)
-    if ndims(a) == 2
+function show(io::IO, n::NamedArray)
+    print(io, summary(n))
+    s = size(n)
+    if ndims(n) == 0
+        println(io)
+        show(io, n.array[1])
+    elseif ndims(n) == 2
         maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
         println(io)
-        show(io, a, min(maxnrow, s[1]))
-    elseif ndims(a) != 0 ## effectively > 2
+        show(io, n, min(maxnrow, s[1]))
+    else
         nlinesneeded = prod(s[3:end]) * (s[1] + 3) + 1
         if nlinesneeded > displaysize(io)[1]
             maxnrow = clamp((displaysize(io)[1] - 3) ÷ (prod(s[3:end])) - 3, 3, s[1])
@@ -42,15 +45,15 @@ function show(io::IO, a::NamedArray)
         end
         maxrepeat = displaysize(io)[1] ÷ (maxnrow + 4)
         i = 1
-        for idx in CartesianRange(size(a)[3:end])
+        for idx in CartesianRange(size(n)[3:end])
             if i > maxrepeat
                 print(io, "\n⋮")
                 break
             end
-            cartnames = [string(strdimnames(a, 2+i), "=", strnames(a, 2+i)[ind]) for (i, ind) in enumerate(idx.I)]
+            cartnames = [string(strdimnames(n, 2+i), "=", strnames(n, 2+i)[ind]) for (i, ind) in enumerate(idx.I)]
             println(io, "\n")
             println(io, "[:, :, ", join(cartnames, ", "), "] =")
-            show(io, a[:, :, idx], maxnrow)
+            show(io, n[:, :, idx], maxnrow)
             i += 1
         end
     end
@@ -90,21 +93,21 @@ function sprint_row(namewidth::Int, name, width::Int, names::Tuple; dots="…", 
 end
 
 ## for 2D printing
-function show(io::IO, a::NamedMatrix, maxnrow::Int)
-    @assert ndims(a)==2
-    nrow, ncol = size(a)
+function show(io::IO, n::NamedMatrix, maxnrow::Int)
+    @assert ndims(n)==2
+    nrow, ncol = size(n)
     ## rows
     rowrange, totrowrange = compute_range(maxnrow, nrow)
-    s = [sprint(showcompact, a.array[i,j]) for i=totrowrange, j=1:ncol]
-    rowname, colname = strnames(a)
+    s = [sprint(showcompact, n.array[i,j]) for i=totrowrange, j=1:ncol]
+    rowname, colname = strnames(n)
     strlen(x) = length(string(x))
     colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
-    rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, strdimnames(a)))+3)
+    rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, strdimnames(n)))+3)
     maxncol = div(displaysize(io)[2] - rownamewidth - 4, colwidth+2) # dots, spaces between
     ## columns
     colrange, totcorange = compute_range(maxncol, ncol)
     ## header
-    header = sprint_row(rownamewidth, rightalign(join(strdimnames(a), " ╲ "), rownamewidth),
+    header = sprint_row(rownamewidth, rightalign(join(strdimnames(n), " ╲ "), rownamewidth),
                         colwidth, map(i->colname[i], colrange))
     println(io, header)
     print(io, "─"^(rownamewidth+1), "┼", "─"^(length(header)-rownamewidth-2))
@@ -141,8 +144,8 @@ function show{T1,T2}(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}})
     maxnrow = displaysize(io)[1]
     half_screen_rows = div(maxnrow - 5, 2)
     rownames, colnames = strnames(n)
-    rowpad = maximum([length(n) for n in rownames])
-    colpad = maximum([length(n) for n in colnames])
+    rowpad = maximum([length(s) for s in rownames])
+    colpad = maximum([length(s) for s in colnames])
     k = 0
     sep = "\n\t"
     for col = 1:S.n, k = S.colptr[col] : (S.colptr[col+1]-1)

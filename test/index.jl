@@ -19,7 +19,7 @@ end
 
 include("init-namedarrays.jl")
 
-@test n[:] == n.array[:]
+@test n[:] == view(n, :) == n.array[:]
 n1 = NamedArray(rand(10))
 @test n1[:] == n1
 @test [x for x in n] == [x for x in n.array]
@@ -28,7 +28,8 @@ n1 = NamedArray(rand(10))
 first = n.array[1,:]
 @test convert(Array, n["one", :]) == first
 @test n[Not("two"), :].array == n.array[1:1,:]
-@test n[:, ["b", "d"]] == n[:, [2, 4]]
+@test names(n[Not("two"), :]) == names(n[1:1, :])
+@test n[:, ["b", "d"]] == view(n, :, ["b", "d"]) == n[:, [2, 4]]
 
 if VERSION < v"0.5.0-dev"
     @test names(n["one", :],1) == ["one"]
@@ -41,7 +42,7 @@ end
 ## https://github.com/nalimilan/FreqTables.jl/issues/10
 bi = [false, true, false, true] ## Array{Bool}
 for i in 1:2
-    @test n[:, bi].array == n.array[:, bi]
+    @test n[:, bi] == view(n, :, bi) == n.array[:, bi]
     @test names(n[:, bi], 2) == ["b", "d"]
     bi = BitArray(bi)
 end
