@@ -1,3 +1,11 @@
+## test.jl
+## (c) 2013--2016 David A. van Leeuwen
+
+## various tests for NamedArrays
+
+## This code is licensed under the MIT license
+## See the file LICENSE.md in this distribution
+
 ## NamedArrays is loaded by runtests.jl
 
 print("Starting test, no assertions should fail... ")
@@ -122,50 +130,22 @@ end
 
 include("rearrange.jl")
 
-if VERSION >= v"0.4.0-dev"
-    print("eachindex, ")
-    ## eachindex
-    for i in eachindex(n)
-        @test n[i] == n.array[i]
-    end
+print("eachindex, ")
+## eachindex
+for i in eachindex(n)
+    @test n[i] == n.array[i]
 end
 
 include("matrixops.jl")
 
 include("show.jl")
 
-println("done!")
-
-## how are we doing for speed?
-function sgetindex(x, r1=1:size(x,1), r2=1:size(x,2))
-    a::Float64 = 0
-    for j=r2
-        for i=r1
-            a = x[i,j]
-        end
-    end
-end
-
-n = NamedArray(rand(1000,1000))
-t1 = t2 = t3 = 0.0
-for j = 1:2
-    t1 = @elapsed sgetindex(n)
-    t2 = @elapsed sgetindex(n.array)
-    si, sj = names(n)
-    t3 = @elapsed sgetindex(n, si, sj)
-end
-println("Timing named index: ", t1, ", array index: ", t2, ", named key: ", t3)
-
-s = sparse(rand(1:1000, 10), rand(1:1000, 10), true)
-n = NamedArray(s)
-for j = 1:2
-    t1 = @elapsed for i=1:1000 sum(s, 1) end
-    t2 = @elapsed for i=1:1000 sum(n, 1) end
-end
-println("Timing sum large sparse array: ", t1, ", named: ", t2)
+include("speed.jl")
 
 if VERSION ≥ v"0.5.0-dev"
     # julia issue #17328
     a = NamedArray([1.0,2.0,3.0,4.0])
     @test sumabs(a, 1)[1] == 10
 end
+
+println("done!")

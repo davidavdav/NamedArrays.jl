@@ -1,3 +1,10 @@
+## show.jl
+## (c) 2013--2014 David A. van Leeuwen
+
+## various tests for show()
+
+## This code is licensed under the MIT license
+## See the file LICENSE.md in this distribution
 println("show,")
 
 include("init-namedarrays.jl")

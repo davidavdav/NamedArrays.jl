@@ -4,7 +4,7 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-import Base: getindex, to_index
+import Base: getindex
 
 ## ambiguity from abstractarray.jl
 if VERSION < v"0.5-dev"
@@ -38,8 +38,8 @@ end
 
 ## single index
 indices{K<:Real,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
-indices{K,V<:Integer}(dict::Associative{K,V}, i::Real) = to_index(i)
-indices{K,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
+@inline indices{K,V<:Integer}(dict::Associative{K,V}, i::Real) = Base.to_index(i)
+@inline indices{K,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
 
 ## ambiguity if dict key is CartesionIndex, this should never happen
 indices{K<:CartesianIndex,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
@@ -58,21 +58,28 @@ indices{K,V<:Integer}(dict::Associative{K,V}, ::Colon) = collect(1:length(dict))
 indices{K<:Not,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
 indices(dict::Associative, i::Not) = setdiff(1:length(dict), indices(dict, i.index))
 
-namedgetindex(n::NamedArray, i::Integer) = getindex(n.array, i)
-namedgetindex(n::NamedArray, i1::Integer, i2::Integer) = getindex(n.array, i1, i2)
-namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer) = getindex(n.array, i1, i2, i3)
-namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer) = getindex(n.array, i1, i2, i3, i4)
-namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer) = getindex(n.array, i1, i2, i3, i4, i5)
-namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer, I::Integer...) = getindex(n.array, i1, i2, i3, i4, i5, I...)
+## namedgetindex collects the elements from the array, and takes care of the index names
+## `index` is an integer now, or an array of integers, or a cartesianindex
+## and has been computed by `indices()`
+
+## Simple scalar indexing
+if VERSION < v"0.5.0-dev"
+    namedgetindex(n::NamedArray, i::Integer) = getindex(n.array, i)
+    namedgetindex(n::NamedArray, i1::Integer, i2::Integer) = getindex(n.array, i1, i2)
+    namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer) = getindex(n.array, i1, i2, i3)
+    namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer) = getindex(n.array, i1, i2, i3, i4)
+    namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer) = getindex(n.array, i1, i2, i3, i4, i5)
+    namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer, I::Integer...) = getindex(n.array, i1, i2, i3, i4, i5, I...)
+else
+    @inline namedgetindex{N}(n::NamedArray, I::Vararg{Integer,N}) = getindex(n.array, I...)
+end
 
 dimkeepingtype(x) = false
 dimkeepingtype(x::AbstractArray) = true
 dimkeepingtype(x::Range) = true
 dimkeepingtype(x::BitArray) = true
 
-## namedgetindex collects the elements from the array, and takes care of the index names
-## `index` is an integer now, or an array of integers, or a cartesianindex
-## and has been computed by `indices()`
+## Slices etc.
 if VERSION < v"0.5.0-dev"
     ## in julia pre 0.5, only trailing singleton dimensions are removed
     function namedgetindex(n::NamedArray, index...)
