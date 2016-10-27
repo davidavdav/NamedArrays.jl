@@ -1,4 +1,3 @@
-using Compat
 using DataStructures
 
 include("compat.jl")

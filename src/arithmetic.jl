@@ -123,8 +123,8 @@ end
 ## Abstract \ Named
 ## ambiguity
 \{Tx<:Number,Ty<:Number}(x::Diagonal{Tx}, y::NamedVector{Ty}) = x \ y.array
-@compat \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedVector{Ty}) = x \ y.array
-@compat \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedMatrix{Ty}) = NamedArray(x \ y.array, (defaultnamesdict(size(x,1)), y.dicts[2]), (:A, y.dimnames[2]))
+\{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedVector{Ty}) = x \ y.array
+\{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedMatrix{Ty}) = NamedArray(x \ y.array, (defaultnamesdict(size(x,1)), y.dicts[2]), (:A, y.dimnames[2]))
 if VERSION >= v"0.4.0-dev"
     \(x::Bidiagonal,y::NamedVector) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
     \(x::Bidiagonal,y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))

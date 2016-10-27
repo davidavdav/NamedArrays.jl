@@ -1,4 +1,3 @@
 julia 0.4
-Compat
-Combinatorics
+Combinatorics 0.3.2
 DataStructures 0.4.4

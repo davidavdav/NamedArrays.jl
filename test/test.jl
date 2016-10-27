@@ -43,7 +43,7 @@ print("sum, ")
 print("conversions, ")
 ## conversion
 @test convert(Array, n) == n.array
-@test @compat map(Float32, n).array == @compat map(Float32, n.array)
+@test map(Float32, n).array == map(Float32, n.array)
 
 print("changing names, ")
 ## changingnames

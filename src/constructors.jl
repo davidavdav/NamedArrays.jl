@@ -63,7 +63,7 @@ for the dimensions (`:A`, `:B`, ...) and indices (`"1"`, `"2"`, ...).
 function NamedArray(T::DataType, dims::Int...)
     ld = length(dims)
     names = [[string(j) for j=1:i] for i=dims]
-    dimnames = [@compat Symbol(letter(i)) for i=1:ld]
+    dimnames = [Symbol(letter(i)) for i=1:ld]
     a = Array(T, dims...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end

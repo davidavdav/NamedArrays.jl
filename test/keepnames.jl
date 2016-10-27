@@ -2,7 +2,7 @@ include("init-namedarrays.jl")
 
 print("hcat/vcat, ")
 
-letters = [string(@compat Char(96+i)) for i=1:26]
+letters = [string(Char(96+i)) for i=1:26]
 
 ## vectors
 ## same names

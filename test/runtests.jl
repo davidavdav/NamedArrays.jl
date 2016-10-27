@@ -7,7 +7,6 @@
 ## See the file LICENSE.md in this distribution
 
 using NamedArrays
-using Compat
 using Base.Test
 using DataStructures
 
