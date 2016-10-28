@@ -6,8 +6,8 @@
 
 import Base: getindex
 
-## ambiguity from abstractarray.jl
-if VERSION < v"0.5-dev"
+if VERSION < v"0.5"
+    ## ambiguity from abstractarray.jl
     getindex(n::NamedArray, i::Real) = namedgetindex(n, indices(n.dicts[1], i))
     getindex(n::NamedArray, i::AbstractArray) = namedgetindex(n, indices(n.dicts[1], i))
 end
@@ -17,7 +17,7 @@ getindex(n::NamedArray, ::Colon) = n.array[:]
 
 ## special 0-dimensional case
 getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)
-if VERSION < v"0.5-dev"
+if VERSION < v"0.5"
     getindex(n::NamedArray, i) = namedgetindex(n, indices(n.dicts[1], i))
     getindex(n::NamedArray, i1, i2) = namedgetindex(n, indices(n.dicts[1], i1), indices(n.dicts[2], i2))
     getindex(n::NamedArray, i1, i2, i3) = namedgetindex(n, indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3))
@@ -63,7 +63,7 @@ indices(dict::Associative, i::Not) = setdiff(1:length(dict), indices(dict, i.ind
 ## and has been computed by `indices()`
 
 ## Simple scalar indexing
-if VERSION < v"0.5.0-dev"
+if VERSION < v"0.5"
     namedgetindex(n::NamedArray, i::Integer) = getindex(n.array, i)
     namedgetindex(n::NamedArray, i1::Integer, i2::Integer) = getindex(n.array, i1, i2)
     namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer) = getindex(n.array, i1, i2, i3)
@@ -80,7 +80,7 @@ dimkeepingtype(x::Range) = true
 dimkeepingtype(x::BitArray) = true
 
 ## Slices etc.
-if VERSION < v"0.5.0-dev"
+if VERSION < v"0.5"
     ## in julia pre 0.5, only trailing singleton dimensions are removed
     function namedgetindex(n::NamedArray, index...)
         a = getindex(n.array, index...)
@@ -155,7 +155,7 @@ import Base.setindex!
 
 setindex!{T}(A::NamedArray{T}, x) = setindex!(A, convert(T,x), 1)
 
-if VERSION < v"0.5-dev"
+if VERSION < v"0.5"
     setindex!{T}(n::NamedArray{T}, x, i1::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1],i1))
     setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1], i1), indices(n.dicts[2], i2))
     setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real, i3::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1],i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3))
@@ -178,7 +178,7 @@ function setindex!{T}(A::NamedArray{T}, X::ArrayOrNamed{T}, I::Range{Int})
     return A
 end
 
-if VERSION < v"0.5-dev"
+if VERSION < v"0.5"
     # n[[1,3,4,6]] = 1:4
     setindex!{T<:Real}(A::NamedArray, X::AbstractArray, I::AbstractVector{T}) = setindex!(A.array, X, I)
 

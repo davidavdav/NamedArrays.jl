@@ -19,10 +19,8 @@ defaultdimnames(ndim::Integer) = map(defaultdimname, tuple(1:ndim...))
 defaultdimnames(a::AbstractArray) = defaultdimnames(ndims(a))
 
 ## disambiguation (Argh...)
-if VERSION ≥ v"0.4-dev"
-    NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
-    NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
-end
+NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
+NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
 
 ## Basic constructor: array, tuple of dicts, tuple
 ## This calls the inner constructor with the appropriate types
@@ -68,6 +66,6 @@ function NamedArray(T::DataType, dims::Int...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
 
-if VERSION >= v"0.5.0-dev"
+if VERSION >= v"0.5.0-dev+2396"
     include("typedconstructor.jl")
 end

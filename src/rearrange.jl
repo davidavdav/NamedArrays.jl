@@ -54,7 +54,7 @@ rotr90(n::NamedArray) = transpose(flipdim(n, 1))
 rotl90(n::NamedArray) = transpose(flipdim(n, 2))
 rot180(n::NamedArray) = NamedArray(rot180(n.array), tuple([reverse(name) for name in names(n)]...), n.dimnames)
 
-if VERSION < v"0.5.0-dev"
+if VERSION < v"0.5"
     import Base.nthperm, Base.nthperm!
 else
     import Combinatorics.nthperm, Combinatorics.nthperm!
