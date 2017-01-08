@@ -150,6 +150,7 @@ function indices(n::NamedArray, I::Pair...)
 end
 
 getindex(n::NamedArray, I::Pair...) = getindex(n.array, indices(n, I...)...)
+getindex{T,N}(n::NamedArray{T,N}, I::CartesianIndex{N}) = getindex(n.array, I)
 
 import Base.setindex!
 
