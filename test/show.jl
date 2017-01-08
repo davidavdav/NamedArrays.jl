@@ -102,3 +102,16 @@ lines = showlines(NamedArray(sprand(1000,1000, 1e-4), (nms, nms)))
 @test startswith(lines[1], "1000×1000 Named sparse matrix with")
 @test endswith(lines[1], "Float64 nonzero entries:")
 @test sum([contains(line, "⋮") for line in lines]) == 1
+
+# array with Nullable names
+lines = showlines(NamedArray(rand(2, 2), (Nullable["a", Nullable()], Nullable["c", "d"])))
+@test lines[1] == "2$(times)2 Named Array{Float64,2}"
+if VERSION >= v"0.5.0-"
+    @test split(lines[2]) == ["A", "╲", "B", "│", "\"c\"", "\"d\""]
+    @test startswith(lines[4], "\"a\"")
+    @test startswith(lines[5], "#NULL")
+else
+    @test split(lines[2]) == ["A","╲","B","│","Nullable(\"c\")","Nullable(\"d\")"]
+    @test startswith(lines[4], "Nullable(\"a\")")
+    @test startswith(lines[5], "Nullable")
+end
