@@ -40,11 +40,9 @@ n4 = NamedArray(a, (OrderedDict("a"=>1,"b"=>2), OrderedDict("C"=>1,"D"=>2,"E"=>3
 @test names(n3,2) == names(n4,2) == ["C","D","E"]
 
 ## 0-dim case #21
-if VERSION ≥ v"0.4-dev"
-    n0 = NamedArray(Array{Int}())
-    @test size(n0) == ()
-    @test n0[1] == n0.array[1]
-end
+n0 = NamedArray(Array{Int}())
+@test size(n0) == ()
+@test n0[1] == n0.array[1]
 
 ## Calling constructors through convert, #38
 @test convert(NamedArray, n.array) == NamedArray(n.array)

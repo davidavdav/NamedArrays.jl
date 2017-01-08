@@ -31,7 +31,7 @@ first = n.array[1,:]
 @test names(n[Not("two"), :]) == names(n[1:1, :])
 @test n[:, ["b", "d"]] == view(n, :, ["b", "d"]) == n[:, [2, 4]]
 
-if VERSION < v"0.5.0-dev"
+if VERSION < v"0.5"
     @test names(n["one", :],1) == ["one"]
 end
 @test names(n[Not("one"), :],1) == ["two"]

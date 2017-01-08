@@ -62,20 +62,22 @@ end
 @test ((1:6) - v).array == (1:6) - v.array
 
 ## matmul
-if VERSION >= v"0.5.0-dev" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
+if VERSION ≥ v"0.5" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
     ## Assume dimensions/names are correct
 	c = NamedArray(Float64, 5, 5)
-	A_mul_B!(c, randn(5, 10), randn(10, 5))
-	A_mul_Bc!(c, randn(5, 10), randn(5, 10))
-	A_mul_Bt!(c, randn(5, 10), randn(5, 10))
-	Ac_mul_B!(c, randn(10, 5), randn(10, 5))
-	At_mul_B!(c, randn(10, 5), randn(10, 5))
-	At_mul_Bt!(c, randn(10,5), randn(5, 10))
+	r5x10 = randn(5, 10)
+	r10x5 = randn(10, 5)
+	@test A_mul_B!(c, r5x10, r10x5) == r5x10 * r10x5
+	@test A_mul_Bc!(c, r5x10, r5x10) == r5x10 * r5x10'
+	@test A_mul_Bt!(c, r5x10, r5x10) == r5x10 * r5x10'
+	@test Ac_mul_B!(c, r10x5, r10x5) == r10x5' * r10x5
+	@test At_mul_B!(c, r10x5, r10x5) == r10x5' * r10x5
+	@test At_mul_Bt!(c, r10x5, r5x10) == r10x5' * r5x10'
 end
 
 for m in (NamedArray(rand(4)), NamedArray(rand(4,3)))
-    m * m'
-    m' * m
+    @test m * m' == m.array * m.array'
+    @test m' * m == m.array' * m.array
     @test n * m == n * m.array == n.array * m == n.array * m.array
     ## the first expression dispatches Ac_mul_Bc!:
     @test isapprox(m' * n.array', m' * n')
@@ -151,7 +153,7 @@ lufa = lufact(n.array)
 a = randn(1000,10); s = NamedArray(a'a)
 
 ## The necessity for isapprox sugests we don't get BLAS implementations but a fallback...
-if VERSION >= v"0.5.0-dev" ## v0.4 cholfact is different?
+if VERSION ≥ v"0.5" ## v0.4 cholfact is different?
 	@test isapprox(cholfact(s).factors.array, cholfact(s.array).factors)
 end
 

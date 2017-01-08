@@ -57,7 +57,7 @@ end
 
 import Base: A_mul_B!, A_mul_Bc!, A_mul_Bc, A_mul_Bt!, A_mul_Bt, Ac_mul_B, Ac_mul_B!, Ac_mul_Bc, Ac_mul_Bc!, At_mul_B, At_mul_B!, At_mul_Bt, At_mul_Bt!
 
-if VERSION >= v"0.5.0-dev" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
+if VERSION ≥ v"0.5.0" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
     ## Assume dimensions/names are correct
     for op in (:A_mul_B!, :A_mul_Bc!, :A_mul_Bt!, :Ac_mul_B!, :Ac_mul_Bc!, :At_mul_B!, :At_mul_Bt!)
         @eval ($op)(C::NamedMatrix, A::AbstractMatrix, B::AbstractMatrix) = ($op)(C.array, A, B)
@@ -125,10 +125,10 @@ end
 \{Tx<:Number,Ty<:Number}(x::Diagonal{Tx}, y::NamedVector{Ty}) = x \ y.array
 \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedVector{Ty}) = x \ y.array
 \{Tx<:Number,Ty<:Number}(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedMatrix{Ty}) = NamedArray(x \ y.array, (defaultnamesdict(size(x,1)), y.dicts[2]), (:A, y.dimnames[2]))
-if VERSION >= v"0.4.0-dev"
-    \(x::Bidiagonal,y::NamedVector) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
-    \(x::Bidiagonal,y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
-end
+
+\(x::Bidiagonal,y::NamedVector) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
+\(x::Bidiagonal,y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y,2)), (:A, y.dimnames[2]))
+
 ## AbstractVectorOrMat gives us more ambiguities than separate entries...
 \(x::AbstractVector, y::NamedVector) = x \ y.array
 \(x::AbstractMatrix, y::NamedVector) = x \ y.array

@@ -9,7 +9,7 @@ include("init-namedarrays.jl")
 @test dimnames(n.array, 1) == :A
 @test dimnames(n.array, 2) == :B
 
-if VERSION > v"0.5.0-dev" ## ascii and utf-8 are both String
+if VERSION ≥ v"0.5" ## ascii and utf-8 are both String
 	dn1 = ["一", "二"]
 	dn2 = ["一", "二", "三", "四"]
 else

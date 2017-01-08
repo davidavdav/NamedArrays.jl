@@ -23,7 +23,7 @@ dimnames(a::AbstractArray) = [defaultdimnames(a)...]
 dimnames(a::AbstractArray, d::Integer) = defaultdimname(d)
 
 ## string versions of the above
-strnames(dict::Associative) = map(string, names(dict))
+strnames(dict::Associative) = [isa(name, String) ? name : sprint(showcompact, name) for name in names(dict)]
 strnames(n::NamedArray) = [strnames(d) for d in n.dicts]
 strnames(n::NamedArray, d::Integer) = strnames(n.dicts[d])
 strdimnames(n::NamedArray) = [string(dn) for dn in n.dimnames]
