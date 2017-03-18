@@ -154,8 +154,6 @@ getindex{T,N}(n::NamedArray{T,N}, I::CartesianIndex{N}) = getindex(n.array, I)
 
 import Base.setindex!
 
-setindex!{T}(A::NamedArray{T}, x) = setindex!(A, convert(T,x), 1)
-
 if VERSION < v"0.5"
     setindex!{T}(n::NamedArray{T}, x, i1::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1],i1))
     setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1], i1), indices(n.dicts[2], i2))

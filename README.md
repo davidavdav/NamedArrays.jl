@@ -4,9 +4,8 @@ NamedArrays
 Julia type that implements a drop-in replacement of Array with named dimensions.
 
 [![Build Status](https://travis-ci.org/davidavdav/NamedArrays.jl.svg)](https://travis-ci.org/davidavdav/NamedArrays.jl)
-[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.3.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
-[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.4.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
 [![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.5.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
+[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.6.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
 [![Coverage Status](https://coveralls.io/repos/github/davidavdav/NamedArrays.jl/badge.svg?branch=master)](https://coveralls.io/github/davidavdav/NamedArrays.jl?branch=master)
 
 Idea
@@ -277,11 +276,11 @@ Implementation
 Currently, the type is defined as
 
 ```julia
-type NamedArray{T,N,DT} <: AbstractArray{T,N}
-    array::Array{T,N}
+type NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
+    array::AT
     dicts::DT
-    dimnames::NTuple{N}
-}
+    dimnames::NTuple{N, Any}
+end
 ```
 
-but the inner constructor actually expects `NTuple`s for `names` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `names` and `dimnames`.  You can use the expression `tuple(Vector...)` for that.
+but the inner constructor actually expects `NTuple`s for `dicts` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `dicts` and `dimnames`.  You can use the expression `tuple(Vector...)` for that.
