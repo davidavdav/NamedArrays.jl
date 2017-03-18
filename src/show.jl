@@ -21,9 +21,6 @@ print(n::NamedArray) = print(n.array)
 
 ## This seems to be the essential function to overload for displaying in REPL:
 Base.show(io::IO, ::MIME"text/plain", n::NamedArray) = show(io, n)
-if VERSION < v"0.5.0-dev+4356"
-    Base.writemime(io::IO, ::MIME"text/plain", n::NamedArray) = show(io, n)
-end
 
 ## ndims==1 is dispatched below
 function show(io::IO, n::NamedArray)

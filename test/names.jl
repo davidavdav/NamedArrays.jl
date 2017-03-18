@@ -9,13 +9,8 @@ include("init-namedarrays.jl")
 @test dimnames(n.array, 1) == :A
 @test dimnames(n.array, 2) == :B
 
-if VERSION ≥ v"0.5" ## ascii and utf-8 are both String
-	dn1 = ["一", "二"]
-	dn2 = ["一", "二", "三", "四"]
-else
-	dn1 = ["yi", "er"]
-	dn2 = ["yi", "er", "san", "si"]
-end
+dn1 = ["一", "二"]
+dn2 = ["一", "二", "三", "四"]
 
 setnames!(n, dn1, 1)
 for (i, zh) in enumerate(dn2)

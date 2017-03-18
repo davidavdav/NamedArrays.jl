@@ -12,29 +12,24 @@ letter(i) = string(Char((64+i) % 256))
 defaultnames(dim::Integer) = map(string, 1:dim)
 defaultnamesdict(names::Vector) = OrderedDict(zip(names, 1:length(names)))
 defaultnamesdict(dim::Integer) = defaultnamesdict(defaultnames(dim))
-defaultnamesdict(dims::NTuple) = map(defaultnamesdict, dims)
+defaultnamesdict(dims::Tuple) = map(defaultnamesdict, dims)
 
 defaultdimname(dim::Integer) = Symbol(letter(dim))
 defaultdimnames(ndim::Integer) = map(defaultdimname, tuple(1:ndim...))
 defaultdimnames(a::AbstractArray) = defaultdimnames(ndims(a))
 
 ## disambiguation (Argh...)
-NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
+NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N, Any}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
 NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
 
 ## Basic constructor: array, tuple of dicts, tuple
-## This calls the inner constructor with the appropriate types
-function NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,OrderedDict}, dimnames::NTuple{N})
-    NamedArray{T, N, typeof(a), typeof(names)}(a, names, dimnames) ## inner constructor
-end
-
 ## dimnames created as default, then inner constructor called
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,OrderedDict})
     NamedArray{T, N, typeof(array), typeof(names)}(array, names, defaultdimnames(array)) ## inner constructor
 end
 
 ## constructor with array, names and dimnames (dict is created from names)
-function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N}=defaultdimnames(array))
+function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N, Any}=defaultdimnames(array))
     dicts = defaultnamesdict(names)
     NamedArray(array, dicts, dimnames)
 end
@@ -62,10 +57,8 @@ function NamedArray(T::DataType, dims::Int...)
     ld = length(dims)
     names = [[string(j) for j=1:i] for i=dims]
     dimnames = [Symbol(letter(i)) for i=1:ld]
-    a = Array(T, dims...)
+    a = Array{T}(dims...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
 
-if VERSION >= v"0.5.0-dev+2396"
-    include("typedconstructor.jl")
-end
+(::Type{NamedArray{T}}){T}(n) = NamedArray(Array{T}(n))

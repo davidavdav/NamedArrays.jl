@@ -10,8 +10,4 @@ using NamedArrays
 using Base.Test
 using DataStructures
 
-if VERSION < v"0.5"
-	view(n::NamedArray, args...) = getindex(n, args...)
-end
-
 include("test.jl")

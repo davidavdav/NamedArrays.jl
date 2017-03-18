@@ -5,14 +5,21 @@
 ## This code is licensed under the MIT License
 ## See the file LICENSE.md in this distribution
 
-import Base: +, -, *, /, .+, .-, .*, ./, \
+import Base: +, -, *, /
+if VERSION < v"0.6.0-dev.1632"
+    @eval import Base: .+, .-, .*, ./, \
+end
 
 -(n::NamedArray) = NamedArray(-n.array, n.dicts, n.dimnames)
 
 ## disambiguation magic
-.*(n::NamedArray{Bool}, b::BitArray) = NamedArray(n.array .* b, n.dicts, n.dimnames)
-.*{N}(n::NamedArray{Bool,N}, b::BitArray{N}) = NamedArray(n.array .* b, n.dicts, n.dimnames)
-.*{N}(b::BitArray{N}, n::NamedArray{Bool,N}) = n .* b
+if VERSION < v"0.6.0-dev.1632"
+    @eval begin
+        .*(n::NamedArray{Bool}, b::BitArray) = NamedArray(n.array .* b, n.dicts, n.dimnames)
+        .*{N}(n::NamedArray{Bool,N}, b::BitArray{N}) = NamedArray(n.array .* b, n.dicts, n.dimnames)
+        .*{N}(b::BitArray{N}, n::NamedArray{Bool,N}) = n .* b
+    end
+end
 
 # disambiguation (Argh...)
 for op in (:+, :-)
@@ -20,7 +27,24 @@ for op in (:+, :-)
     @eval ($op){T1<:Number,T2<:Number}(x::NamedVector{T1}, y::Range{T2}) = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
 end
 
-for op in (:+, :-, :.+, :.-, :.*, :./)
+if VERSION < v"0.6.0-dev.1632"
+    for op in (:.+, :.-, :.*, :./)
+        @eval begin
+            function ($op){T1<:Number, T2<:Number}(x::NamedArray{T1}, y::NamedArray{T2})
+                if names(x) == names(y) && x.dimnames == y.dimnames
+                    NamedArray(($op)(x.array, y.array), x.dicts, x.dimnames)
+                else
+                    warn("Dropping mismatching names")
+                    ($op)(x.array, y.array)
+                end
+            end
+            ($op){T1<:Number,T2<:Number,N}(x::NamedArray{T1,N}, y::AbstractArray{T2,N}) = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
+            ($op){T1<:Number,T2<:Number,N}(x::AbstractArray{T1,N}, y::NamedArray{T2,N}) = NamedArray(($op)(x, y.array), y.dicts, y.dimnames)
+        end
+    end
+end
+
+for op in (:+, :-)
     ## named %op% named
     @eval begin
         function ($op){T1<:Number, T2<:Number}(x::NamedArray{T1}, y::NamedArray{T2})
@@ -46,7 +70,16 @@ for op in (:+, :-)
 end
 
 ## NamedArray, Number
-for op in (:+, :-, :*, :.+, :.-, :.*, :./)
+if VERSION < v"0.6.0-dev.1632"
+    for op in (:.+, :.-, :.*, :./)
+        @eval begin
+            ($op){T1<:Number,T2<:Number}(x::NamedArray{T1}, y::T2) = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
+            ($op){T1<:Number,T2<:Number}(x::T1, y::NamedArray{T2}) = NamedArray(($op)(x, y.array), y.dicts, y.dimnames)
+        end
+    end
+end
+
+for op in (:+, :-, :*)
     @eval begin
         ($op){T1<:Number,T2<:Number}(x::NamedArray{T1}, y::T2) = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
         ($op){T1<:Number,T2<:Number}(x::T1, y::NamedArray{T2}) = NamedArray(($op)(x, y.array), y.dicts, y.dimnames)
@@ -57,11 +90,9 @@ end
 
 import Base: A_mul_B!, A_mul_Bc!, A_mul_Bc, A_mul_Bt!, A_mul_Bt, Ac_mul_B, Ac_mul_B!, Ac_mul_Bc, Ac_mul_Bc!, At_mul_B, At_mul_B!, At_mul_Bt, At_mul_Bt!
 
-if VERSION ≥ v"0.5.0" ## v0.4 ambiguity-hell with AbstractTriangular c.s.
-    ## Assume dimensions/names are correct
-    for op in (:A_mul_B!, :A_mul_Bc!, :A_mul_Bt!, :Ac_mul_B!, :Ac_mul_Bc!, :At_mul_B!, :At_mul_Bt!)
-        @eval ($op)(C::NamedMatrix, A::AbstractMatrix, B::AbstractMatrix) = ($op)(C.array, A, B)
-    end
+## Assume dimensions/names are correct
+for op in (:A_mul_B!, :A_mul_Bc!, :A_mul_Bt!, :Ac_mul_B!, :Ac_mul_Bc!, :At_mul_B!, :At_mul_Bt!)
+    @eval ($op)(C::NamedMatrix, A::AbstractMatrix, B::AbstractMatrix) = ($op)(C.array, A, B)
 end
 
 for op in (:A_mul_Bc, :A_mul_Bt)
@@ -87,7 +118,7 @@ for op in (:Ac_mul_Bc, :At_mul_Bt)
 end
 
 import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfact, qrfact!, qrfact, eigfact!, eigfact, eigvals!,
-    eigvals, hessfact, hessfact!, schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!, scale,
+    eigvals, hessfact, hessfact!, schurfact!, schurfact, svdfact!, svdfact, svdvals!, svdvals, svd, diag, diagm, scale!,
     cond, kron, linreg, lyap, sylvester, isposdef
 
 ## matmul

@@ -4,9 +4,8 @@ NamedArrays
 Julia type that implements a drop-in replacement of Array with named dimensions.
 
 [![Build Status](https://travis-ci.org/davidavdav/NamedArrays.jl.svg)](https://travis-ci.org/davidavdav/NamedArrays.jl)
-[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.3.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
-[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.4.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
 [![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.5.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
+[![NamedArrays](http://pkg.julialang.org/badges/NamedArrays_0.6.svg)](http://pkg.julialang.org/?pkg=NamedArrays)
 [![Coverage Status](https://coveralls.io/repos/github/davidavdav/NamedArrays.jl/badge.svg?branch=master)](https://coveralls.io/github/davidavdav/NamedArrays.jl?branch=master)
 
 Idea
@@ -38,9 +37,9 @@ Construction
 
 ```julia
 # NamedArray(a::Array)
-x = NamedArray(Int[1 2; 3 4])
-# NamedArray(::Type{T}, dims...)
-x = NamedArray(Int, 2, 2)
+x = NamedArray([1 2; 3 4])
+# NamedArray{T}(dims...)
+x = NamedArray{Int}(2, 2)
 ```
 
 these constructors add default names to the array of type String, "1",
@@ -52,15 +51,15 @@ NamedArray of element type `T` with the specified dimensions `dims...`.
 
 ```julia
 # NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Dict}, dimnames::NTuple{N})
-x = NamedArray(Int[1 3; 2 4], ( ["A"=>1,"B"=>2], ["C"=>1,"D"=>2] ), ("ROWS","COLS"))
+x = NamedArray([1 3; 2 4], ( ["A"=>1,"B"=>2], ["C"=>1,"D"=>2] ), ("ROWS","COLS"))
 ```
 This is the basic constructor for a namedarray.  `names` must be a tuple of `Dict`s whose range (the values) are exacly covering the range `1:size(a,dim)` for each dimension `dim`.   The keys in the various dictionaries may be of mixed types, but after initialization, the type of the names cannot be altered.  `dimnames` specify the names of the dimensions themselves, and may be of any type.
 
 ```julia
 # NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
-x = NamedArray(Int[1 3; 2 4], ( ["A","B"], ["C","D"] ), ("ROWS","COLS"))
+x = NamedArray([1 3; 2 4], ( ["A","B"], ["C","D"] ), ("ROWS","COLS"))
 # NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Vector})
-x = NamedArray(Int[1 3; 2 4], ( ["A","B"], ["C","D"] ))
+x = NamedArray([1 3; 2 4], ( ["A","B"], ["C","D"] ))
 ```
 This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.).
 
@@ -277,11 +276,11 @@ Implementation
 Currently, the type is defined as
 
 ```julia
-type NamedArray{T,N,DT} <: AbstractArray{T,N}
-    array::Array{T,N}
+type NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
+    array::AT
     dicts::DT
-    dimnames::NTuple{N}
-}
+    dimnames::NTuple{N, Any}
+end
 ```
 
-but the inner constructor actually expects `NTuple`s for `names` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `names` and `dimnames`.  You can use the expression `tuple(Vector...)` for that.
+but the inner constructor actually expects `NTuple`s for `dicts` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `dicts` and `dimnames`.  You can use the expression `tuple(Vector...)` for that.

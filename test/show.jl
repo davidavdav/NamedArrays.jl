@@ -9,18 +9,10 @@ println("show,")
 
 include("init-namedarrays.jl")
 
-if VERSION ≥ v"0.5"
-    tostring(b::IOBuffer) = String(b)
-    times = "×" ## \times
-else
-    tostring(b::IOBuffer) = UTF8String(b.data)
-    times = "x" # ex
-end
-
 function showlines(x...)
     buf = IOBuffer()
     show(buf, x...)
-    return split(tostring(buf), "\n")
+    return split(String(buf), "\n")
 end
 
 lines = showlines(NamedArray(Array{Int}()))
@@ -33,14 +25,14 @@ lines = showlines(NamedArray([]))
 
 for lines in Any[showlines(n), showlines(MIME"text/plain"(), n)]
     @test length(lines) == 5
-    @test lines[1] == "2$(times)4 Named Array{Float64,2}"
+    @test lines[1] == "2×4 Named Array{Float64,2}"
     @test split(lines[2]) == vcat(["A", "╲", "B", "│"], letters[1:4])
 end
 
 ## wide array abbreviated
 lines = showlines(NamedArray(randn(2,1000)))
 @test length(lines) == 5
-@test lines[1] == "2$(times)1000 Named Array{Float64,2}"
+@test lines[1] == "2×1000 Named Array{Float64,2}"
 header = split(lines[2])
 @test header[vcat(1:5, end)] == ["A", "╲", "B", "│", "1", "1000"]
 @test "…" in header
@@ -51,7 +43,7 @@ end
 ## tall array abbreviated
 lines = showlines(NamedArray(randn(1000,2)))
 @test length(lines) > 7
-@test lines[1] == "1000$(times)2 Named Array{Float64,2}"
+@test lines[1] == "1000×2 Named Array{Float64,2}"
 @test split(lines[2]) == ["A", "╲", "B", "│", "1", "2"]
 @test split(lines[4])[1] == "1"
 @test split(lines[end])[1] == "1000"
@@ -68,7 +60,7 @@ lines = showlines(NamedArray(randn(1000)))
 zo = [0,1]
 lines = showlines(NamedArray(rand(2,2,2), (zo, zo, zo), ("base", "zero", "indexing")))
 @test length(lines) == 13
-@test lines[1] == "2$(times)2$(times)2 Named Array{Float64,3}"
+@test lines[1] == "2×2×2 Named Array{Float64,3}"
 
 for (index, offset) in ([0, 3], [1, 9])
     @test lines[offset] == "[:, :, indexing=$index] ="
@@ -82,7 +74,7 @@ for ndim in 1:5
     if (ndim == 1)
         line1 = "2-element Named Array{Float64,1}"
     else
-        line1 = join(repmat(["2"], ndim), times) * " Named Array{Float64,$ndim}"
+        line1 = join(repmat(["2"], ndim), "×") * " Named Array{Float64,$ndim}"
     end
     @test lines[1] == line1
     if ndim ≥ 3
@@ -105,13 +97,7 @@ lines = showlines(NamedArray(sprand(1000,1000, 1e-4), (nms, nms)))
 
 # array with Nullable names
 lines = showlines(NamedArray(rand(2, 2), (Nullable["a", Nullable()], Nullable["c", "d"])))
-@test lines[1] == "2$(times)2 Named Array{Float64,2}"
-if VERSION >= v"0.5.0-"
-    @test split(lines[2]) == ["A", "╲", "B", "│", "\"c\"", "\"d\""]
-    @test startswith(lines[4], "\"a\"")
-    @test startswith(lines[5], "#NULL")
-else
-    @test split(lines[2]) == ["A","╲","B","│","Nullable(\"c\")","Nullable(\"d\")"]
-    @test startswith(lines[4], "Nullable(\"a\")")
-    @test startswith(lines[5], "Nullable")
-end
+@test lines[1] == "2×2 Named Array{Float64,2}"
+@test split(lines[2]) == ["A", "╲", "B", "│", "\"c\"", "\"d\""]
+@test startswith(lines[4], "\"a\"")
+@test startswith(lines[5], "#NULL")
