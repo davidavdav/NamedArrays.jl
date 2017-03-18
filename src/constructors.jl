@@ -61,6 +61,4 @@ function NamedArray(T::DataType, dims::Int...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
 
-if VERSION >= v"0.5.0-dev+2396"
-    include("typedconstructor.jl")
-end
+(::Type{NamedArray{T}}){T}(n) = NamedArray(Array{T}(n))

@@ -6,33 +6,18 @@
 
 import Base: getindex
 
-if VERSION < v"0.5"
-    ## ambiguity from abstractarray.jl
-    getindex(n::NamedArray, i::Real) = namedgetindex(n, indices(n.dicts[1], i))
-    getindex(n::NamedArray, i::AbstractArray) = namedgetindex(n, indices(n.dicts[1], i))
-end
 ## from subarray.jl
 getindex(n::NamedVector, ::Colon) = n
 getindex(n::NamedArray, ::Colon) = n.array[:]
 
 ## special 0-dimensional case
 getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)
-if VERSION < v"0.5"
-    getindex(n::NamedArray, i) = namedgetindex(n, indices(n.dicts[1], i))
-    getindex(n::NamedArray, i1, i2) = namedgetindex(n, indices(n.dicts[1], i1), indices(n.dicts[2], i2))
-    getindex(n::NamedArray, i1, i2, i3) = namedgetindex(n, indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3))
-    getindex(n::NamedArray, i1, i2, i3, i4) = namedgetindex(n, indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3), indices(n.dicts[4], i4))
-    getindex(n::NamedArray, i1, i2, i3, i4, i5) = namedgetindex(n, indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3), indices(n.dicts[4], i4), indices(n.dicts[5], i5))
-    getindex(n::NamedArray, i1, i2, i3, i4, i5, I...) = namedgetindex(n, indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3), indices(n.dicts[4], i4), indices(n.dicts[5], i5), [indices(n.dicts[5+i], ind) for (i,ind) in enumerate(I)]...)
 
-    getindex(n::NamedArray, it::Base.IteratorsMD.CartesianIndex) = getindex(n.array, it)
-else
-    @inline function getindex{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N})
-        namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...)
-    end
-	Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Union{AbstractArray,Colon,Real},N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
-	Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
+@inline function getindex{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N})
+    namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...)
 end
+Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Union{AbstractArray,Colon,Real},N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
+Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
 
 ## indices(::Associative, index) converts any type `index` to Integer
 
@@ -63,16 +48,7 @@ indices(dict::Associative, i::Not) = setdiff(1:length(dict), indices(dict, i.ind
 ## and has been computed by `indices()`
 
 ## Simple scalar indexing
-if VERSION < v"0.5"
-    namedgetindex(n::NamedArray, i::Integer) = getindex(n.array, i)
-    namedgetindex(n::NamedArray, i1::Integer, i2::Integer) = getindex(n.array, i1, i2)
-    namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer) = getindex(n.array, i1, i2, i3)
-    namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer) = getindex(n.array, i1, i2, i3, i4)
-    namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer) = getindex(n.array, i1, i2, i3, i4, i5)
-    namedgetindex(n::NamedArray, i1::Integer, i2::Integer, i3::Integer, i4::Integer, i5::Integer, I::Integer...) = getindex(n.array, i1, i2, i3, i4, i5, I...)
-else
-    @inline namedgetindex{N}(n::NamedArray, I::Vararg{Integer,N}) = getindex(n.array, I...)
-end
+@inline namedgetindex{N}(n::NamedArray, I::Vararg{Integer,N}) = getindex(n.array, I...)
 
 dimkeepingtype(x) = false
 dimkeepingtype(x::AbstractArray) = true
@@ -80,62 +56,34 @@ dimkeepingtype(x::Range) = true
 dimkeepingtype(x::BitArray) = true
 
 ## Slices etc.
-if VERSION < v"0.5"
-    ## in julia pre 0.5, only trailing singleton dimensions are removed
-    function namedgetindex(n::NamedArray, index...)
+namedgetindex(n::NamedArray, index::CartesianIndex) = getindex(n.array, index)
+function namedgetindex(n::NamedArray, index...; useview=false)
+    if useview
+        a = view(n.array, index...)
+    else
         a = getindex(n.array, index...)
-        N = length(index)
-        keeping = collect(1:N) ## dimensions that are kept after slicing
-        i = N
-        while i > 1 && !dimkeepingtype(index[i])
-            deleteat!(keeping, i)
-            i -= 1
-        end
-        if ndims(a) != length(keeping) ## || length(dims) == 1 && ndims(n) > 1
-            warn("Dropped names for ", typeof(n.array), " with index ", index)
-            return a;               # number of dimension changed, this should not happen
-        end
-        newnames = Any[]
-        for d in keeping
-            if dimkeepingtype(index[d])
-                push!(newnames, names(n, d)[index[d]])
-            else
-                push!(newnames, names(n, d)[[index[d]]]) ## for julia-0.4, index[d] could be Integer, but result should be Array
-            end
-        end
-        return NamedArray(a, tuple(newnames...), n.dimnames[keeping])
     end
-else
-    ## in julia post 0.5, all singleton dimensions are removed
-    namedgetindex(n::NamedArray, index::CartesianIndex) = getindex(n.array, index)
-    function namedgetindex(n::NamedArray, index...; useview=false)
-        if useview
-            a = view(n.array, index...)
+    N = length(index)
+    keeping = filter(i -> dimkeepingtype(index[i]), 1:N)
+    if ndims(a) < length(keeping) ## || length(dims) == 1 && ndims(n) > 1
+        warn("Dropped names for ", typeof(n.array), " with index ", index)
+        return a;               # number of dimension changed, this should not happen
+    end
+    newnames = Any[]
+    newdimnames = []
+    for d in keeping
+        if ndims(index[d]) > 1
+            ## take over the names of the index for this dimension
+            for (name, dimname) in zip(defaultnames(index[d]), dimnames(index[d]))
+                push!(newnames, name)
+                push!(newdimnames, Symbol(string(n.dimnames[d], "_", dimname)))
+            end
         else
-            a = getindex(n.array, index...)
+            push!(newnames, names(n, d)[index[d]])
+            push!(newdimnames, n.dimnames[d])
         end
-        N = length(index)
-        keeping = filter(i -> dimkeepingtype(index[i]), 1:N)
-        if ndims(a) < length(keeping) ## || length(dims) == 1 && ndims(n) > 1
-            warn("Dropped names for ", typeof(n.array), " with index ", index)
-            return a;               # number of dimension changed, this should not happen
-        end
-        newnames = Any[]
-        newdimnames = []
-        for d in keeping
-            if ndims(index[d]) > 1
-                ## take over the names of the index for this dimension
-                for (name, dimname) in zip(defaultnames(index[d]), dimnames(index[d]))
-                    push!(newnames, name)
-                    push!(newdimnames, Symbol(string(n.dimnames[d], "_", dimname)))
-                end
-            else
-                push!(newnames, names(n, d)[index[d]])
-                push!(newdimnames, n.dimnames[d])
-            end
-        end
-        return NamedArray(a, tuple(newnames...), tuple(newdimnames...))
     end
+    return NamedArray(a, tuple(newnames...), tuple(newdimnames...))
 end
 
 function indices(n::NamedArray, I::Pair...)
@@ -154,18 +102,6 @@ getindex{T,N}(n::NamedArray{T,N}, I::CartesianIndex{N}) = getindex(n.array, I)
 
 import Base.setindex!
 
-if VERSION < v"0.5"
-    setindex!{T}(n::NamedArray{T}, x, i1::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1],i1))
-    setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1], i1), indices(n.dicts[2], i2))
-    setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real, i3::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1],i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3))
-    setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3), indices(n.dicts[4], i4))
-    setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3), indices(n.dicts[4], i4), indices(n.dicts[5], i5))
-    setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real, i6::Real) = setindex!(n.array, convert(T,x), indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3), indices(n.dicts[4], i4), indices(n.dicts[5], i5), indices(n.dicts[6], i6))
-    setindex!{T}(n::NamedArray{T}, x, i1::Real, i2::Real, i3::Real, i4::Real, i5::Real, i6::Real, I...) = setindex!(n.array, convert(T,x), indices(n.dicts[1], i1), indices(n.dicts[2], i2), indices(n.dicts[3], i3), indices(n.dicts[4], i4), indices(n.dicts[5], i5), indices(n.dicts[6], i6), I...)
-    # n[1:4] = 5
-    setindex!{T<:Real}(A::NamedArray, x, I::Union{Colon,AbstractVector{T}}) = setindex!(A.array, x, I)
-end
-
 # n[:] = m
 setindex!(n::NamedArray, x, ::Colon) = setindex!(n.array, x, :)
 
@@ -177,23 +113,9 @@ function setindex!{T}(A::NamedArray{T}, X::ArrayOrNamed{T}, I::Range{Int})
     return A
 end
 
-if VERSION < v"0.5"
-    # n[[1,3,4,6]] = 1:4
-    setindex!{T<:Real}(A::NamedArray, X::AbstractArray, I::AbstractVector{T}) = setindex!(A.array, X, I)
-
-    setindex!(n::NamedArray, x, it::Base.IteratorsMD.CartesianIndex) = setindex!(n.array, x, it)
-    setindex!(n::NamedArray, x, I::Pair...) = setindex!(n.array, x, indices(n, I...)...)
-
-    ## This takes care of most other cases
-    function setindex!(A::NamedArray, x, I...)
-        II = tuple([indices(A.dicts[i], I[i]) for i=1:length(I)]...)
-        setindex!(A.array, x, II...)
-    end
-else
-    ## This takes care of most other cases
-    @inline function setindex!{T,N}(A::NamedArray{T,N}, x, I::Vararg{Any,N})
-        II = map((d,i)->indices(d, i), A.dicts, I)
-        setindex!(A.array, x, II...)
-    end
-    @inline setindex!{T,N}(n::NamedArray{T,N}, x, I::Vararg{Pair,N}) = setindex!(n.array, x, indices(n, I...)...)
+## This takes care of most other cases
+@inline function setindex!{T,N}(A::NamedArray{T,N}, x, I::Vararg{Any,N})
+    II = map((d,i)->indices(d, i), A.dicts, I)
+    setindex!(A.array, x, II...)
 end
+@inline setindex!{T,N}(n::NamedArray{T,N}, x, I::Vararg{Pair,N}) = setindex!(n.array, x, indices(n, I...)...)

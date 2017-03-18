@@ -67,13 +67,11 @@ for i1=1:2, i2=1:3, i3=1:4, i4=1:3, i5=1:2, i6=1:3
     @test m[string(i1), string(i2), string(i3), string(i4), string(i5), string(i6)] == m.array[i1,i2,i3,i4,i5,i6]
 end
 m[1, :, 2, :, 2, 3].array == m.array[1, :, 2, :, 2, 3]
-if VERSION ≥ v"0.5"
-    i = [3 2 4; 1 4 2]
-    @test n[:, i].array == n.array[:, i]
-    @test names(n[:, i], 1) == names(n, 1)
-    @test names(n[:, i], 2) == map(string, 1:2)
-    @test names(n[:, i], 3) == map(string, 1:3)
-end
+i = [3 2 4; 1 4 2]
+@test n[:, i].array == n.array[:, i]
+@test names(n[:, i], 1) == names(n, 1)
+@test names(n[:, i], 2) == map(string, 1:2)
+@test names(n[:, i], 3) == map(string, 1:3)
 
 print("dodgy indices, ")
 ## weird indices
@@ -111,22 +109,16 @@ print("vectorized, ")
 
 ## a selection of vectorized functions
 for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos, :atan, :sinc, :cosc, :deg2rad, :log, :log2, :log10, :log1p, :exp, :exp2, :exp10, :expm1, :abs, :abs2, :sign, :sqrt,  :erf, :erfc, :erfcx, :erfi, :dawson, :erfinv, :erfcinv, :gamma, :lgamma, :digamma, :invdigamma, :trigamma, :besselj0, :besselj1, :bessely0, :bessely1, :eta, :zeta)
-    if VERSION < v"0.5"
-        @eval @test ($f)(n).array == ($f)(n.array)
-    else
-        @eval begin
-            m = ($f).(n)
-            @test m.array == ($f).(n.array)
-            @test namesanddim(m) == namesanddim(n)
-        end
+    @eval begin
+        m = ($f).(n)
+        @test m.array == ($f).(n.array)
+        @test namesanddim(m) == namesanddim(n)
     end
 end
 #39
-if VERSION ≥ v"0.5"
-    v = n[1,:]
-    @test sin.(v).array == sin.(v.array)
-    @test namesanddim(sin.(v)) == namesanddim(v)
-end
+v = n[1,:]
+@test sin.(v).array == sin.(v.array)
+@test namesanddim(sin.(v)) == namesanddim(v)
 
 include("rearrange.jl")
 
@@ -142,10 +134,8 @@ include("show.jl")
 
 include("speed.jl")
 
-if VERSION ≥ v"0.5"
-    # julia issue #17328
-    a = NamedArray([1.0,2.0,3.0,4.0])
-    @test sumabs(a, 1)[1] == 10
-end
+# julia issue #17328
+a = NamedArray([1.0,2.0,3.0,4.0])
+@test sumabs(a, 1)[1] == 10
 
 println("done!")

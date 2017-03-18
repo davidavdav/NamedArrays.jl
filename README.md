@@ -37,9 +37,9 @@ Construction
 
 ```julia
 # NamedArray(a::Array)
-x = NamedArray(Int[1 2; 3 4])
-# NamedArray(::Type{T}, dims...)
-x = NamedArray(Int, 2, 2)
+x = NamedArray([1 2; 3 4])
+# NamedArray{T}(dims...)
+x = NamedArray{Int}(2, 2)
 ```
 
 these constructors add default names to the array of type String, "1",
@@ -51,15 +51,15 @@ NamedArray of element type `T` with the specified dimensions `dims...`.
 
 ```julia
 # NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Dict}, dimnames::NTuple{N})
-x = NamedArray(Int[1 3; 2 4], ( ["A"=>1,"B"=>2], ["C"=>1,"D"=>2] ), ("ROWS","COLS"))
+x = NamedArray([1 3; 2 4], ( ["A"=>1,"B"=>2], ["C"=>1,"D"=>2] ), ("ROWS","COLS"))
 ```
 This is the basic constructor for a namedarray.  `names` must be a tuple of `Dict`s whose range (the values) are exacly covering the range `1:size(a,dim)` for each dimension `dim`.   The keys in the various dictionaries may be of mixed types, but after initialization, the type of the names cannot be altered.  `dimnames` specify the names of the dimensions themselves, and may be of any type.
 
 ```julia
 # NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
-x = NamedArray(Int[1 3; 2 4], ( ["A","B"], ["C","D"] ), ("ROWS","COLS"))
+x = NamedArray([1 3; 2 4], ( ["A","B"], ["C","D"] ), ("ROWS","COLS"))
 # NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Vector})
-x = NamedArray(Int[1 3; 2 4], ( ["A","B"], ["C","D"] ))
+x = NamedArray([1 3; 2 4], ( ["A","B"], ["C","D"] ))
 ```
 This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.).
 

@@ -1,9 +1,6 @@
 n = NamedArray(rand(2,4))
 Letters = [string(Char(64+i)) for i in 1:26]
 letters = [string(Char(64+32+i)) for i in 1:26]
-if VERSION < v"0.5"
-	letters = ASCIIString[ascii(s) for s in letters]
-end
 
 setnames!(n, ["one", "two"], 1)
 setnames!(n, letters[1:4], 2)
