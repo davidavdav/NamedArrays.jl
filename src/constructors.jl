@@ -61,4 +61,4 @@ function NamedArray(T::DataType, dims::Int...)
     NamedArray(a, tuple(names...), tuple(dimnames...))
 end
 
-(::Type{NamedArray{T}}){T}(n) = NamedArray(Array{T}(n))
+(::Type{NamedArray{T}}){T}(n...) = NamedArray(Array{T}(n...))
