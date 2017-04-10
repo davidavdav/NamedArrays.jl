@@ -47,3 +47,10 @@ n0 = NamedArray(Array{Int}())
 ## Calling constructors through convert, #38
 @test convert(NamedArray, n.array) == NamedArray(n.array)
 @test convert(NamedVector, [1, 2, 3]) == NamedArray([1, 2, 3])
+
+## new uninitialized construction syntax, #46
+for i in 1:5
+	dims = 2*ones(Int, i)
+	n1 = NamedArray(Int, dims...)
+	n2 = NamedArray{Int}(dims...)
+end
