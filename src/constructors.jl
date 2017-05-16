@@ -1,5 +1,5 @@
 ## constructors.jl
-## (c) 2014 David A. van Leeuwen
+## (c) 2014--2017 David A. van Leeuwen
 
 ## Constructors related to the types in namedarraytypes.jl
 
@@ -22,7 +22,7 @@ defaultdimnames(a::AbstractArray) = defaultdimnames(ndims(a))
 NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N, Any}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
 NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
 
-## Basic constructor: array, tuple of dicts, tuple
+## Basic constructor: array, tuple of dicts
 ## dimnames created as default, then inner constructor called
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,OrderedDict})
     NamedArray{T, N, typeof(array), typeof(names)}(array, names, defaultdimnames(array)) ## inner constructor

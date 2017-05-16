@@ -18,7 +18,7 @@ for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
 end
 
 function fan{T,N}(f::Function, fname::AbstractString, a::NamedArray{T,N}, dim::Int)
-    dimnames = Array(Any, N)
+    dimnames = Array{Any}(N)
     for i=1:N
         if i==dim
             dimnames[i] = string(fname, "(", a.dimnames[dim], ")")
@@ -30,7 +30,7 @@ function fan{T,N}(f::Function, fname::AbstractString, a::NamedArray{T,N}, dim::I
 end
 
 ## rename a dimension
-for f in (:cumprod, :cumsum, :cumsum_kbn, :cummin, :cummax)
+for f in (:cumprod, :cumsum, :cumsum_kbn)
     eval(Expr(:import, :Base, f))
     @eval ($f)(a::NamedArray, d::Integer=1) = fan($f, string($f), a, d)
 end

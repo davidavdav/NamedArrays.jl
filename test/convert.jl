@@ -2,7 +2,6 @@ print("convert, ")
 
 n = NamedArray(randn(5, 10))
 
-@test array(n) == n.array
 @test convert(Array, n) == n.array
 @test convert(NamedArray, n) == n
 

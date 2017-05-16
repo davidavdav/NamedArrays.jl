@@ -9,5 +9,6 @@
 using NamedArrays
 using Base.Test
 using DataStructures
+using Combinatorics
 
 include("test.jl")

@@ -54,7 +54,7 @@ function setnames!(n::NamedArray, v, d::Integer, i::Integer)
     n.dicts[d][v] = i
 end
 
-function setdimnames!{T,N}(n::NamedArray{T,N}, dn::NTuple{N})
+function setdimnames!{T,N}(n::NamedArray{T,N}, dn::NTuple{N,Any})
     n.dimnames = dn
 end
 
@@ -62,7 +62,7 @@ setdimnames!(n::NamedArray, dn::Vector) = setdimnames!(n, tuple(dn...))
 
 function setdimnames!{T,N}(n::NamedArray{T,N}, v, d::Integer)
     1 <= d <= N || throw(BoundsError(size(n), d))
-    vdimnames = Array(Any, N)
+    vdimnames = Array{Any}(N)
     for i=1:N
         if i==d
             vdimnames[i] = v

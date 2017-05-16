@@ -98,6 +98,8 @@ function indices(n::NamedArray, I::Pair...)
 end
 
 getindex(n::NamedArray, I::Pair...) = getindex(n.array, indices(n, I...)...)
+## 0.6 ambiguity
+getindex(n::NamedVector, I::CartesianIndex{1}) = getindex(n.array, I)
 getindex{T,N}(n::NamedArray{T,N}, I::CartesianIndex{N}) = getindex(n.array, I)
 
 import Base.setindex!

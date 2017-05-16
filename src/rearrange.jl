@@ -18,7 +18,7 @@ end
 
 import Base.flipdim
 function flipdim{T,N}(a::NamedArray{T,N}, d::Int)
-    vdicts = Array(OrderedDict, N)
+    vdicts = Array{OrderedDict}(N)
     n = size(a,d)+1
     for i=1:N
         dict = copy(a.dicts[i])

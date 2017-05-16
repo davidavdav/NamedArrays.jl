@@ -48,9 +48,49 @@ function Base.vcat(N::NamedVector...)
     end
 end
 
-## broadcast
+## broadcast v0.5
 Base.Broadcast.broadcast_t(f, T, n::NamedArray, As...) = broadcast!(f, similar(n, T, Base.Broadcast.broadcast_shape(n, As...)), n, As...)
-
+## broadcast v0.6
+if VERSION ≥ v"0.6.0-dev"
+    Base.Broadcast._containertype(::Type{<:NamedArray}) = NamedArray
+    Base.Broadcast.promote_containertype(::Type{NamedArray}, _) = NamedArray
+    Base.Broadcast.promote_containertype(_, ::Type{NamedArray}) = NamedArray
+    Base.Broadcast.promote_containertype(::Type{NamedArray}, ::Type{Array}) = NamedArray
+    Base.Broadcast.promote_containertype(::Type{Array}, ::Type{NamedArray}) = NamedArray
+    Base.Broadcast.promote_containertype(::Type{NamedArray}, ::Type{NamedArray}) = NamedArray
+    #function Base.Broadcast.broadcast_c(f, ::Type{NamedArray}, n::NamedArray, As...)#
+    #    a = similar(n.array)
+    #    broadcast!(f, a, n, As...)
+    #    return NamedArray(a, n.dicts, n.dimnames)
+    #end
+    array(n::NamedArray) = n.array
+    array(a) = a
+    function Base.Broadcast.broadcast_c(f, t::Type{NamedArray}, As...)
+        arrays = [array(a) for a in As]
+        res = broadcast(f, arrays...)
+        ## is there a NamedArray with the same dimensions?
+        for a in As
+            isa(a, NamedArray) && size(a) == size(res) && return NamedArray(res, a.dicts, a.dimnames)
+        end
+        ## can we collect the dimensions from individual namedarrays?
+        dicts = OrderedDict[]
+        dimnames = []
+        found = false
+        for d in 1:ndims(res)
+            found = false
+            for a in As
+                if isa(a, NamedArray) && size(a, d) == size(res, d)
+                    push!(dicts, a.dicts[d])
+                    push!(dimnames, a.dimnames[d])
+                    found = true
+                    break
+                end
+            end
+            found || return res
+        end
+        return NamedArray(res, dicts, dimnames)
+    end
+end
 ## reorder names
 import Base: sort, sort!
 function sort!(v::NamedVector; kws...)

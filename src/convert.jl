@@ -13,7 +13,7 @@ convert(::Type{NamedArray}, a::AbstractArray) = NamedArray(a)
 convert(::Type{NamedVector}, a::AbstractArray) = NamedArray(a)
 
 ## to array
-array(n::NamedArray) = n.array
+## array(n::NamedArray) = n.array
 ## convert{T,N}(::Type{AbstractArray{T,N}}, a::NamedArray{T,N}) = a.array
 ## convert{T}(::Type{AbstractArray{T}}, a::NamedArray{T}) = a.array
 ## convert{T,N}(::Type{AbstractArray}, a::NamedArray{T,N}) = a.array

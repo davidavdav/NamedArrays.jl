@@ -53,7 +53,7 @@ for  f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     end
 end
 
-for f in (:cumprod, :cumsum, :cumsum_kbn, :cummin, :cummax)
+for f in (:cumprod, :cumsum, :cumsum_kbn)
     for dim=1:2
         @eval @test ($f)(n,$dim).array == ($f)(n.array,$dim)
     end
@@ -84,7 +84,7 @@ m[1//4] = 1
 m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 @test m[1] == m.array[4]
 ## this goes wrong for julia-v0.3
-@test array(m[[4,3,2,1]]) == m.array
+@test m[[4,3,2,1]].array == m.array
 
 print("sort, ")
 m = NamedArray(rand(100))
@@ -108,7 +108,7 @@ print("broadcast, ")
 print("vectorized, ")
 
 ## a selection of vectorized functions
-for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos, :atan, :sinc, :cosc, :deg2rad, :log, :log2, :log10, :log1p, :exp, :exp2, :exp10, :expm1, :abs, :abs2, :sign, :sqrt,  :erf, :erfc, :erfcx, :erfi, :dawson, :erfinv, :erfcinv, :gamma, :lgamma, :digamma, :invdigamma, :trigamma, :besselj0, :besselj1, :bessely0, :bessely1, :eta, :zeta)
+for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos, :atan, :sinc, :cosc, :deg2rad, :log, :log2, :log10, :log1p, :exp, :exp2, :exp10, :expm1, :abs, :abs2, :sign, :sqrt)
     @eval begin
         m = ($f).(n)
         @test m.array == ($f).(n.array)
@@ -136,6 +136,6 @@ include("speed.jl")
 
 # julia issue #17328
 a = NamedArray([1.0,2.0,3.0,4.0])
-@test sumabs(a, 1)[1] == 10
+@test sum(abs, a, 1)[1] == 10
 
 println("done!")

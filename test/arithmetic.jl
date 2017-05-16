@@ -8,50 +8,59 @@
 ## test arithmetic operations
 print("arithmetic, ")
 
+dotops = [:.+, :.-, :.*, :./]
+
 x = NamedArray(randn(5, 10))
 @test (-x).array == -(x.array)
-for op in (:+, :-, :*, :.+, :.-, :.*, :./)
-	@eval begin
-		for y in (true, Int8(3), Int16(3), Int32(3), Int64(3), Float32(π), Float64(π), BigFloat(π))
-			z = ($op)(x, y)
-			@test z.array == ($op)(x.array, y)
-			@test names(z) == names(x)
-			z = ($op)(y, x)
-			@test z.array == ($op)(y, x.array)
-			@test names(z) == names(x)
+for op in vcat([:+, :-, :*], dotops)
+	if VERSION < v"0.6.0-pre" || op ∉ dotops
+		@eval begin
+			for y in (true, Int8(3), Int16(3), Int32(3), Int64(3), Float32(π), Float64(π), BigFloat(π))
+				z = ($op)(x, y)
+				println($op, z)
+				@test z.array == ($op)(x.array, y)
+				@test names(z) == names(x)
+				z = ($op)(y, x)
+				@test z.array == ($op)(y, x.array)
+				@test names(z) == names(x)
+			end
 		end
 	end
 end
-for op in (:+, :-, :.+, :.-, :.*, :./)
+for op in vcat([:+, :-], dotops)
 	for T in (Bool, Int8, Int16, Int32, Int64, Float32, Float64)
-		@eval begin
-			z = ($op)(x, x)
-			@test z.array == ($op)(x.array, x.array)
-			@test names(z) == names(x)
-			@test dimnames(z) == dimnames(x)
-			y = rand($T, 5, 10)
-			z = ($op)(x, y)
-			@test z.array == ($op)(x.array, y)
-			@test names(z) == names(x)
-			@test dimnames(z) == dimnames(x)
-			z = ($op)(y, x)
-			@test z.array == ($op)(y, x.array)
-			@test names(z) == names(x)
-			@test dimnames(z) == dimnames(x)
+		if VERSION < v"0.6.0-pre" || op ∉ dotops
+			@eval begin
+				z = ($op)(x, x)
+				@test z.array == ($op)(x.array, x.array)
+				@test names(z) == names(x)
+				@test dimnames(z) == dimnames(x)
+				y = rand($T, 5, 10)
+				z = ($op)(x, y)
+				@test z.array == ($op)(x.array, y)
+				@test names(z) == names(x)
+				@test dimnames(z) == dimnames(x)
+				z = ($op)(y, x)
+				@test z.array == ($op)(y, x.array)
+				@test names(z) == names(x)
+				@test dimnames(z) == dimnames(x)
+			end
 		end
 	end
 end
 
 include("init-namedarrays.jl")
 
-for op in [:.*, :+, .-]
-	@eval for b in NamedArray[bv, bm] ## NamedArray[] for julia-0.4
-		@test (($op)(b, BitArray(b))).array == ($op)(b.array, BitArray(b))
-		@test names(($op)(b, BitArray(b))) == names(b)
-		@test ($op)(BitArray(b), b).array == ($op)(BitArray(b), b.array)
-		@test names(($op)(BitArray(b), b)) == names(b)
-		@test ($op)(b, true).array == ($op)(b.array, true)
-		@test ($op)(true, b).array == ($op)(true, b.array)
+if VERSION < v"0.6.0-pre"
+	for op in [:.*, :+, .-]
+		@eval for b in NamedArray[bv, bm] ## NamedArray[] for julia-0.4
+			@test (($op)(b, BitArray(b))).array == ($op)(b.array, BitArray(b))
+			@test names(($op)(b, BitArray(b))) == names(b)
+			@test ($op)(BitArray(b), b).array == ($op)(BitArray(b), b.array)
+			@test names(($op)(BitArray(b), b)) == names(b)
+			@test ($op)(b, true).array == ($op)(b.array, true)
+			@test ($op)(true, b).array == ($op)(true, b.array)
+		end
 	end
 end
 

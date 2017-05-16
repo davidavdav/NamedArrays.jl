@@ -5,9 +5,9 @@
 ## This code is licensed under the MIT License
 ## See the file LICENSE.md in this distribution
 
-import Base: +, -, *, /
+import Base: +, -, *, /, \
 if VERSION < v"0.6.0-dev.1632"
-    @eval import Base: .+, .-, .*, ./, \
+    import Base: .+, .-, .*, ./, \
 end
 
 -(n::NamedArray) = NamedArray(-n.array, n.dicts, n.dimnames)
@@ -134,12 +134,17 @@ end
 ## Named * Named
 *(A::NamedMatrix, B::NamedMatrix) = NamedArray(A.array * B.array, (A.dicts[1], B.dicts[2]), (A.dimnames[1], B.dimnames[2]))
 *(A::NamedMatrix, B::NamedVector) = NamedArray(A.array * B.array, (A.dicts[1],), (B.dimnames[1],))
+if VERSION ≥ v"0.6.0-dev"
+    *(A::NamedRowVector, B::NamedVector) = A.array * B.array
+end
 ## Named * Abstract
 *(A::NamedMatrix, B::AbstractMatrix) = NamedArray(A.array * B, (A.dicts[1], defaultnamesdict(size(B,2))), A.dimnames)
 *(A::AbstractMatrix, B::NamedMatrix) = NamedArray(A * B.array, (defaultnamesdict(size(A,1)), B.dicts[2]), B.dimnames)
 *(A::NamedMatrix, B::AbstractVector) = NamedArray(A.array * B, (A.dicts[1],), (A.dimnames[1],))
 *(A::AbstractMatrix, B::NamedVector) = A * B.array
-
+if VERSION ≥ v"0.6.0-dev"
+    *(A::NamedRowVector, B::AbstractVector) = A.array * B
+end
 ## \ --- or should we overload A_div_B?
 ## Named \ Named
 \(x::NamedVector, y::NamedVector) = x.array \ y.array
@@ -225,6 +230,7 @@ function qrfact!{T<:BlasFloat}(n::NamedMatrix{T}, pivot::Union{Type{Val{false}},
     qr = qrfact!(n.array, pivot)
     LinAlg.QRCompactWY(NamedArray(qr.factors, n.dicts, n.dimnames), qr.T)
 end
+LAPACK.gemqrt!{BF<:BlasFloat}(side::Char, trans::Char, V::NamedArray{BF}, T::StridedMatrix{BF}, C::StridedVecOrMat{BF}) = LAPACK.gemqrt!(side, trans, V.array, T, C)
 
 qrfact{T<:BlasFloat}(n::NamedMatrix{T}, pivot::Union{Type{Val{false}}, Type{Val{true}}} = Val{false}) = qrfact!(copy(n), pivot)
 
@@ -258,7 +264,7 @@ cond(n::NamedArray) = cond(n.array)
 # null(n::NamedArray) = null(n.array)
 
 function kron(a::NamedArray, b::NamedArray)
-    n = Array(typeof(AbstractString[]), 2)
+    n = Array{typeof(AbstractString[])}(2)
     dn = AbstractString[]
     for dim in 1:2
         n[dim] = AbstractString[]
