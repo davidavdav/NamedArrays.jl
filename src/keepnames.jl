@@ -51,13 +51,17 @@ end
 ## broadcast v0.5
 Base.Broadcast.broadcast_t(f, T, n::NamedArray, As...) = broadcast!(f, similar(n, T, Base.Broadcast.broadcast_shape(n, As...)), n, As...)
 ## broadcast v0.6
-if VERSION ≥ v"0.6.0-dev"
+if isdefined(Base.Broadcast, :_containertype)
     Base.Broadcast._containertype(::Type{<:NamedArray}) = NamedArray
+end
+if isdefined(Base.Broadcast, :promote_containertype)
     Base.Broadcast.promote_containertype(::Type{NamedArray}, _) = NamedArray
     Base.Broadcast.promote_containertype(_, ::Type{NamedArray}) = NamedArray
     Base.Broadcast.promote_containertype(::Type{NamedArray}, ::Type{Array}) = NamedArray
     Base.Broadcast.promote_containertype(::Type{Array}, ::Type{NamedArray}) = NamedArray
     Base.Broadcast.promote_containertype(::Type{NamedArray}, ::Type{NamedArray}) = NamedArray
+end
+if isdefined(Base.Broadcast, :broadcast_c)
     #function Base.Broadcast.broadcast_c(f, ::Type{NamedArray}, n::NamedArray, As...)#
     #    a = similar(n.array)
     #    broadcast!(f, a, n, As...)

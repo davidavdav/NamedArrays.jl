@@ -37,7 +37,7 @@ end
 @compat NamedVecOrMat{T} = Union{NamedVector{T},NamedMatrix{T}}
 @compat ArrayOrNamed{T,N} = Union{Array{T,N}, NamedArray{T,N,Array}}
 
-if VERSION ≥ v"0.6.0-dev"
+if isdefined(Base, :RowVector)
     @compat NamedRowVector{T,RVT<:AbstractVector} = NamedArray{T,2,RowVector{T,RVT}}
 end
 
