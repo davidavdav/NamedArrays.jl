@@ -134,7 +134,7 @@ end
 ## Named * Named
 *(A::NamedMatrix, B::NamedMatrix) = NamedArray(A.array * B.array, (A.dicts[1], B.dicts[2]), (A.dimnames[1], B.dimnames[2]))
 *(A::NamedMatrix, B::NamedVector) = NamedArray(A.array * B.array, (A.dicts[1],), (B.dimnames[1],))
-if VERSION ≥ v"0.6.0-dev"
+if isdefined(Base, :RowVector)
     *(A::NamedRowVector, B::NamedVector) = A.array * B.array
 end
 ## Named * Abstract
@@ -142,7 +142,7 @@ end
 *(A::AbstractMatrix, B::NamedMatrix) = NamedArray(A * B.array, (defaultnamesdict(size(A,1)), B.dicts[2]), B.dimnames)
 *(A::NamedMatrix, B::AbstractVector) = NamedArray(A.array * B, (A.dicts[1],), (A.dimnames[1],))
 *(A::AbstractMatrix, B::NamedVector) = A * B.array
-if VERSION ≥ v"0.6.0-dev"
+if isdefined(Base, :RowVector)
     *(A::NamedRowVector, B::AbstractVector) = A.array * B
 end
 ## \ --- or should we overload A_div_B?
