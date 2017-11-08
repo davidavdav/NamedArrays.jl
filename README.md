@@ -60,8 +60,9 @@ This is the basic constructor for a namedarray.  `names` must be a tuple of `Dic
 x = NamedArray([1 3; 2 4], ( ["A","B"], ["C","D"] ), ("ROWS","COLS"))
 # NamedArray{T,N}(a::Array{T,N}, names::NTuple{N,Vector})
 x = NamedArray([1 3; 2 4], ( ["A","B"], ["C","D"] ))
+x = NamedArray([1, 2], ( ["A","B"], ))  # note the comma after ["A","B"] to ensure evaluation as tuple
 ```
-This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.).
+This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.). 
 
 In principle, there is no limit imposed to the type of the `names` used, but we discourage the use of `Real`, `AbstractArray` and `Range`, because they have a special interpretation in `getindex()` and `setindex`.
 
