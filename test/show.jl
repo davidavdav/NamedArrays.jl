@@ -9,9 +9,9 @@ println("show,")
 
 include("init-namedarrays.jl")
 
-function showlines(x...)
+function showlines(x...; kwargs...)
     buf = IOBuffer()
-    show(buf, x...)
+    show(IOContext(buf; kwargs...), x...)
     return split(String(buf), "\n")
 end
 
@@ -95,9 +95,19 @@ lines = showlines(NamedArray(sprand(1000,1000, 1e-4), (nms, nms)))
 @test endswith(lines[1], "Float64 nonzero entries:")
 @test sum([contains(line, "⋮") for line in lines]) == 1
 
-# array with Nullable names
+## array with Nullable names
 lines = showlines(NamedArray(rand(2, 2), (Nullable["a", Nullable()], Nullable["c", "d"])))
 @test lines[1] == "2×2 Named Array{Float64,2}"
 @test split(lines[2]) == ["A", "╲", "B", "│", "\"c\"", "\"d\""]
 @test startswith(lines[4], "\"a\"")
 @test startswith(lines[5], "#NULL")
+
+## no limits
+for dims in [(1000,), (1000, 2)]
+    lines = showlines(NamedArray(rand(dims...)), limit=false)
+    @test length(lines) == 1003
+    @test startswith(lines[end-500], "500 ")
+end
+lines = showlines(NamedArray(rand(10, 1000)), limit=false)
+@test length(split(lines[2])) == 1004 ##  "A"    "╲"    "B"    "│" ...
+@test length(split(lines[end])) == 1002 # "10"   "│" ...

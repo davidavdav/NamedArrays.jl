@@ -13,7 +13,7 @@ using Compat
 ## The inner constructor checks for consistency, the values must all be 1:d
 if !isdefined(:NamedArray)
 
-type NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
+mutable struct NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
     array::AT
     dicts::DT
     dimnames::NTuple{N, Any}
@@ -28,7 +28,7 @@ end
 
 
 ## a type that negates any index
-immutable Not{T}
+struct Not{T}
     index::T
 end
 

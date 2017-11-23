@@ -26,16 +26,21 @@ Base.show(io::IO, ::MIME"text/plain", n::NamedArray) = show(io, n)
 function show(io::IO, n::NamedArray)
     print(io, summary(n))
     s = size(n)
+    limit = get(io, :limit, true)
     if ndims(n) == 0
         println(io)
         show(io, n.array[1])
     elseif ndims(n) == 2
-        maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
         println(io)
-        show(io, n, min(maxnrow, s[1]))
+        if limit
+            maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
+            show(io, n, min(maxnrow, s[1]))
+        else
+            show(io, n, s[1])
+        end
     else
         nlinesneeded = prod(s[3:end]) * (s[1] + 3) + 1
-        if nlinesneeded > displaysize(io)[1]
+        if limit && nlinesneeded > displaysize(io)[1]
             maxnrow = clamp((displaysize(io)[1] - 3) ÷ (prod(s[3:end])) - 3, 3, s[1])
         else
             maxnrow = s[1]
@@ -60,9 +65,14 @@ end
 
 function show(io::IO, v::NamedVector)
     println(io, summary(v))
+    limit = get(io, :limit, true)
     if size(v) != (0,)
-        maxnrow = displaysize(io)[1] - 5
-        show(io, v, min(maxnrow, length(v)))
+        if limit
+            maxnrow = displaysize(io)[1] - 5
+            show(io, v, min(maxnrow, length(v)))
+        else
+            show(io, v, length(v))
+        end
     end
 end
 
@@ -93,6 +103,7 @@ end
 function show(io::IO, n::NamedMatrix, maxnrow::Int)
     @assert ndims(n)==2
     nrow, ncol = size(n)
+    limit = get(io, :limit, true)
     ## rows
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(showcompact, n.array[i,j]) for i=totrowrange, j=1:ncol]
@@ -100,7 +111,11 @@ function show(io::IO, n::NamedMatrix, maxnrow::Int)
     strlen(x) = length(string(x))
     colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
     rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, strdimnames(n)))+3)
-    maxncol = div(displaysize(io)[2] - rownamewidth - 4, colwidth+2) # dots, spaces between
+    if limit
+        maxncol = div(displaysize(io)[2] - rownamewidth - 4, colwidth+2) # dots, spaces between
+    else
+        maxncol = ncol
+    end
     ## columns
     colrange, totcorange = compute_range(maxncol, ncol)
     ## header
@@ -138,8 +153,13 @@ function show{T1,T2}(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}})
     if nnz(S) != 0
         print(io, S.m, "×", S.n, " Named sparse matrix with ", nnz(S), " ", eltype(S), " nonzero entries", nnz(S) == 0 ? "" : ":")
     end
-    maxnrow = displaysize(io)[1]
-    half_screen_rows = div(maxnrow - 5, 2)
+    limit = get(io, :limit, true)
+    if limit
+        maxnrow = displaysize(io)[1]
+        half_screen_rows = div(maxnrow - 5, 2)
+    else
+        half_screen_rows = typemax(Int)
+    end
     rownames, colnames = strnames(n)
     rowpad = maximum([length(s) for s in rownames])
     colpad = maximum([length(s) for s in colnames])
