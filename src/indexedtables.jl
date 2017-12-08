@@ -1,8 +1,8 @@
 using IndexedTables
 
-import IndexedTables.IndexedTable
+import IndexedTables.NDSparse
 
-function IndexedTable(n::NamedArray)
+function NDSparse(n::NamedArray)
 	L = length(n) # elements in array
 	cols = Dict{Symbol, Array}()
 	factor = 1
@@ -13,5 +13,5 @@ function IndexedTable(n::NamedArray)
 		cols[Symbol(dimnames(n, d))] = data
 		factor *= nlevels
 	end
-	return IndexedTable(Columns(;cols...), array(n)[:])
+	return NDSparse(Columns(;cols...), array(n)[:])
 end

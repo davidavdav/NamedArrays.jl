@@ -19,7 +19,11 @@ end
 
 include("init-namedarrays.jl")
 
-@test n[:] == view(n, :) == n.array[:]
+@test n[:] == view(n, :) == n.array[:] ## values
+@test names(n[:], 1)[2] == ("two", "a")
+@test names(n[:], 1)[5] == ("one", "c")
+@test dimnames(n[:], 1) == (:A, :B)
+
 n1 = NamedArray(rand(10))
 @test n1[:] == n1
 @test [x for x in n] == [x for x in n.array]

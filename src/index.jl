@@ -6,9 +6,23 @@
 
 import Base: getindex
 
+function flattenednames(n::NamedArray)
+    L = length(n) # elements in array
+	cols = Array[]
+	factor = 1
+	for d in 1:ndims(n)
+		nlevels = size(n, d)
+		nrep = L ÷ (nlevels * factor)
+		data = repmat(vcat([fill(x, factor) for x in names(n, d)]...), nrep)
+		push!(cols, data)
+		factor *= nlevels
+	end
+    return collect(zip(cols...))
+end
+
 ## from subarray.jl
 getindex(n::NamedVector, ::Colon) = n
-getindex(n::NamedArray, ::Colon) = n.array[:]
+getindex(n::NamedArray, ::Colon) = NamedArray(n.array[:], [flattenednames(n)] , [tuple(dimnames(n)...)])
 
 ## special 0-dimensional case
 getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)
