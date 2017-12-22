@@ -42,10 +42,10 @@ function NamedArray{T,N,VT}(array::AbstractArray{T,N},
     if VT <: OrderedDict
         dicts = tuple(names...)
     else
-        dicts = defaultnamesdict(tuple(names...))::NTuple{N, OrderedDict}
+        dicts = defaultnamesdict(tuple(names...))
     end
     println(dicts)
-    NamedArray{T, N, typeof(array), NTuple{N, OrderedDict}}(array, dicts, tuple(dimnames...)::NTuple{N})
+    NamedArray{T, N, typeof(array), NTuple{N, OrderedDict{VT,Int}}}(array, dicts, tuple(dimnames...))
 end
 
 
