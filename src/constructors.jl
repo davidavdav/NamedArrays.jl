@@ -12,10 +12,10 @@ letter(i) = string(Char((64+i) % 256))
 defaultnames(dim::Integer) = map(string, 1:dim)
 defaultnamesdict(names::Vector) = OrderedDict(zip(names, 1:length(names)))
 defaultnamesdict(dim::Integer) = defaultnamesdict(defaultnames(dim))
-defaultnamesdict(dims::Tuple) = map(defaultnamesdict, dims)
+defaultnamesdict(dims::Tuple) = map(defaultnamesdict, dims)::NTuple{length(dims), OrderedDict}
 
 defaultdimname(dim::Integer) = Symbol(letter(dim))
-defaultdimnames(ndim::Integer) = map(defaultdimname, tuple(1:ndim...))
+defaultdimnames(ndim::Integer) = ntuple(defaultdimname, ndim)
 defaultdimnames(a::AbstractArray) = defaultdimnames(ndims(a))
 
 ## disambiguation (Argh...)
@@ -31,7 +31,7 @@ end
 ## constructor with array, names and dimnames (dict is created from names)
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N, Any}=defaultdimnames(array))
     dicts = defaultnamesdict(names)
-    NamedArray(array, dicts, dimnames)
+    NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)
 end
 
 ## vectors instead of tuples, with defaults (incl. no names or dimnames at all)
@@ -42,9 +42,10 @@ function NamedArray{T,N,VT}(array::AbstractArray{T,N},
     if VT <: OrderedDict
         dicts = tuple(names...)
     else
-        dicts = defaultnamesdict(tuple(names...))
+        dicts = defaultnamesdict(tuple(names...))::NTuple{N, OrderedDict}
     end
-    NamedArray(array, dicts, tuple(dimnames...))
+    println(dicts)
+    NamedArray{T, N, typeof(array), NTuple{N, OrderedDict}}(array, dicts, tuple(dimnames...)::NTuple{N})
 end
 
 

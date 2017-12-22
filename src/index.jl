@@ -8,15 +8,15 @@ import Base: getindex
 
 function flattenednames(n::NamedArray)
     L = length(n) # elements in array
-	cols = Array[]
-	factor = 1
-	for d in 1:ndims(n)
-		nlevels = size(n, d)
-		nrep = L ÷ (nlevels * factor)
-		data = repmat(vcat([fill(x, factor) for x in names(n, d)]...), nrep)
-		push!(cols, data)
-		factor *= nlevels
-	end
+    cols = Array[]
+    factor = 1
+    for d in 1:ndims(n)
+        nlevels = size(n, d)
+        nrep = L ÷ (nlevels * factor)
+        data = repmat(vcat([fill(x, factor) for x in names(n, d)]...), nrep)
+        push!(cols, data)
+        factor *= nlevels
+    end
     return collect(zip(cols...))
 end
 
