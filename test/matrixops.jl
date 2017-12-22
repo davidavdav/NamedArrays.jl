@@ -1,6 +1,8 @@
 print("matrixops, ")
 ## this test for typos, mainly, not for correct functioning...
 
+## TODO I am not convinced this does anything related to NamedArrays...
+
 for t in (Float32, Float64)
     a = rand(t, 10, 10)
     b = rand(t, 10, 5)

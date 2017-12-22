@@ -31,11 +31,11 @@ strdimnames(n::NamedArray, d::Integer) = string(n.dimnames[d])
 
 
 ## seting names, dimnames
-function setnames!(n::NamedArray, v::Vector, d::Integer)
+function setnames!{T,N,KT}(n::NamedArray{T,N}, v::Vector{KT}, d::Integer)
     size(n.array, d) == length(v) || throw(DimensionMismatch("inconsistent vector length"))
-    keytype(n.dicts[d]) == eltype(v) || throw(TypeError(:setnames!, "second argument", keytype(n.dicts[d]), eltype(v)))
+    keytype(n.dicts[d]) == KT || throw(TypeError(:setnames!, "second argument", keytype(n.dicts[d]), KT))
     ## n.dicts is a tuple, so we need to replace it as a whole...
-    vdicts = OrderedDict[]
+    vdicts = OrderedDict{Any,Int}[]
     for i = 1:length(n.dicts)
         if i==d
             push!(vdicts, OrderedDict(zip(v, 1:length(v))))
@@ -43,7 +43,7 @@ function setnames!(n::NamedArray, v::Vector, d::Integer)
             push!(vdicts, n.dicts[i])
         end
     end
-    n.dicts = tuple(vdicts...)
+    n.dicts = tuple(vdicts...)::NTuple{N}
 end
 
 function setnames!(n::NamedArray, v, d::Integer, i::Integer)
