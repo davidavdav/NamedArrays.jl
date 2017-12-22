@@ -1,16 +1,16 @@
-n = NamedArray(rand(2,4))
+n = @inferred NamedArray(rand(2,4))
 Letters = [string(Char(64+i)) for i in 1:26]
 letters = [string(Char(64+32+i)) for i in 1:26]
 
-setnames!(n, ["one", "two"], 1)
-setnames!(n, letters[1:4], 2)
+@inferred setnames!(n, ["one", "two"], 1)
+@inferred setnames!(n, letters[1:4], 2)
 
-v = NamedArray(rand(1:100, 6), (letters[1:6],), (:index,))
+v = @inferred NamedArray(rand(1:100, 6), (letters[1:6],), (:index,))
 
-m = NamedArray(rand(2,3,4,3,2,3))
+m = @inferred NamedArray(rand(2,3,4,3,2,3))
 
-bv = NamedArray(rand(Bool, 25))
-bm = NamedArray(rand(Bool, 10, 10))
+bv = @inferred NamedArray(rand(Bool, 25))
+bm = @inferred NamedArray(rand(Bool, 10, 10))
 
 if !isdefined(:namesanddim)
 	namesanddim(n::NamedArray) = (names(n), dimnames(n))

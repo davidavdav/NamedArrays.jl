@@ -12,16 +12,16 @@ include("init-namedarrays.jl")
 dn1 = ["一", "二"]
 dn2 = ["一", "二", "三", "四"]
 
-setnames!(n, dn1, 1)
+@inferred setnames!(n, dn1, 1)
 for (i, zh) in enumerate(dn2)
-	setnames!(n, zh, 2, i)
+	@inferred setnames!(n, zh, 2, i)
 end
 
 @test names(n) == Array[dn1, dn2]
 
-setdimnames!(n, ("thing1", :thing2))
+@inferred setdimnames!(n, ("thing1", :thing2))
 @test dimnames(n) == ["thing1", :thing2]
-setdimnames!(n, ["magnificent", 7])
+setdimnames!(n, ["magnificent", 7]) ## can't infer mixed types
 @test dimnames(n) == ["magnificent", 7]
 
 println(n)

@@ -8,7 +8,7 @@ print("getindex, ")
 ## Test Integer indices up to 5 dimensions, as well as CartesianIndexes
 for i in 1:7
 	dims = fill(3, i)
-	n1 = NamedArray(rand(dims...))
+	n1 = @inferred NamedArray(rand(dims...))
 	for i in CartesianRange(tuple(dims...))
 		@test n1[i.I...] == n1.array[i.I...]
 		@test n1[i] == n1.array[i]
@@ -24,7 +24,7 @@ include("init-namedarrays.jl")
 @test names(n[:], 1)[5] == ("one", "c")
 @test dimnames(n[:], 1) == (:A, :B)
 
-n1 = NamedArray(rand(10))
+n1 = @inferred NamedArray(rand(10))
 @test n1[:] == n1
 @test [x for x in n] == [x for x in n.array]
 
@@ -48,7 +48,7 @@ for i in 1:2
     bi = BitArray(bi)
 end
 
-m = copy(n)
+m = @inferred copy(n)
 print("setindex, ")
 ## setindex
 m[1,1] = 0
@@ -72,7 +72,7 @@ m[:] = n
 m[:] = 1:8
 @test m[:] == collect(1:8)
 
-m = NamedArray(rand(Int, 10))
+m = @inferred NamedArray(rand(Int, 10))
 m[2:5] = -1
 m[6:8] = 2:4
 m[[1,9,10]] = 0:2

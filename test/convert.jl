@@ -15,5 +15,5 @@ end
 
 # issue 43
 
-x = NamedArray(Array([1 2; 3 4]), (["a","b"], [10,11]), (:rows,:cols))
+x = @inferred NamedArray(Array([1 2; 3 4]), (["a","b"], [10,11]), (:rows,:cols))
 @test convert(Array, x) == x.array

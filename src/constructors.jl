@@ -12,7 +12,7 @@ letter(i) = string(Char((64+i) % 256))
 defaultnames(dim::Integer) = map(string, 1:dim)
 defaultnamesdict(names::Vector) = OrderedDict(zip(names, 1:length(names)))
 defaultnamesdict(dim::Integer) = defaultnamesdict(defaultnames(dim))
-defaultnamesdict(dims::Tuple) = map(defaultnamesdict, dims)::NTuple{length(dims), OrderedDict}
+defaultnamesdict(dims::Tuple) = map(defaultnamesdict, dims) # ::NTuple{length(dims), OrderedDict}
 
 defaultdimname(dim::Integer) = Symbol(letter(dim))
 defaultdimnames(ndim::Integer) = ntuple(defaultdimname, ndim)
@@ -39,13 +39,14 @@ function NamedArray{T,N,VT}(array::AbstractArray{T,N},
                             names::Vector{VT}=[defaultnames(d) for d in size(array)],
                             dimnames::Vector = [defaultdimname(i) for i in 1:ndims(array)])
     length(names) == length(dimnames) == N || error("Dimension mismatch")
-    if VT <: OrderedDict
+    if VT == Union{} ## edge case, array == Array{}()
+        dicts = ()
+    elseif VT <: OrderedDict
         dicts = tuple(names...)
     else
-        dicts = defaultnamesdict(tuple(names...))
+        dicts = defaultnamesdict(tuple(names...))::NTuple{N, OrderedDict{eltype(VT),Int}}
     end
-    println(dicts)
-    NamedArray{T, N, typeof(array), NTuple{N, OrderedDict{VT,Int}}}(array, dicts, tuple(dimnames...))
+    NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, tuple(dimnames...))
 end
 
 
@@ -54,12 +55,6 @@ end
 `NamedArray(T::Type, dims::Int...)` creates an uninitialized array with default names
 for the dimensions (`:A`, `:B`, ...) and indices (`"1"`, `"2"`, ...).
 """
-function NamedArray(T::DataType, dims::Int...)
-    ld = length(dims)
-    names = [[string(j) for j=1:i] for i=dims]
-    dimnames = [Symbol(letter(i)) for i=1:ld]
-    a = Array{T}(dims...)
-    NamedArray(a, tuple(names...), tuple(dimnames...))
-end
+NamedArray(T::DataType, dims::Int...) = NamedArray(Array{T}(dims...))
 
 (::Type{NamedArray{T}}){T}(n...) = NamedArray(Array{T}(n...))

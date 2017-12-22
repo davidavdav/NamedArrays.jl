@@ -27,9 +27,9 @@ size(a::NamedArray) = size(a.array)
 size(a::NamedArray, d) = size(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
-function Base.similar(n::NamedArray, t::Type, dims::Base.Dims)
+function Base.similar{T,N}(n::NamedArray{T,N}, t::Type, dims::Base.Dims)
     nd = length(dims)
-    dicts = Array{Any}(nd)
+    dicts = Array{OrderedDict{Any,Int}}(nd)
     dimnames = Array{Any}(nd)
     for d in 1:length(dims)
         if d ≤ ndims(n) && dims[d] == size(n, d)
@@ -40,7 +40,9 @@ function Base.similar(n::NamedArray, t::Type, dims::Base.Dims)
             dimnames[d] = letter(d)
         end
     end
-    return NamedArray(similar(n.array, t, dims), tuple(dicts...), tuple(dimnames...))
+    tdicts = tuple(dicts...)
+    array = similar(n.array, t, dims)
+    return NamedArray{t,N,typeof(array),typeof(tdicts)}(array, tdicts, tuple(dimnames...))
 end
 
 ## our own interpretation of ind2sub
