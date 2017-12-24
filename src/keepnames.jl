@@ -92,7 +92,8 @@ if isdefined(Base.Broadcast, :broadcast_c)
             end
             found || return res
         end
-        return NamedArray(res, dicts, dimnames)
+        tdicts = tuple(dicts...)
+        return NamedArray(res, tdicts, tuple(dimnames...))
     end
 end
 ## reorder names

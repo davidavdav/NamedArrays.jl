@@ -49,13 +49,14 @@ print("changing names, ")
 ## changingnames
 for  f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     for dim=1:2
-        @eval @test ($f)(n,$dim).array == ($f)(n.array,$dim)
+        @eval @test ($f)(n.array, $dim) == ($f)(n, $dim).array
+        @eval @inferred ($f)(n, $dim)
     end
 end
 
 for f in (:cumprod, :cumsum, :cumsum_kbn)
     for dim=1:2
-        @eval @test ($f)(n,$dim).array == ($f)(n.array,$dim)
+        @eval @test ($f)(n.array, $dim) == ($f)(n, $dim).array
     end
 end
 

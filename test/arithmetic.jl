@@ -11,7 +11,7 @@ print("arithmetic, ")
 dotops = [:.+, :.-, :.*, :./]
 
 x = NamedArray(randn(5, 10))
-@test (-x).array == -(x.array)
+@test @inferred -x == -(x.array)
 for op in vcat([:+, :-, :*], dotops)
 	if VERSION < v"0.6.0-pre" || op ∉ dotops
 		@eval begin
