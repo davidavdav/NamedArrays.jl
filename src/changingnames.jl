@@ -1,6 +1,6 @@
 ## changingnames.jl  methods for NamedArray that change some of the names
 
-## (c) 2013 David A. van Leeuwen
+## (c) 2013, 2017 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
@@ -17,6 +17,7 @@ for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     @eval ($f)(a::NamedArray, d::Int) = ($f)(a, (d,))
 end
 
+## I forgot what `fan` stands for.  Function Apply Name?
 function fan{T,N}(f::Function, fname::AbstractString, a::NamedArray{T,N}, dim::Int)
     dimnames = Array{Any}(N)
     for i=1:N

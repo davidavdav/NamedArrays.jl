@@ -1,5 +1,5 @@
 ## index.jl getindex and setindex methods for NamedArray
-## (c) 2013--2016 David A. van Leeuwen
+## (c) 2013--2017 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution

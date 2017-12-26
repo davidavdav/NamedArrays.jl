@@ -1,6 +1,6 @@
 ## index.jl  methods for NamedArray that keep the names (some checking may be done)
 
-## (c) 2013, 2014 David A. van Leeuwen
+## (c) 2013, 2014, 2017 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
@@ -72,9 +72,12 @@ if isdefined(Base.Broadcast, :broadcast_c)
     function Base.Broadcast.broadcast_c(f, t::Type{NamedArray}, As...)
         arrays = [array(a) for a in As]
         res = broadcast(f, arrays...)
+        T = eltype(res)
+        N = ndims(res)
+        AT = typeof(res)
         ## is there a NamedArray with the same dimensions?
         for a in As
-            isa(a, NamedArray) && size(a) == size(res) && return NamedArray(res, a.dicts, a.dimnames)
+            isa(a, NamedArray) && size(a) == size(res) && return NamedArray{T, N, AT, typeof(a.dicts)}(res, a.dicts, a.dimnames)
         end
         ## can we collect the dimensions from individual namedarrays?
         dicts = OrderedDict[]
@@ -90,10 +93,13 @@ if isdefined(Base.Broadcast, :broadcast_c)
                     break
                 end
             end
-            found || return res
+            if !found
+                push!(dicts, defaultnamesdict(size(res, d)))
+                push!(dimnames, defaultdimname(d))
+            end
         end
         tdicts = tuple(dicts...)
-        return NamedArray(res, tdicts, tuple(dimnames...))
+        return NamedArray{T, N, AT, typeof(tdicts)}(res, tdicts, tuple(dimnames...))
     end
 end
 ## reorder names
