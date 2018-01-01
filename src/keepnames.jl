@@ -66,20 +66,18 @@ if isdefined(Base.Broadcast, :broadcast_c)
     array(a) = a
     function dictstype{T,N,AT,DT,M}(n::NamedArray{T,N,AT,DT}, ::Type{Val{M}})
         N > M && error("Cannot truncate array")
-        return tuple([i ≤ N ? typeof(n.dicts[i]) : nothing for i in 1:M]...)
+        return tuple(n.dicts..., fill(nothing, M - N)...)::NTuple{M, Any}
     end
-    dictstype{M}(rest, ::Type{Val{M}}) = tuple(fill(nothing, M)...)
-    dictstypejoined(::Type{Void}, ::Type{Void}) = Void
-    dictstypejoined(::Type{T}, ::Type{Void}) where T = T
-    dictstypejoined(::Type{Void}, ::Type{T}) where T = T
-    function dictstyperecursive(t1::Tuple, t2::Tuple)
+    dictstype{M}(rest, ::Type{Val{M}}) = tuple(fill(nothing, M)...)::NTuple{M}
+    dictstypejoined(::Void, ::Void) = nothing
+    dictstypejoined(t, ::Void) = t
+    dictstypejoined(::Void, t) = t
+    dictstypejoined(t1, t2) = t1
+    function dictstyperecursive(::Type{Val{N}}, t1::Tuple, t2::Tuple) where N
         length(t1) == length(t2) || error("Inconsistent tuple lengths")
-        return tuple([dictstypejoined(typeof(d1), typeof(d2)) for (d1, d2) in zip(t1, t2)]...)
+        return tuple([dictstypejoined(d1, d2) for (d1, d2) in zip(t1, t2)]...)
     end
-
-    dictstyperecursive(t::NTuple{2}, ::Void, rest...) = dictstyperecursive(t, rest...)
-    dictstyperecursive(::Void, t::NTuple{2}, rest...) = dictstyperecursive(t, rest...)
-    #dictstyperecursive(t1::)
+    dictstyperecursive(::Type{Val{N}}, t1::Tuple, t2::Tuple, t::Tuple...) where N = dictstyperecursive(Val{N}, dictstyperecursive(Val{N}, t1, t2), t...)
     function Base.Broadcast.broadcast_c(f, t::Type{NamedArray}, As...)
         arrays = [array(a) for a in As]
         res = broadcast(f, arrays...)
