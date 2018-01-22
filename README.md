@@ -73,7 +73,7 @@ n[1,1]
 n[1,:]
 n["label",2]
 n[1:10, Not("label")]
-n[[2,4,6], ["a", "b", "d"]
+n[[2,4,6], ["a", "b", "d"]]
 ```
 
 This is the main use of `NamedArrays`.  As an index, not only integers, arrays of integer and ranges can be given, but also names (keys), arrays of keys and negations of any of any of these can be specified.
