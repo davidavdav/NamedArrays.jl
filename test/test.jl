@@ -57,6 +57,7 @@ end
 for f in (:cumprod, :cumsum, :cumsum_kbn)
     for dim=1:2
         @eval @test ($f)(n.array, $dim) == ($f)(n, $dim).array
+        @eval @inferred ($f)(n, $dim)
     end
 end
 
