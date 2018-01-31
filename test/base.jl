@@ -3,6 +3,7 @@ print("base, ")
 include("init-namedarrays.jl")
 
 nn = @inferred similar(n)
+
 @test copy!(nn, 1, n, 1, length(n)) == n
 @test copy!(nn, 1, n.array, 1, length(n)) == n
 
@@ -37,3 +38,9 @@ end
 
 writedlm(STDOUT, n)
 writedlm(STDOUT, v)
+
+## Issue #60 
+for func in [similar, zeros, ones, n -> hcat(n, n), n -> vcat(n, n)]
+    fn = @inferred func(n)
+    @test keytype.(fn.dicts) == (String, String)
+end

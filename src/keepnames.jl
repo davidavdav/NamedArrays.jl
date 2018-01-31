@@ -8,12 +8,12 @@
 # Keep names for consistently named vectors, or drop them
 function Base.hcat(N::NamedVecOrMat...)
     keepnames=true
-    N1=N[1]
-    firstnames = names(N1,1)
-    for i=2:length(N)
-        keepnames &= names(N[i],1)==firstnames
+    N1 = N[1]
+    firstnames = names(N1, 1)
+    for i in 2:length(N)
+        keepnames &= names(N[i],1) == firstnames
     end
-    a = hcat(map(a -> a.array, N)...)
+    a = hcat(map(n -> n.array, N)...)
     if keepnames
         colnames = defaultnamesdict(size(a,2))
         NamedArray(a, (N1.dicts[1], colnames), (N1.dimnames[1], :hcat))

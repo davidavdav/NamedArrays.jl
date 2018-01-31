@@ -27,6 +27,8 @@ size(a::NamedArray) = size(a.array)
 size(a::NamedArray, d) = size(a.array, d)
 ndims(a::NamedArray) = ndims(a.array)
 
+Base.similar(n::NamedArray, t::Type) = NamedArray(similar(n.array, t), n.dicts, n.dimnames)
+
 function Base.similar{T,N}(n::NamedArray{T,N}, t::Type, dims::Base.Dims)
     nd = length(dims)
     dicts = Array{OrderedDict{Any,Int}}(nd)
