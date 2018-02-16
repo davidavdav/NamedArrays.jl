@@ -62,7 +62,7 @@ x = NamedArray([1 3; 2 4], ( ["A","B"], ["C","D"] ), ("ROWS","COLS"))
 x = NamedArray([1 3; 2 4], ( ["A","B"], ["C","D"] ))
 x = NamedArray([1, 2], ( ["A","B"], ))  # note the comma after ["A","B"] to ensure evaluation as tuple
 ```
-This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.). 
+This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a,dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.).
 
 In principle, there is no limit imposed to the type of the `names` used, but we discourage the use of `Real`, `AbstractArray` and `Range`, because they have a special interpretation in `getindex()` and `setindex`.
 
@@ -96,9 +96,10 @@ n[Not("one"), :]
 
 ### Dictionary-style indexing
 
-You can also use a dictionary-style indexing, if you don't want to bother about the order of the dimensions:
+You can also use a dictionary-style indexing, if you don't want to bother about the order of the dimensions, or make a slice using a specific named dimension:
 ```julia
 n[:B=>"b", :A=>"one"]
+n[:B => "c"]
 ```
 This style cannot be mixed with other indexing styles, yet.
 
@@ -148,13 +149,6 @@ convert(::Type{Array}, a::NamedArray)
 ```
 
  converts a NamedArray to an Array by dropping all name information
-
-```julia
-convert{T}(::Type{NamedArray{T}}, a::NamedArray)
-float32(a)
-float64(a)
-```
- converts the element type of a NamedArray
 
  * Arithmetic:
   - between NamedArray and NamedArray
@@ -238,38 +232,6 @@ std
 
  These functions, when operating along one dimension, keep the names in the orther dimensions, and name the left over singleton dimension as `$function($dimname)`.
 
-Methods that AbstractArray covers
----------------------------
-
-Some methods work automatically with NamedArrays courtesy of the super
-type AbstractArray.  However, they may not treat the names attributes
-correctly
-
-```julia
-a::NamedArray
-b::NamedArray
-d::Int
-function f
-sum(a)
-prod(a)
-isequal(a,b)
-==(a, b)
-cumsum(a)
-cumsum(a, d)
-cumprod(a)
-cumprod(a, d)
-maximum(a)
-eltype(a)
-cummin(a)
-cummin(a, d)
-cummax(a)
-cummanx(a, d)
-repmat(a, d1, d2)
-nnz(a)
-minimum(a)
-mapslices(f, a, d)
-map(f, a)
-```
 
 Implementation
 ------------

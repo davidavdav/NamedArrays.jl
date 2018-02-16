@@ -1,5 +1,5 @@
 ## NamedArrays.jl
-## (c) 2013--2014 David A. van Leeuwen
+## (c) 2013--2018 David A. van Leeuwen
 
 ## Julia type that implements a drop-in replacement of Array with named dimensions.
 

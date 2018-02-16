@@ -1,4 +1,4 @@
-## (c) 2016 David A. van Leeuwen
+## (c) 2016--2018 David A. van Leeuwen
 ## tests for ../src/index.jl
 
 import Base.indices
@@ -38,8 +38,11 @@ first = n.array[1,:]
 @test names(n[Not("one"), :],1) == ["two"]
 @test names(n[1:1, Not("a")], 2) == ["b", "c", "d"]
 ## indexing by pair
-@test n[:B=>"a", :A=>"two"] == n.array[2, 1]
-@test n[:A=>"one", :B=>"d"] == n.array[1, 4]
+@test n[:B=>"a", :A=>"two"] == n[2, 1]
+@test n[:A=>"one", :B=>"d"] == n[1, 4]
+@test n[:B => "b"] == n[:, "b"]
+@test n[:A => "two"] == n["two", :]
+
 ## https://github.com/nalimilan/FreqTables.jl/issues/10
 bi = [false, true, false, true] ## Array{Bool}
 for i in 1:2

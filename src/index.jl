@@ -1,5 +1,5 @@
 ## index.jl getindex and setindex methods for NamedArray
-## (c) 2013--2017 David A. van Leeuwen
+## (c) 2013--2018 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
@@ -100,13 +100,16 @@ function namedgetindex(n::NamedArray, index...; useview=false)
     return NamedArray(a, tuple(newnames...), tuple(newdimnames...))
 end
 
+## work out n(:A => "1", :C => "5")
 function indices(n::NamedArray, I::Pair...)
-    length(I) == ndims(n) || error("Incorrect number of dimensions")
     dict = Dict{Any,Any}(I...)
-    Set(keys(dict)) == Set(n.dimnames) || error("Dimension name mismatch")
-    result = Vector{Int}(ndims(n))
-    for (i, name) in enumerate(n.dimnames)
-        result[i] = n.dicts[i][dict[name]]
+    Set(keys(dict)) ⊆ Set(n.dimnames) || error("Dimension name mismatch")
+    result = Vector{Union{Int,Colon}}(ndims(n))
+    fill!(result, :) ## unspecified dimensions act as colon
+    for (i, dim) in enumerate(n.dimnames)
+        if dim in keys(dict)
+            result[i] = n.dicts[i][dict[dim]]
+        end
     end
     return result
 end
