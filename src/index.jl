@@ -36,6 +36,8 @@ Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N}) = namedgetindex(n, map((d,i
 ## indices(::Associative, index) converts any type `index` to Integer
 
 ## single index
+indices(dict::Associative{Any,V}, i::Real) where V <: Integer = dict[i]
+indices(dict::Associative{Any,V}, i)  where V <: Integer = dict[i]
 indices{K<:Real,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
 @inline indices{K,V<:Integer}(dict::Associative{K,V}, i::Real) = Base.to_index(i)
 @inline indices{K,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
