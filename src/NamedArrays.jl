@@ -12,7 +12,7 @@ module NamedArrays
 
 using DataStructures
 
-export NamedArray, NamedVector, NamedMatrix, Not
+export NamedArray, NamedVector, NamedMatrix, Name, Not
 
 ## type definition
 include("namedarraytypes.jl")

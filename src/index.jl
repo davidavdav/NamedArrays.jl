@@ -4,7 +4,19 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-import Base: getindex
+import Base: getindex, setindex!
+
+## AbstractArray Interface, integers have precedence over everything else
+getindex(n::NamedArray{T, N, AT, DT, IndexLinear()}, i::Int) where {T, N, AT, DT} = getindex(n.array, i)
+getindex(n::NamedArray{T, N, AT, DT, IndexCartesian()}, I::Vararg{Int, N}) where {T, N, AT, DT} = getindex(n.array, I)
+setindex!(n::NamedArray{T, N, AT, DT, IndexLinear()}, v, i::Int) where {T, N, AT, DT} = setindex!(n.array, v, i::Int)
+setindex!(n::NamedArray{T, N, AT, DT, IndexCartesian()}, v, I::Vararg{Int, N}) where {T, N, AT, DT} = setindex!(n.array, v, I)
+## optional methods
+Base.IndexStyle(::NamedArray{T,N,AT,DT,IS}) where {T, N, AT, DT, IS} = IS
+
+## Ambiguity
+getindex(n::NamedArray{T, 1, AT, DT, IndexLinear()}, i::Int64) where {T, AT, DT} = getindex(n.array, i)
+setindex!(n::NamedArray{T, 1, AT, DT, IndexLinear()}, v::Any, i::Int64) where {T, AT, DT} = setindex!(n.array, v, i)
 
 function flattenednames(n::NamedArray)
     L = length(n) # elements in array
@@ -25,20 +37,25 @@ getindex(n::NamedVector, ::Colon) = n
 getindex(n::NamedArray, ::Colon) = NamedArray(n.array[:], [flattenednames(n)] , [tuple(dimnames(n)...)])
 
 ## special 0-dimensional case
-getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)
+## getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)
 
-@inline function getindex{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N})
+@inline function getindex(n::NamedArray{T, N, AT, DT, IS}, I::Vararg{Any,N}) where {T, N, AT, DT, IS}
     namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...)
 end
 Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Union{AbstractArray,Colon,Real},N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
 Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
 
+## indices computes numeric indices from named or other
+
 ## indices(::Associative, index) converts any type `index` to Integer
 
 ## single index
-indices{K<:Real,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
-@inline indices{K,V<:Integer}(dict::Associative{K,V}, i::Real) = Base.to_index(i)
-@inline indices{K,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
+indices(dict::Associative{K,V}, i::Integer) where {K, V<:Integer} = i ## integer index takes precedence
+## indices(dict::Associative{K,V}, i::K) where {K<:Real, V<:Integer} = dict[i]
+## indices(dict::Associative{K,V}, i::Real) where {K, V<:Integer} = Base.to_index(i)
+indices(dict::Associative{K,V}, i::K) where {K, V<:Integer} = dict[i]
+indices(dict::Associative{K,V}, i::Name) where {K, V<:Integer} = dict[i.name]
+
 
 ## ambiguity if dict key is CartesionIndex, this should never happen
 indices{K<:CartesianIndex,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
@@ -46,10 +63,12 @@ indices(dict::Associative, ci::CartesianIndex) = ci
 
 ## multiple indices
 ## the following two lines are partly because of ambiguity
-indices{T<:Integer,V<:Integer}(dict::Associative{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]
-indices{T<:Real,V<:Integer}(dict::Associative{T,V}, i::AbstractArray{T}) = [dict[k] for k in i]
-indices{T<:Integer,K,V<:Integer}(dict::Associative{K,V}, i::AbstractArray{T}) = i
-indices{K,V<:Integer}(dict::Associative{K,V}, i::AbstractArray{K}) = [dict[k] for k in i]
+#indices(dict::Associative{T,V}, i::AbstractArray{T}) where {T<:Integer,V<:Integer} = [dict[k] for k in i]
+#indices(dict::Associative{T,V}, i::AbstractArray{T}) where {T<:Real,V<:Integer} = [dict[k] for k in i]
+
+indices(dict::Associative{K,V}, i::AbstractArray{T}) where {T<:Integer,K,V<:Integer} = i
+indices(dict::Associative{K,V}, i::AbstractArray{K}) where {K,V<:Integer} = [dict[k] for k in i]
+indices(dict::Associative{K,V}, i::AbstractArray{Name{K}}) where {K, V<:Integer} = [dict[k.name] for k in i]
 ## in 0.4, we need to take care of : ourselves it seems
 indices{K,V<:Integer}(dict::Associative{K,V}, ::Colon) = collect(1:length(dict))
 

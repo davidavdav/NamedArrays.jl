@@ -11,16 +11,19 @@
 ## The inner constructor checks for consistency, the values must all be 1:d
 if !isdefined(:NamedArray)
 
-mutable struct NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
+mutable struct NamedArray{T,N,AT,DT,IS} <: AbstractArray{T,N}
     array::AT
     dicts::DT
     dimnames::NTuple{N, Any}
     function (::Type{S}){S<:NamedArray, T, N}(array::AbstractArray{T, N}, dicts::NTuple{N, OrderedDict}, dimnames::NTuple{N, Any})
         size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
-        new{T,N,typeof(array),typeof(dicts)}(array, dicts, dimnames)
+        new{T, N, typeof(array), typeof(dicts), IndexStyle(array)}(array, dicts, dimnames)
     end
 end
 
+struct Name{T}
+    name::T
+end
 
 ## a type that negates any index
 struct Not{T}

@@ -77,16 +77,18 @@ i = [3 2 4; 1 4 2]
 
 print("dodgy indices, ")
 ## weird indices
-m = NamedArray(rand(4), ([1//1, 1//2, 1//3, 1//4],), ("weird",))
+m = NamedArray(rand(4), ([1//1, 1//2, 1//3, 1//4],), ("rational",))
 @test m[1//2] == m.array[2]
 @test m[[1//4,1//3]] == m.array[[4,3]]
 m[1//4] = 1
 @test m[4] == 1
 
 m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
-@test m[1] == m.array[4]
+@test m[1] == m.array[1] ## Integer precedence
+@test m[Name(1)] == m.array[4] ## but Name() indicates names
 ## this goes wrong for julia-v0.3
-@test m[[4,3,2,1]].array == m.array
+@test m[[4,3,2,1]].array == m.array[[4, 3, 2, 1]]
+@test m[Name.([4, 3, 2, 1])].array == m
 
 print("sort, ")
 m = NamedArray(rand(100))
