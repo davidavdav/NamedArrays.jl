@@ -39,14 +39,14 @@ function checkdict(dict::Associative)
     return OrderedDict{union, Int}(pairs)
 end
 
-mutable struct NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
+mutable struct NamedArray{T,N,AT} <: AbstractArray{T,N}
     array::AT
-    dicts::DT
+    dicts::NTuple{N, OrderedDict}
     dimnames::NTuple{N, Any}
     function (::Type{S}){S<:NamedArray, T, N}(array::AbstractArray{T, N}, dicts::NTuple{N, OrderedDict}, dimnames::NTuple{N, Any})
         size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
         ## dicts = map(dict -> checkdict(dict), dicts)
-        new{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)
+        new{T, N, typeof(array)}(array, dicts, dimnames)
     end
 end
 

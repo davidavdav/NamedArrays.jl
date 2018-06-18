@@ -25,13 +25,13 @@ NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = NamedArray{T,N,typeof(a
 ## Basic constructor: array, tuple of dicts
 ## dimnames created as default, then inner constructor called
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,OrderedDict})
-    NamedArray{T, N, typeof(array), typeof(names)}(array, names, defaultdimnames(array)) ## inner constructor
+    NamedArray{T, N, typeof(array)}(array, names, defaultdimnames(array)) ## inner constructor
 end
 
 ## constructor with array, names and dimnames (dict is created from names)
 function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N, Any}=defaultdimnames(array))
     dicts = defaultnamesdict(names)
-    NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)
+    NamedArray{T, N, typeof(array)}(array, dicts, dimnames)
 end
 
 ## vectors instead of tuples, with defaults (incl. no names or dimnames at all)
@@ -46,7 +46,7 @@ function NamedArray{T,N,VT}(array::AbstractArray{T,N},
     else
         dicts = defaultnamesdict(tuple(names...))::NTuple{N, OrderedDict{eltype(VT),Int}}
     end
-    NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, tuple(dimnames...))
+    NamedArray{T, N, typeof(array)}(array, dicts, tuple(dimnames...))
 end
 
 

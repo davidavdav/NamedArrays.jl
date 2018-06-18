@@ -2,8 +2,8 @@ n = @inferred NamedArray(rand(2,4))
 Letters = [string(Char(64+i)) for i in 1:26]
 letters = [string(Char(64+32+i)) for i in 1:26]
 
-@inferred setnames!(n, ["one", "two"], 1)
-@inferred setnames!(n, letters[1:4], 2)
+setnames!(n, ["one", "two"], 1)
+setnames!(n, letters[1:4], 2)
 
 v = @inferred NamedArray(rand(1:100, 6), (letters[1:6],), (:index,))
 

@@ -12,7 +12,7 @@ for f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     @eval function ($f){T,N}(a::NamedArray{T,N}, d::Dims)
         s = ($f)(a.array, d)
         dicts = tuple([issubset(i,d) ? OrderedDict(string($f,"(",a.dimnames[i],")") => 1) : a.dicts[i] for i=1:ndims(a)]...)
-        NamedArray{T,N,typeof(a.array), typeof(dicts)}(s, dicts, a.dimnames)
+        NamedArray{T,N,typeof(a.array)}(s, dicts, a.dimnames)
     end
     @eval ($f)(a::NamedArray, d::Int) = ($f)(a, (d,))
 end

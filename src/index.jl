@@ -7,16 +7,16 @@
 import Base: getindex, setindex!
 
 ## AbstractArray Interface, integers have precedence over everything else
-getindex(n::NamedArray{T, N, AT, DT}, i::Int) where {T, N, AT, DT} = getindex(n.array, i)
-getindex(n::NamedArray{T, N, AT, DT}, I::Vararg{Int, N}) where {T, N, AT, DT} = getindex(n.array, I...)
-setindex!(n::NamedArray{T, N, AT, DT}, v, i::Int) where {T, N, AT, DT} = setindex!(n.array, v, i::Int)
-setindex!(n::NamedArray{T, N, AT, DT}, v, I::Vararg{Int, N}) where {T, N, AT, DT} = setindex!(n.array, v, I...)
+getindex(n::NamedArray{T, N, AT}, i::Int) where {T, N, AT} = getindex(n.array, i)
+getindex(n::NamedArray{T, N, AT}, I::Vararg{Int, N}) where {T, N, AT} = getindex(n.array, I...)
+setindex!(n::NamedArray{T, N, AT}, v, i::Int) where {T, N, AT} = setindex!(n.array, v, i::Int)
+setindex!(n::NamedArray{T, N, AT}, v, I::Vararg{Int, N}) where {T, N, AT} = setindex!(n.array, v, I...)
 ## optional methods
 Base.IndexStyle(n::NamedArray) = IndexStyle(n.array)
 
 ## Ambiguity
 #getindex(n::NamedArray{T, 1, AT, DT}, i::Int64) where {T, AT, DT} = getindex(n.array, i)
-setindex!(n::NamedArray{T, 1, AT, DT}, v::Any, i::Int64) where {T, AT, DT} = setindex!(n.array, v, i)
+#setindex!(n::NamedArray{T, 1, AT}, v::Any, i::Int64) where {T, AT} = setindex!(n.array, v, i)
 
 function flattenednames(n::NamedArray)
     L = length(n) # elements in array
@@ -39,7 +39,7 @@ getindex(n::NamedArray, ::Colon) = NamedArray(n.array[:], [flattenednames(n)] , 
 ## special 0-dimensional case
 ## getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)
 
-getindex(n::NamedArray{T, N, AT, DT}, I::Vararg{Any,N}) where {T, N, AT, DT} = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...)
+getindex(n::NamedArray{T, N, AT}, I::Vararg{Any,N}) where {T, N, AT} = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...)
 
 Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Union{AbstractArray,Colon,Real},N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
 Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)

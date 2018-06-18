@@ -12,9 +12,9 @@ include("init-namedarrays.jl")
 dn1 = ["一", "二"]
 dn2 = ["一", "二", "三", "四"]
 
-@inferred setnames!(n, dn1, 1)
+setnames!(n, dn1, 1)
 for (i, zh) in enumerate(dn2)
-	@inferred setnames!(n, zh, 2, i)
+	setnames!(n, zh, 2, i)
 end
 
 @test names(n) == Array[dn1, dn2]

@@ -64,7 +64,7 @@ end
 if isdefined(Base.Broadcast, :broadcast_c)
     array(n::NamedArray) = n.array
     array(a) = a
-    function dictstype{T,N,AT,DT,M}(n::NamedArray{T,N,AT,DT}, ::Type{Val{M}})
+    function dictstype{T,N,AT,M}(n::NamedArray{T,N,AT}, ::Type{Val{M}})
         N > M && error("Cannot truncate array")
         return tuple(n.dicts..., fill(nothing, M - N)...)::NTuple{M, Any}
     end
@@ -86,7 +86,7 @@ if isdefined(Base.Broadcast, :broadcast_c)
         AT = typeof(res)
         ## is there a NamedArray with the same dimensions?
         for a in As
-            isa(a, NamedArray) && size(a) == size(res) && return NamedArray{T, N, AT, typeof(a.dicts)}(res, a.dicts, a.dimnames)
+            isa(a, NamedArray) && size(a) == size(res) && return NamedArray{T, N, AT}(res, a.dicts, a.dimnames)
         end
         ## can we collect the dimensions from individual namedarrays?
         dicts = OrderedDict[]

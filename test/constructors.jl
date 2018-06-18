@@ -27,8 +27,8 @@ n1 = @inferred NamedArray(Complex64, 5, 8)
 n2 = @inferred NamedArray(a, (["s", "t"],[:a, :b, :c]), ("string", :symbol))
 
 n = @inferred NamedArray(rand(2,4))
-@inferred setnames!(n, ["one", "two"], 1)
-@inferred setnames!(n, ["a", "b", "c", "d"], 2)
+setnames!(n, ["one", "two"], 1)
+setnames!(n, ["a", "b", "c", "d"], 2)
 
 a = [1 2 3; 4 5 6]
 n3 = @inferred NamedArray(a, (["a","b"],["C","D","E"]))

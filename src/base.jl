@@ -7,7 +7,7 @@
 
 ## copy
 import Base: copy, copy!
-copy{T,N,AT,DT}(a::NamedArray{T,N,AT,DT}) = NamedArray{T,N,AT,DT}(copy(a.array), deepcopy(a.dicts), identity(a.dimnames))
+copy(a::NamedArray{T,N,AT}) where {T, N, AT} = NamedArray{T,N,AT}(copy(a.array), deepcopy(a.dicts), identity(a.dimnames))
 
 ## from array.jl
 function copy!{T}(dest::NamedArray{T}, dsto::Integer, src::ArrayOrNamed{T}, so::Integer, N::
@@ -44,7 +44,7 @@ function Base.similar{T,N}(n::NamedArray{T,N}, t::Type, dims::Base.Dims)
     end
     tdicts = tuple(dicts...)
     array = similar(n.array, t, dims)
-    return NamedArray{t,N,typeof(array),typeof(tdicts)}(array, tdicts, tuple(dimnames...))
+    return NamedArray{t,N,typeof(array)}(array, tdicts, tuple(dimnames...))
 end
 
 ## our own interpretation of ind2sub

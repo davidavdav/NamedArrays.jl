@@ -188,7 +188,7 @@ function lufact!{T}(n::NamedArray{T}, pivot::Union{Type{Val{false}}, Type{Val{tr
 end
 
 ## after lu.jl, this could be merged at Base.
-function Base.getindex(A::LU{T,NamedArray{T,2,AT,DT}}, d::Symbol) where {T, AT, DT}
+function Base.getindex(A::LU{T,NamedArray{T,2,AT}}, d::Symbol) where {T, AT}
     m, n = size(A)
     if d == :L
         L = tril!(A.factors[1:m, 1:min(m,n)])
