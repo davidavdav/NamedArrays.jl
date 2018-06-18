@@ -7,16 +7,16 @@
 import Base: getindex, setindex!
 
 ## AbstractArray Interface, integers have precedence over everything else
-getindex(n::NamedArray{T, N, AT, DT, IndexLinear()}, i::Int) where {T, N, AT, DT} = getindex(n.array, i)
-getindex(n::NamedArray{T, N, AT, DT, IndexCartesian()}, I::Vararg{Int, N}) where {T, N, AT, DT} = getindex(n.array, I)
-setindex!(n::NamedArray{T, N, AT, DT, IndexLinear()}, v, i::Int) where {T, N, AT, DT} = setindex!(n.array, v, i::Int)
-setindex!(n::NamedArray{T, N, AT, DT, IndexCartesian()}, v, I::Vararg{Int, N}) where {T, N, AT, DT} = setindex!(n.array, v, I)
+getindex(n::NamedArray{T, N, AT, DT}, i::Int) where {T, N, AT, DT} = getindex(n.array, i)
+getindex(n::NamedArray{T, N, AT, DT}, I::Vararg{Int, N}) where {T, N, AT, DT} = getindex(n.array, I...)
+setindex!(n::NamedArray{T, N, AT, DT}, v, i::Int) where {T, N, AT, DT} = setindex!(n.array, v, i::Int)
+setindex!(n::NamedArray{T, N, AT, DT}, v, I::Vararg{Int, N}) where {T, N, AT, DT} = setindex!(n.array, v, I...)
 ## optional methods
-Base.IndexStyle(::NamedArray{T,N,AT,DT,IS}) where {T, N, AT, DT, IS} = IS
+Base.IndexStyle(n::NamedArray) = IndexStyle(n.array)
 
 ## Ambiguity
-getindex(n::NamedArray{T, 1, AT, DT, IndexLinear()}, i::Int64) where {T, AT, DT} = getindex(n.array, i)
-setindex!(n::NamedArray{T, 1, AT, DT, IndexLinear()}, v::Any, i::Int64) where {T, AT, DT} = setindex!(n.array, v, i)
+#getindex(n::NamedArray{T, 1, AT, DT}, i::Int64) where {T, AT, DT} = getindex(n.array, i)
+setindex!(n::NamedArray{T, 1, AT, DT}, v::Any, i::Int64) where {T, AT, DT} = setindex!(n.array, v, i)
 
 function flattenednames(n::NamedArray)
     L = length(n) # elements in array
@@ -39,9 +39,8 @@ getindex(n::NamedArray, ::Colon) = NamedArray(n.array[:], [flattenednames(n)] , 
 ## special 0-dimensional case
 ## getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)
 
-@inline function getindex(n::NamedArray{T, N, AT, DT, IS}, I::Vararg{Any,N}) where {T, N, AT, DT, IS}
-    namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...)
-end
+getindex(n::NamedArray{T, N, AT, DT}, I::Vararg{Any,N}) where {T, N, AT, DT} = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...)
+
 Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Union{AbstractArray,Colon,Real},N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
 Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
 
@@ -66,9 +65,10 @@ indices(dict::Associative, ci::CartesianIndex) = ci
 #indices(dict::Associative{T,V}, i::AbstractArray{T}) where {T<:Integer,V<:Integer} = [dict[k] for k in i]
 #indices(dict::Associative{T,V}, i::AbstractArray{T}) where {T<:Real,V<:Integer} = [dict[k] for k in i]
 
-indices(dict::Associative{K,V}, i::AbstractArray{T}) where {T<:Integer,K,V<:Integer} = i
-indices(dict::Associative{K,V}, i::AbstractArray{K}) where {K,V<:Integer} = [dict[k] for k in i]
-indices(dict::Associative{K,V}, i::AbstractArray{Name{K}}) where {K, V<:Integer} = [dict[k.name] for k in i]
+indices(dict::Associative{K,V}, i::AbstractArray) where {K,V<:Integer} = [indices(dict, k) for k in i]
+#indices(dict::Associative{K,V}, i::AbstractArray{T}) where {T<:Integer,K,V<:Integer} = i
+#indices(dict::Associative{K,V}, i::AbstractArray{K}) where {K,V<:Integer} = [dict[k] for k in i]
+#indices(dict::Associative{K,V}, i::AbstractArray{Name{K}}) where {K, V<:Integer} = [dict[k.name] for k in i]
 ## in 0.4, we need to take care of : ourselves it seems
 indices{K,V<:Integer}(dict::Associative{K,V}, ::Colon) = collect(1:length(dict))
 

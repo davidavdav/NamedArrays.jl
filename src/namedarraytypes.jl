@@ -9,20 +9,45 @@
 ## DT is a tuple of Dicts, characterized by the types of the keys.
 ## This way NamedArray is dependent on the dictionary type of each dimensions.
 ## The inner constructor checks for consistency, the values must all be 1:d
+
+using DataStructures: OrderedDict
+
 if !isdefined(:NamedArray)
 
-mutable struct NamedArray{T,N,AT,DT,IS} <: AbstractArray{T,N}
+struct Name{T}
+    name::T
+end
+
+Base.show(io::IO, name::Name) = print(io, name.name)
+
+function checkdict(dict::Associative)
+    pairs = Pair[]
+    union = Union{}
+    n = length(dict)
+    covered = falses(n)
+    for (key, value) in dict
+        if isa(key, Integer)
+            key = Name(key)
+        end
+        union = Union{union, typeof(key)}
+        push!(pairs, key => value)
+        if isa(value, Integer) && 1 ≤ value ≤ n
+            covered[value] = true
+        end
+    end
+    all(covered) || error("Not all target indices are covered")
+    return OrderedDict{union, Int}(pairs)
+end
+
+mutable struct NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
     array::AT
     dicts::DT
     dimnames::NTuple{N, Any}
     function (::Type{S}){S<:NamedArray, T, N}(array::AbstractArray{T, N}, dicts::NTuple{N, OrderedDict}, dimnames::NTuple{N, Any})
         size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
-        new{T, N, typeof(array), typeof(dicts), IndexStyle(array)}(array, dicts, dimnames)
+        ## dicts = map(dict -> checkdict(dict), dicts)
+        new{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)
     end
-end
-
-struct Name{T}
-    name::T
 end
 
 ## a type that negates any index
