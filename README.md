@@ -219,7 +219,7 @@ names(n::NamedArray, dim::Integer) ## just for dimension `dim`
 dimnames(n::NamedArray) ## the names of the dimensions
 
 @show names(n);
-names(n) = Array{T,1} where T[String["one", "two"], Symbol[:a, :b, :c]]
+names(n) = [String["one", "two"], Symbol[:a, :b, :c]]
 
 @show names(n, 1)
 names(n, 1) = String["one", "two"]
@@ -246,7 +246,7 @@ sets all the names of dimension `dim`, or only the name at index `index`, or the
 copy(a::NamedArray)
 ```
 
-returns a copy of all the elements in a, and copiess of the names, and returns a NamedArray
+returns a copy of all the elements in a, and copies of the names, and returns a NamedArray
 
 ### Convert
 
@@ -322,4 +322,4 @@ These functions, when operating along one dimension, keep the names in the other
 
 The current goal is to reduce complexity of the implementation.  Where possible, we want to use more of the `Base.AbstractArray` implementation.
 
-A longer term goal is to improve type stability, this might have a repercussion to the semantics of some operations.  
+A longer term goal is to improve type stability, this might have a repercussion to the semantics of some operations.

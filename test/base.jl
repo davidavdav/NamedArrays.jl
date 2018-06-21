@@ -39,8 +39,14 @@ end
 writedlm(STDOUT, n)
 writedlm(STDOUT, v)
 
-## Issue #60 
+## Issue #60
 for func in [similar, zeros, ones, n -> hcat(n, n), n -> vcat(n, n)]
     fn = @inferred func(n)
     @test keytype.(fn.dicts) == (String, String)
+end
+
+## issue 61
+d = Dict(v)
+for key in keys(d)
+	@test d[key] == v[key]
 end

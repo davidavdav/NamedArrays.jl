@@ -52,3 +52,6 @@ Base.ind2sub(n::NamedArray, index::Integer) = tuple(map(x -> names(n, x[1])[x[2]
 
 ## simplified text representation of namedarray
 Base.writedlm(io, n::NamedVecOrMat) = writedlm(io, hcat(names(n,1), n.array))
+
+## Turn a NamedVector into a dict, #61
+Base.Dict(n::NamedVector) = Dict(name => n[name] for name in names(n, 1))
