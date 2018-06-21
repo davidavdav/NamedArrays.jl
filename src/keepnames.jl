@@ -111,6 +111,7 @@ if isdefined(Base.Broadcast, :broadcast_c)
         return NamedArray{T, N, AT, typeof(tdicts)}(res, tdicts, tuple(dimnames...))
     end
 end
+
 ## reorder names
 import Base: sort, sort!
 function sort!(v::NamedVector; kws...)

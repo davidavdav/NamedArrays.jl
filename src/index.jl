@@ -16,7 +16,7 @@ Base.IndexStyle(n::NamedArray) = IndexStyle(n.array)
 
 ## Ambiguity
 #getindex(n::NamedArray{T, 1, AT, DT}, i::Int64) where {T, AT, DT} = getindex(n.array, i)
-setindex!(n::NamedArray{T, 1, AT, DT}, v::Any, i::Int64) where {T, AT, DT} = setindex!(n.array, v, i)
+#setindex!(n::NamedArray{T, 1, AT, DT}, v::Any, i::Int64) where {T, AT, DT} = setindex!(n.array, v, i)
 
 function flattenednames(n::NamedArray)
     L = length(n) # elements in array
@@ -119,7 +119,7 @@ function namedgetindex(n::NamedArray, index...; useview=false)
     return NamedArray(a, tuple(newnames...), tuple(newdimnames...))
 end
 
-## work out n(:A => "1", :C => "5")
+## work out n[:A => "1", :C => "5"]
 function indices(n::NamedArray, I::Pair...)
     dict = Dict{Any,Any}(I...)
     Set(keys(dict)) ⊆ Set(n.dimnames) || error("Dimension name mismatch")
@@ -138,22 +138,13 @@ getindex(n::NamedArray, I::Pair...) = getindex(n.array, indices(n, I...)...)
 getindex(n::NamedVector, I::CartesianIndex{1}) = getindex(n.array, I)
 getindex{T,N}(n::NamedArray{T,N}, I::CartesianIndex{N}) = getindex(n.array, I)
 
-import Base.setindex!
+## Setindex is remarkably more simple than getindex.  I wonder why...
 
-# n[:] = m
-setindex!(n::NamedArray, x, ::Colon) = setindex!(n.array, x, :)
-
-# n[1:4] = 1:4
-## shamelessly copied from array.jl
-function setindex!{T}(A::NamedArray{T}, X::ArrayOrNamed{T}, I::Range{Int})
-    if length(X) != length(I); error("argument dimensions must match"); end
-    copy!(A, first(I), X, 1, length(I))
-    return A
+## This takes care of most cases
+@inline function setindex!{T,N}(n::NamedArray{T,N}, x, I::Vararg{Any,N})
+    II = map((d,i)->indices(d, i), n.dicts, I)
+    setindex!(n.array, x, II...)
 end
 
-## This takes care of most other cases
-@inline function setindex!{T,N}(A::NamedArray{T,N}, x, I::Vararg{Any,N})
-    II = map((d,i)->indices(d, i), A.dicts, I)
-    setindex!(A.array, x, II...)
-end
-@inline setindex!{T,N}(n::NamedArray{T,N}, x, I::Vararg{Pair,N}) = setindex!(n.array, x, indices(n, I...)...)
+## assignment via n[:B => "two"] = [...]
+@inline setindex!(n::NamedArray, x, I::Vararg{Pair}) = setindex!(n.array, x, indices(n, I...)...)

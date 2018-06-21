@@ -26,12 +26,32 @@ Synopsis
 ```julia
 using NamedArrays
 n = NamedArray(rand(2,4))
+@show n;
+
+n = 2×4 Named Array{Float64,2}
+A ╲ B │         1          2          3          4
+──────┼───────────────────────────────────────────
+1     │  0.833541   0.409606   0.203789   0.724494
+2     │  0.458244   0.908721   0.808201  0.0580882
+
 setnames!(n, ["one", "two"], 1)         # give the names "one" and "two" to the rows (dimension 1)
 n["one", 2:3]
 n["two", :] = 11:14
 n[Not("two"), :] = 4:7                  # all rows but the one called "two"
-n
-sum(n, 1)
+@show n;
+
+n = 2×4 Named Array{Float64,2}
+A ╲ B │    1     2     3     4
+──────┼───────────────────────
+one   │  4.0   5.0   6.0   7.0
+two   │ 11.0  12.0  13.0  14.0
+
+@show sum(n, 1);
+
+sum(n, 1) = 1×4 Named Array{Float64,2}
+ A ╲ B │    1     2     3     4
+───────┼───────────────────────
+sum(A) │ 15.0  17.0  19.0  21.0
 ```
 
 Construction
@@ -59,17 +79,24 @@ The key-lookup for names is implemented by using `DataStructures.OrderedDict`s f
 using DataStructures
 n = NamedArray([1 3; 2 4], ( OrderedDict("A"=>1, "B"=>2), OrderedDict("C"=>1, "D"=>2) ),
                ("Rows", "Cols"))
+@show n;
+
+n = 2×2 Named Array{Int64,2}
+Rows ╲ Cols │ C  D
+────────────┼─────
+A           │ 1  3
+B           │ 2  4
 ```
 This is the basic constructor for a namedarray.  The second argument `names` must be a tuple of `OrderedDict`s whose range (the values) are exacly covering the range `1:size(a,dim)` for each dimension.   The keys in the various dictionaries may be of mixed types, but after construction, the type of the names cannot be altered.  The third argument `dimnames` is a tuple of the names of the dimensions themselves, and these names may be of any type.
 
-### Vectors/tuples of names
+### Vectors of names
 
 ```julia
 # NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
 n = NamedArray([1 3; 2 4], ( ["a", "b"], ["c", "d"] ), ("Rows", "Cols"))
 # NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Vector})
 n = NamedArray([1 3; 2 4], ( ["a", "b"], ["c", "d"] ))
-n = NamedArray([1, 2], ( ["A", "B"], ))  # note the comma after ["A", "B"] to ensure evaluation as tuple
+n = NamedArray([1, 2], ( ["a", "b"], ))  # note the comma after ["a", "b"] to ensure evaluation as tuple
 ```
 This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a, dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.).
 
@@ -104,10 +131,18 @@ dodgy[Name(1), Name(30)] == a[2, 3] ## true
 
 ```julia
 n = NamedArray([1 2 3; 4 5 6], (["one", "two"], [:a, :b, :c]))
-n["one", :a] == 1
-n[:, :b] == [2, 5]
-n["two", [1, 3]] == [4, 6]
-n["one", [:a, :b]] == [1, 2]
+@show n;
+
+n = 2×3 Named Array{Int64,2}
+A ╲ B │ :a  :b  :c
+──────┼───────────
+one   │  1   2   3
+two   │  4   5   6
+
+n["one", :a] == 1 ## true
+n[:, :b] == [2, 5] ## true
+n["two", [1, 3]] == [4, 6] ## true
+n["one", [:a, :b]] == [1, 2] ## true
 ```
 
 This is the main use of `NamedArrays`.  Names (keys) and arrays of names can be specified as an index, and these can be mixed with other forms of indexing.
@@ -120,15 +155,17 @@ When a single element is selected by an index expression, a scalar value is retu
 
 
 ```julia
-julia> n[:, :b] ## this expression drops the singleton dimensions, and hence the names
-2-element Named Array{Int64,1}
+@show n[:, :b]; ## this expression drops the singleton dimensions, and hence the names
+
+n[:, :b] = 2-element Named Array{Int64,1}
 A   │
 ────┼──
 one │ 2
 two │ 5
 
-julia> n[["one"], [:a]] ## this expression keeps the names
-1×1 Named Array{Int64,2}
+@show n[["one"], [:a]]; ## this expression keeps the names
+
+n[["one"], [:a]] = 1×1 Named Array{Int64,2}
 A ╲ B │ :a
 ──────┼───
 one   │  1
@@ -162,8 +199,9 @@ n[1, 1] = 0
 n["one", :b] = 1
 n[:, :c] = 101:102
 n[:B=>:b, :A=>"two"] = 50
-println(n) # ==>
-2×3 Named Array{Int64,2}
+@show(n) # ==>
+
+n = 2×3 Named Array{Int64,2}
 A ╲ B │  :a   :b   :c
 ──────┼──────────────
 one   │   0    1  101
@@ -173,74 +211,65 @@ two   │   4   50  102
 General functions
 --
 
- * Names, dimnames
+### Access to the names of the indices and dimensions
 
 ```julia
-allnames(a::NamedArray)
-names(a::NamedArray, dim)
-dimnames(a::NamedArray)
+names(n::NamedArray) ## get all index names for all dimensions
+names(n::NamedArray, dim::Integer) ## just for dimension `dim`
+dimnames(n::NamedArray) ## the names of the dimensions
+
+@show names(n);
+names(n) = Array{T,1} where T[String["one", "two"], Symbol[:a, :b, :c]]
+
+@show names(n, 1)
+names(n, 1) = String["one", "two"]
+
+@show dimnames(n);
+dimnames(n) = Symbol[:A, :B]
 ```
 
- return the names of the indices along dimension `dim` and the names of the dimensions themselves.
+### Setting the names after construction
 
- ```julia
- setnames!(a::NamedArray, names::Vector, dim::Int)
- setnames!(a::NamedArray, name, dim::Int, index:Int)
- setdimnames!(a::NamedArray, name, dim:Int)
- ```
+Because the type of the keys are encoded in the type of the `NamedArray`, you can only change the names of indices if they have the same type as before.
+
+```julia
+ setnames!(n::NamedArray, names::Vector, dim::Integer)
+ setnames!(n::NamedArray, name, dim::Int, index:Integer)
+ setdimnames!(n::NamedArray, name, dim:Integer)
+```
 
 sets all the names of dimension `dim`, or only the name at index `index`, or the name of the dimension `dim`.
 
- * Copy
+### Copy
 
 ```julia
 copy(a::NamedArray)
 ```
 
-returns a copy of all the elements in a, and returns a NamedArray
+returns a copy of all the elements in a, and copiess of the names, and returns a NamedArray
 
- * Convert
+### Convert
 
 ```julia
 convert(::Type{Array}, a::NamedArray)
 ```
 
- converts a NamedArray to an Array by dropping all name information
-
- * Arithmetic:
-  - between NamedArray and NamedArray
-  - between NamedArray and Array
-  - between NamedArray and Number
-    - `+`, `-`, `.+`, `.-`, `.*`, `./`
-  - between NamedArray and Number
-    - `*`, `/`, `\`
-  - Matrix Multiplication `*` between NamedArray and NamedArray
-
- * `print`, `show`:
-  - basic printing, limited support for pretty-printing.
-
- * `size`, `ndims`, `eltype`
-
- * Similar
-
-```julia
-similar(a::NamedArray, t::DataType, dims::NTuple)
-```
+ converts a NamedArray to an Array by dropping all name information.  You can also directly access the underlying array using `n.array`, or use the accessor function `array(n)`.
 
 Methods with special treatment of names / dimnames
 --------------------------------------------------
 
- * Concatenation
+### Concatenation
 
 ```julia
 hcat(V::NamedVector...)
 ```
 
- concatenates (column) vectors to an array.  If the names are identical
+concatenates (column) vectors to an array.  If the names are identical
 for all vectors, these are retained in the results.  Otherwise
 the names are reinitialized to the default "1", "2", ...
 
- * Transposition
+### Transposition
 
 ```julia
 ' ## transpose post-fix operator '
@@ -250,9 +279,9 @@ permutedims
 circshift
 ```
 
- operate on the dimnames as well
+operate on the dimnames as well
 
- * Reordering of dimensions in NamedVectors
+ ### Reordering of dimensions in NamedVectors
 
 ```julia
 nthperm
@@ -262,21 +291,21 @@ shuffle
 shuffle!
 reverse
 reverse!
+sort
+sort!
 ```
 
- operate on the names of the rows as well
+operate on the names of the rows as well
 
-
- * Broadcasts
+ ### Broadcasts
 
 ```julia
 broadcast
 broadcast!
 ```
+These functions keep the names of the first argument
 
- these functions check consistency of the names of dimensions `d` with `length(d)>1`, and performs the normal `broadcast`
-
- * Aggregates
+### Aggregates
 
 ```julia
 sum
@@ -287,20 +316,10 @@ mean
 std
 ```
 
- These functions, when operating along one dimension, keep the names in the orther dimensions, and name the left over singleton dimension as `$function($dimname)`.
+These functions, when operating along one dimension, keep the names in the other dimensions, and name the left over singleton dimension as `$function($dimname)`.
 
+## Further Development
 
-Implementation
-------------
+The current goal is to reduce complexity of the implementation.  Where possible, we want to use more of the `Base.AbstractArray` implementation.
 
-Currently, the type is defined as
-
-```julia
-type NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
-    array::AT
-    dicts::DT
-    dimnames::NTuple{N, Any}
-end
-```
-
-but the inner constructor actually expects `NTuple`s for `dicts` and `dimnames`, which more easily allows somewhat stricter typechecking.   This is sometimes a bit annoying, if you want to initialize a new NamedArray from known `dicts` and `dimnames`.  You can use the expression `tuple(Vector...)` for that.
+A longer term goal is to improve type stability, this might have a repercussion to the semantics of some operations.  
