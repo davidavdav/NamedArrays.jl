@@ -48,14 +48,14 @@ print("conversions, ")
 print("changing names, ")
 ## changingnames
 for  f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
-    for dim=1:2
+    for dim in 1:2
         @eval @test ($f)(n.array, $dim) == ($f)(n, $dim).array
         @eval @inferred ($f)(n, $dim)
     end
 end
 
 for f in (:cumprod, :cumsum, :cumsum_kbn)
-    for dim=1:2
+    for dim in 1:2
         @eval @test ($f)(n.array, $dim) == ($f)(n, $dim).array
         @eval @inferred ($f)(n, $dim)
     end
@@ -64,7 +64,7 @@ end
 print("multi-dimensional, ")
 #multidimensional
 m = NamedArray(rand(2,3,4,3,2,3))
-for i1=1:2, i2=1:3, i3=1:4, i4=1:3, i5=1:2, i6=1:3
+for i1 in 1:2, i2 in 1:3, i3 in 1:4, i4 in 1:3, i5 in 1:2, i6 in 1:3
     @test m[i1,i2,i3,i4,i5,i6] == m.array[i1,i2,i3,i4,i5,i6]
     @test m[string(i1), string(i2), string(i3), string(i4), string(i5), string(i6)] == m.array[i1,i2,i3,i4,i5,i6]
 end
@@ -120,7 +120,7 @@ for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos,
     end
 end
 #39
-v = n[1,:]
+v = n[1, :]
 @test sin.(v).array == sin.(v.array)
 @test namesanddim(sin.(v)) == namesanddim(v)
 
@@ -139,7 +139,7 @@ include("show.jl")
 include("speed.jl")
 
 # julia issue #17328
-a = NamedArray([1.0,2.0,3.0,4.0])
+a = NamedArray([1.0, 2.0, 3.0, 4.0])
 @test sum(abs, a, 1)[1] == 10
 
 println("done!")

@@ -10,7 +10,11 @@ letter(i) = string(Char((64+i) % 256))
 
 ## helpers for constructing names dictionaries
 defaultnames(dim::Integer) = map(string, 1:dim)
-defaultnamesdict(names::Vector) = OrderedDict(zip(names, 1:length(names)))
+function defaultnamesdict(names::Vector)
+    dict = OrderedDict(zip(names, 1:length(names)))
+    length(dict) == length(names) || error("Cannot have duplicated names for indices")
+    return dict
+end
 defaultnamesdict(dim::Integer) = defaultnamesdict(defaultnames(dim))
 defaultnamesdict(dims::Tuple) = map(defaultnamesdict, dims) # ::NTuple{length(dims), OrderedDict}
 

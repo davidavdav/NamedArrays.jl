@@ -54,3 +54,6 @@ for i in 1:5
 	n1 = @inferred NamedArray(Int, dims...)
 	n2 = @inferred NamedArray{Int}(dims...)
 end
+
+## repeated indices #63
+@test_throws ErrorException @inferred n[["one", "one"], :]
