@@ -64,9 +64,8 @@ function find_namedarray(args::Tuple)
 end
 find_namedarray(x::NamedArray) = x
 find_namedarray(a::NamedArray, rest) = a
-find_namedarray(::Any, rest) = find_aac(rest)
-
-
+find_namedarray(::Any, rest) = find_namedarray(rest)
+find_namedarray(x::Any) = ()
 
 ## reorder names
 import Base: sort, sort!
