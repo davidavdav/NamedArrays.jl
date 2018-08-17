@@ -91,7 +91,7 @@ import Base.LinAlg: Givens, BlasFloat, lufact!, LU, ipiv2perm, cholfact!, cholfa
 *(x::SparseMatrixCSC{Tx,TiA},y::NamedMatrix{Ty}) where {Tx,TiA,Ty} = x*y.array
 *(x::SparseMatrixCSC{Tx,S},y::NamedVector{Ty}) where {Tx,S,Ty} = x*y.array
 for t in (:Tridiagonal, :(LinAlg.AbstractTriangular), :Givens, :Bidiagonal)
-    @eval *(x::$t, y::NamedMatrix) = NamedArray(x*y.array, ([string(i) for i in 1:size(x,1)],names(y, all=2)), y.dimnames)
+    @eval *(x::$t, y::NamedMatrix) = NamedArray(x*y.array, ([string(i) for i in 1:size(x,1)],names(y, 2)), y.dimnames)
     @eval *(x::$t, y::NamedVector) = x*y.array
 end
 
@@ -113,28 +113,28 @@ end
 ## \ --- or should we overload A_div_B?
 ## Named \ Named
 \(x::NamedVector, y::NamedVector) = x.array \ y.array
-\(x::NamedMatrix, y::NamedVector) = NamedArray(x.array\y.array, (names(x, all=2),), (x.dimnames[2],))
-\(x::NamedVector, y::NamedMatrix) = NamedArray(x.array\y.array, (["1"],names(y, all=2)), (:A, y.dimnames[2]))
-\(x::NamedMatrix, y::NamedMatrix) = NamedArray(x.array\y.array, (names(x, all=2),names(y, all=2)), (x.dimnames[2], y.dimnames[2]))
+\(x::NamedMatrix, y::NamedVector) = NamedArray(x.array\y.array, (names(x, 2),), (x.dimnames[2],))
+\(x::NamedVector, y::NamedMatrix) = NamedArray(x.array\y.array, (["1"],names(y, 2)), (:A, y.dimnames[2]))
+\(x::NamedMatrix, y::NamedMatrix) = NamedArray(x.array\y.array, (names(x, 2),names(y, 2)), (x.dimnames[2], y.dimnames[2]))
 
 ## Named \ Abstract
 \(x::NamedVector, y::AbstractVecOrMat) = x.array \ y
 \(x::NamedMatrix, y::AbstractVector) = NamedArray(x.array \ y, (x.dicts[2],), (x.dimnames[2],))
-\(x::NamedMatrix, y::AbstractMatrix) = NamedArray(x.array \ y, (names(x, all=2),[string(i) for i in 1:size(y,2)]), (x.dimnames[2],:B))
+\(x::NamedMatrix, y::AbstractMatrix) = NamedArray(x.array \ y, (names(x, 2),[string(i) for i in 1:size(y,2)]), (x.dimnames[2],:B))
 ## Abstract \ Named
 ## ambiguity
 \(x::Diagonal{Tx}, y::NamedVector{Ty}) where {Tx<:Number,Ty<:Number} = x \ y.array
 \(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedVector{Ty}) where {Tx<:Number,Ty<:Number} = x \ y.array
 \(x::Union{Bidiagonal{Tx},LinAlg.AbstractTriangular{Tx}}, y::NamedMatrix{Ty}) where {Tx<:Number,Ty<:Number} = NamedArray(x \ y.array, (defaultnamesdict(size(x,1)), y.dicts[2]), (:A, y.dimnames[2]))
 
-\(x::Bidiagonal,y::NamedVector) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y, all=2)), (:A, y.dimnames[2]))
-\(x::Bidiagonal,y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y, all=2)), (:A, y.dimnames[2]))
+\(x::Bidiagonal,y::NamedVector) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y, 2)), (:A, y.dimnames[2]))
+\(x::Bidiagonal,y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y, 2)), (:A, y.dimnames[2]))
 
 ## AbstractVectorOrMat gives us more ambiguities than separate entries...
 \(x::AbstractVector, y::NamedVector) = x \ y.array
 \(x::AbstractMatrix, y::NamedVector) = x \ y.array
-\(x::AbstractVector, y::NamedMatrix) = NamedArray(x \ y.array, (["1"],names(y, all=2)), (:A, y.dimnames[2]))
-\(x::AbstractMatrix, y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y, all=2)), (:A, y.dimnames[2]))
+\(x::AbstractVector, y::NamedMatrix) = NamedArray(x \ y.array, (["1"],names(y, 2)), (:A, y.dimnames[2]))
+\(x::AbstractMatrix, y::NamedMatrix) = NamedArray(x \ y.array, ([string(i) for i in 1:size(x,2)], names(y, 2)), (:A, y.dimnames[2]))
 
 ## keeping names for some matrix routines
 for f in (:inv, :chol, :sqrtm, :pinv, :expm)
@@ -233,8 +233,8 @@ function kron(a::NamedArray, b::NamedArray)
     dn = AbstractString[]
     for dim in 1:2
         n[dim] = AbstractString[]
-        for i in names(a, all=dim)
-            for j in names(b, all=dim)
+        for i in names(a, dim)
+            for j in names(b, dim)
                 push!(n[dim], string(i, "×", j))
             end
         end

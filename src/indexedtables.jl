@@ -9,7 +9,7 @@ function NDSparse(n::NamedArray)
 	for d in 1:ndims(n)
 		nlevels = size(n, d)
 		nrep = L ÷ (nlevels * factor)
-		data = repmat(vcat([fill(x, factor) for x in names(n, all=d)]...), nrep)
+		data = repmat(vcat([fill(x, factor) for x in names(n, d)]...), nrep)
 		cols[Symbol(dimnames(n, d))] = data
 		factor *= nlevels
 	end

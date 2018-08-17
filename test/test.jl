@@ -38,7 +38,7 @@ print("sum, ")
 @test sum(n) == sum(n.array)
 @test sum(n, 1).array == sum(n.array, 1)
 @test sum(n, 2).array == sum(n.array, 2)
-@test names(sum(n, 2), all=1) == ["one", "two"]
+@test names(sum(n, 2), 1) == ["one", "two"]
 
 print("conversions, ")
 ## conversion
@@ -71,9 +71,9 @@ end
 m[1, :, 2, :, 2, 3].array == m.array[1, :, 2, :, 2, 3]
 i = [3 2 4; 1 4 2]
 @test n[:, i].array == n.array[:, i]
-@test names(n[:, i], all=1) == names(n, all=1)
-@test names(n[:, i], all=2) == map(string, 1:2)
-@test names(n[:, i], all=3) == map(string, 1:3)
+@test names(n[:, i], 1) == names(n, 1)
+@test names(n[:, i], 2) == map(string, 1:2)
+@test names(n[:, i], 3) == map(string, 1:3)
 
 print("dodgy indices, ")
 ## weird indices
@@ -95,14 +95,14 @@ m = NamedArray(rand(100))
 for rev in [false, true]
     ms = sort(m, rev=rev)
     @test ms.array == sort(m.array, rev=rev)
-    @test names(ms, all=1) == names(m, all=1)[sortperm(m.array, rev=rev)]
+    @test names(ms, 1) == names(m, 1)[sortperm(m.array, rev=rev)]
 end
 m = NamedArray(rand(10,10))
 for rev in [false, true]
     for dim in 1:2
         ms = sort(m, dim, rev=rev)
         @test ms.array == sort(m.array, dim, rev=rev)
-        @test names(ms, all=dim) == [string(i) for i in 1:size(ms, dim)]
+        @test names(ms, dim) == [string(i) for i in 1:size(ms, dim)]
     end
 end
 

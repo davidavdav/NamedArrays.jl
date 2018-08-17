@@ -25,7 +25,7 @@ function flattenednames(n::NamedArray)
     for d in 1:ndims(n)
         nlevels = size(n, d)
         nrep = L ÷ (nlevels * factor)
-        data = repmat(vcat([fill(x, factor) for x in names(n, all=d)]...), nrep)
+        data = repmat(vcat([fill(x, factor) for x in names(n, d)]...), nrep)
         push!(cols, data)
         factor *= nlevels
     end
@@ -112,7 +112,7 @@ function namedgetindex(n::NamedArray, index...; useview=false)
                 push!(newdimnames, Symbol(string(n.dimnames[d], "_", dimname)))
             end
         else
-            push!(newnames, names(n, all=d)[index[d]])
+            push!(newnames, names(n, d)[index[d]])
             push!(newdimnames, n.dimnames[d])
         end
     end

@@ -36,8 +36,8 @@ n4 = @inferred NamedArray(a, (OrderedDict("a"=>1,"b"=>2), OrderedDict("C"=>1,"D"
 
 @test n3.array == n4.array == a
 @test dimnames(n3) == dimnames(n4) == Any[:A,:B]
-@test names(n3, all=1) == names(n4, all=1) == ["a","b"]
-@test names(n3, all=2) == names(n4, all=2) == ["C","D","E"]
+@test names(n3, 1) == names(n4, 1) == ["a","b"]
+@test names(n3, 2) == names(n4, 2) == ["C","D","E"]
 
 ## 0-dim case #21
 n0 = @inferred NamedArray(Array{Int}(undef))

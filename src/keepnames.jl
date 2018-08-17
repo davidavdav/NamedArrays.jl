@@ -9,9 +9,9 @@
 function Base.hcat(N::NamedVecOrMat...)
     keepnames=true
     N1 = N[1]
-    firstnames = names(N1, all=1)
+    firstnames = names(N1, 1)
     for i in 2:length(N)
-        keepnames &= names(N[i], all=1) == firstnames
+        keepnames &= names(N[i], 1) == firstnames
     end
     a = hcat(map(n -> n.array, N)...)
     if keepnames
@@ -25,9 +25,9 @@ end
 function Base.vcat(N::NamedMatrix...)
     keepnames=true
     N1=N[1]
-    firstnames = names(N1, all=2)
+    firstnames = names(N1, 2)
     for i=2:length(N)
-        keepnames &= names(N[i], all=2)==firstnames
+        keepnames &= names(N[i], 2)==firstnames
     end
     a = vcat(map(a -> a.array, N)...)
     if keepnames
@@ -40,7 +40,7 @@ end
 
 function Base.vcat(N::NamedVector...)
     a = vcat(map(n -> n.array, N)...)
-    anames = vcat(map(n -> names(n, all=1), N)...)
+    anames = vcat(map(n -> names(n, 1), N)...)
     if length(unique(anames)) == length(a)
         return NamedArray(a, (anames,), (:vcat,))
     else
@@ -72,7 +72,7 @@ find_namedarray(::Any, rest) = find_aac(rest)
 import Base: sort, sort!
 function sort!(v::NamedVector; kws...)
     i = sortperm(v.array; kws...)
-    newnames = names(v, all=1)[i]
+    newnames = names(v, 1)[i]
     empty!(v.dicts[1])
     for (ind, k) in enumerate(newnames)
         v.dicts[1][k] = ind
