@@ -48,69 +48,98 @@ function Base.vcat(N::NamedVector...)
     end
 end
 
-## broadcast v0.5
-Base.Broadcast.broadcast_t(f, T, n::NamedArray, As...) = broadcast!(f, similar(n, T, Base.Broadcast.broadcast_shape(n, As...)), n, As...)
-## broadcast v0.6
-if isdefined(Base.Broadcast, :_containertype)
-    Base.Broadcast._containertype(::Type{<:NamedArray}) = NamedArray
-end
-if isdefined(Base.Broadcast, :promote_containertype)
-    Base.Broadcast.promote_containertype(::Type{NamedArray}, _) = NamedArray
-    Base.Broadcast.promote_containertype(_, ::Type{NamedArray}) = NamedArray
-    Base.Broadcast.promote_containertype(::Type{NamedArray}, ::Type{Array}) = NamedArray
-    Base.Broadcast.promote_containertype(::Type{Array}, ::Type{NamedArray}) = NamedArray
-    Base.Broadcast.promote_containertype(::Type{NamedArray}, ::Type{NamedArray}) = NamedArray
-end
-if isdefined(Base.Broadcast, :broadcast_c)
-    array(n::NamedArray) = n.array
-    array(a) = a
-    function dictstype{T,N,AT,DT,M}(n::NamedArray{T,N,AT,DT}, ::Type{Val{M}})
-        N > M && error("Cannot truncate array")
-        return tuple(n.dicts..., fill(nothing, M - N)...)::NTuple{M, Any}
-    end
-    dictstype{M}(rest, ::Type{Val{M}}) = tuple(fill(nothing, M)...)::NTuple{M}
-    dictstypejoined(::Void, ::Void) = nothing
-    dictstypejoined(t, ::Void) = t
-    dictstypejoined(::Void, t) = t
-    dictstypejoined(t1, t2) = t1
-    function dictstyperecursive(::Type{Val{N}}, t1::Tuple, t2::Tuple) where N
-        length(t1) == length(t2) || error("Inconsistent tuple lengths")
-        return tuple([dictstypejoined(d1, d2) for (d1, d2) in zip(t1, t2)]...)
-    end
-    dictstyperecursive(::Type{Val{N}}, t1::Tuple, t2::Tuple, t::Tuple...) where N = dictstyperecursive(Val{N}, dictstyperecursive(Val{N}, t1, t2), t...)
-    function Base.Broadcast.broadcast_c(f, t::Type{NamedArray}, As...)
-        arrays = [array(a) for a in As]
-        res = broadcast(f, arrays...)
-        T = eltype(res)
-        N = ndims(res)
-        AT = typeof(res)
-        ## is there a NamedArray with the same dimensions?
-        for a in As
-            isa(a, NamedArray) && size(a) == size(res) && return NamedArray{T, N, AT, typeof(a.dicts)}(res, a.dicts, a.dimnames)
+if VERSION < v"0.7"
+    ## broadcast v0.5
+    if isdefined(Base.Broadcast, :broadcast_t)
+        function Base.Broadcast.broadcast_t(f, T, n::NamedArray, As...)
+            broadcast!(f, similar(n, T, Base.Broadcast.broadcast_shape(n, As...)), n, As...)
         end
-        ## can we collect the dimensions from individual namedarrays?
-        dicts = OrderedDict[]
-        dimnames = []
-        found = false
-        for d in 1:ndims(res)
-            found = false
+    end
+
+    ## broadcast v0.6
+    if isdefined(Base.Broadcast, :_containertype)
+        Base.Broadcast._containertype(::Type{<:NamedArray}) = NamedArray
+    end
+    if isdefined(Base.Broadcast, :promote_containertype)
+        Base.Broadcast.promote_containertype(::Type{NamedArray}, _) = NamedArray
+        Base.Broadcast.promote_containertype(_, ::Type{NamedArray}) = NamedArray
+        Base.Broadcast.promote_containertype(::Type{NamedArray}, ::Type{Array}) = NamedArray
+        Base.Broadcast.promote_containertype(::Type{Array}, ::Type{NamedArray}) = NamedArray
+        Base.Broadcast.promote_containertype(::Type{NamedArray}, ::Type{NamedArray}) = NamedArray
+    end
+    if isdefined(Base.Broadcast, :broadcast_c)
+        array(n::NamedArray) = n.array
+        array(a) = a
+        function dictstype(n::NamedArray{T,N,AT,DT}, ::Type{Val{M}}) where {T,N,AT,DT,M}
+            N > M && error("Cannot truncate array")
+            return tuple(n.dicts..., fill(nothing, M - N)...)::NTuple{M, Any}
+        end
+        dictstype(rest, ::Type{Val{M}}) where {M} = tuple(fill(nothing, M)...)::NTuple{M}
+        dictstypejoined(::Void, ::Void) = nothing
+        dictstypejoined(t, ::Void) = t
+        dictstypejoined(::Void, t) = t
+        dictstypejoined(t1, t2) = t1
+        function dictstyperecursive(::Type{Val{N}}, t1::Tuple, t2::Tuple) where N
+            length(t1) == length(t2) || error("Inconsistent tuple lengths")
+            return tuple([dictstypejoined(d1, d2) for (d1, d2) in zip(t1, t2)]...)
+        end
+        dictstyperecursive(::Type{Val{N}}, t1::Tuple, t2::Tuple, t::Tuple...) where N = dictstyperecursive(Val{N}, dictstyperecursive(Val{N}, t1, t2), t...)
+        function Base.Broadcast.broadcast_c(f, t::Type{NamedArray}, As...)
+            arrays = [array(a) for a in As]
+            res = broadcast(f, arrays...)
+            T = eltype(res)
+            N = ndims(res)
+            AT = typeof(res)
+            ## is there a NamedArray with the same dimensions?
             for a in As
-                if isa(a, NamedArray) && size(a, d) == size(res, d)
-                    push!(dicts, a.dicts[d])
-                    push!(dimnames, a.dimnames[d])
-                    found = true
-                    break
+                isa(a, NamedArray) && size(a) == size(res) && return NamedArray{T, N, AT, typeof(a.dicts)}(res, a.dicts, a.dimnames)
+            end
+            ## can we collect the dimensions from individual namedarrays?
+            dicts = OrderedDict[]
+            dimnames = []
+            found = false
+            for d in 1:ndims(res)
+                found = false
+                for a in As
+                    if isa(a, NamedArray) && size(a, d) == size(res, d)
+                        push!(dicts, a.dicts[d])
+                        push!(dimnames, a.dimnames[d])
+                        found = true
+                        break
+                    end
+                end
+                if !found
+                    push!(dicts, defaultnamesdict(size(res, d)))
+                    push!(dimnames, defaultdimname(d))
                 end
             end
-            if !found
-                push!(dicts, defaultnamesdict(size(res, d)))
-                push!(dimnames, defaultdimname(d))
-            end
+            tdicts = tuple(dicts...)
+            return NamedArray{T, N, AT, typeof(tdicts)}(res, tdicts, tuple(dimnames...))
         end
-        tdicts = tuple(dicts...)
-        return NamedArray{T, N, AT, typeof(tdicts)}(res, tdicts, tuple(dimnames...))
     end
+else
+    ## broadcast v1.0
+    Base.BroadcastStyle(::Type{A}) where {A <: NamedArray} = Broadcast.ArrayStyle{A}()
+    function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{A}},
+                          ::Type{T}) where {A <: NamedArray, T}
+        println("....................")
+        namedarray = find_namedarray(bc)
+        println(namedarray)
+        similar(namedarray, T)
+    end
+
+
+    "`find_namedarray(As)` returns the first NamedArray among the arguments."
+    find_namedarray(bc::Base.Broadcast.Broadcasted) = find_namedarray(bc.args)
+    function find_namedarray(args::Tuple)
+        find_namedarray(find_namedarray(args[1]), Base.tail(args))
+    end
+    find_namedarray(x::NamedArray) = x
+    find_namedarray(a::NamedArray, rest) = a
+    find_namedarray(::Any, rest) = find_aac(rest)
 end
+
+
 
 ## reorder names
 import Base: sort, sort!

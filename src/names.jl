@@ -7,7 +7,7 @@
 import Base.names
 
 ## `names` is somewhat loaded, as some of the semantics were transferred tp `fieldnames`
-names(dict::Associative) = collect(keys(dict))
+names(dict::AbstractDict) = collect(keys(dict))
 names(n::NamedArray) = [names(dict) for dict in n.dicts]
 names(n::NamedArray, d::Integer) = names(n.dicts[d])
 defaultnames(a::AbstractArray) = [defaultnames(a, d) for d in 1:ndims(a)]
@@ -23,7 +23,7 @@ dimnames(a::AbstractArray) = [defaultdimnames(a)...]
 dimnames(a::AbstractArray, d::Integer) = defaultdimname(d)
 
 ## string versions of the above
-strnames(dict::Associative) = [isa(name, String) ? name : sprint(showcompact, name) for name in names(dict)]
+strnames(dict::AbstractDict) = [isa(name, String) ? name : sprint(showcompact, name) for name in names(dict)]
 strnames(n::NamedArray) = [strnames(d) for d in n.dicts]
 strnames(n::NamedArray, d::Integer) = strnames(n.dicts[d])
 strdimnames(n::NamedArray) = [string(dn) for dn in n.dimnames]
@@ -31,7 +31,7 @@ strdimnames(n::NamedArray, d::Integer) = string(n.dimnames[d])
 
 
 ## seting names, dimnames
-function setnames!{T,N,KT}(n::NamedArray{T,N}, v::Vector{KT}, d::Integer)
+function setnames!(n::NamedArray{T,N}, v::Vector{KT}, d::Integer) where {T,N,KT}
     size(n.array, d) == length(v) || throw(DimensionMismatch("inconsistent vector length"))
     keytype(n.dicts[d]) == KT || throw(TypeError(:setnames!, "second argument", keytype(n.dicts[d]), KT))
     ## n.dicts is a tuple, so we need to replace it as a whole...
@@ -54,13 +54,13 @@ function setnames!(n::NamedArray, v, d::Integer, i::Integer)
     n.dicts[d][v] = i
 end
 
-function setdimnames!{T,N}(n::NamedArray{T,N}, dn::NTuple{N,Any})
+function setdimnames!(n::NamedArray{T,N}, dn::NTuple{N,Any}) where {T,N}
     n.dimnames = dn
 end
 
 setdimnames!(n::NamedArray, dn::Vector) = setdimnames!(n, tuple(dn...))
 
-function setdimnames!{T,N}(n::NamedArray{T,N}, v, d::Integer)
+function setdimnames!(n::NamedArray{T,N}, v, d::Integer) where {T,N}
     1 <= d <= N || throw(BoundsError(size(n), d))
     vdimnames = Array{Any}(N)
     for i=1:N

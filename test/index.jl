@@ -9,7 +9,7 @@ print("getindex, ")
 for i in 1:7
 	dims = fill(3, i)
 	n1 = @inferred NamedArray(rand(dims...))
-	for i in CartesianRange(tuple(dims...))
+	for i in CartesianIndices(tuple(dims...))
 		@test n1[i.I...] == n1.array[i.I...]
 		@test n1[i] == n1.array[i]
 		@test n1[[string(ii) for ii in i.I]...] == n1.array[i]

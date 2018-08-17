@@ -12,7 +12,7 @@
 
 using DataStructures: OrderedDict
 
-if !isdefined(:NamedArray)
+if ! @isdefined NamedArray
 
 struct Name{T}
     name::T
@@ -20,7 +20,7 @@ end
 
 Base.show(io::IO, name::Name) = print(io, name.name)
 
-function checkdict(dict::Associative)
+function checkdict(dict::AbstractDict)
     pairs = Pair[]
     union = Union{}
     n = length(dict)
@@ -43,7 +43,9 @@ mutable struct NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
     array::AT
     dicts::DT
     dimnames::NTuple{N, Any}
-    function (::Type{S}){S<:NamedArray, T, N}(array::AbstractArray{T, N}, dicts::NTuple{N, OrderedDict}, dimnames::NTuple{N, Any})
+    function (::Type{S})(array::AbstractArray{T, N},
+                         dicts::NTuple{N, OrderedDict},
+                         dimnames::NTuple{N, Any}) where {S<:NamedArray, T, N}
         size(array) == map(length, dicts) || error("Inconsistent dictionary sizes")
         ## dicts = map(dict -> checkdict(dict), dicts)
         new{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)
@@ -55,13 +57,15 @@ struct Not{T}
     index::T
 end
 
-NamedVector{T} = NamedArray{T,1}
-NamedMatrix{T} = NamedArray{T,2}
-NamedVecOrMat{T} = Union{NamedVector{T},NamedMatrix{T}}
-ArrayOrNamed{T,N} = Union{Array{T,N}, NamedArray{T,N,Array}}
+const NamedVector{T} = NamedArray{T,1}
+const NamedMatrix{T} = NamedArray{T,2}
+const NamedVecOrMat{T} = Union{NamedVector{T},NamedMatrix{T}}
+const ArrayOrNamed{T,N} = Union{Array{T,N}, NamedArray{T,N,Array}}
 
-if isdefined(Base, :RowVector)
-    NamedRowVector{T,RVT<:AbstractVector} = NamedArray{T,2,RowVector{T,RVT}}
-end
+# # WARNING: Base.RowVector is deprecated: it has been moved to the standard library package `LinearAlgebra`.
+# # Add `using LinearAlgebra` to your imports.
+# if isdefined(Base, :RowVector)
+#     NamedRowVector{T,RVT<:AbstractVector} = NamedArray{T,2,RowVector{T,RVT}}
+# end
 
 end

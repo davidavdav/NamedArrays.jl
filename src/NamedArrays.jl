@@ -10,6 +10,8 @@ __precompile__()
 
 module NamedArrays
 
+using Statistics
+using DelimitedFiles
 using DataStructures
 
 export NamedArray, NamedVector, NamedMatrix, Name, Not

@@ -1,4 +1,4 @@
-## index.jl getindex and setindex methods for NamedArray
+# index.jl getindex and setindex methods for NamedArray
 ## (c) 2013--2018 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
@@ -148,3 +148,20 @@ end
 
 ## assignment via n[:B => "two"] = [...]
 @inline setindex!(n::NamedArray, x, I::Vararg{Pair}) = setindex!(n.array, x, indices(n, I...)...)
+
+# _name2index(dict::OrderedDict{K,Int}, value::Any) where K = value
+# _name2index(dict::OrderedDict{K,Int}, name::K) where K = dict[name]
+#
+# function _name2index(dict::OrderedDict{K,Int}, names::AbstractArray{K,N}) where {K,N}
+#     index = similar(names, Int)
+#     @inbounds for i in eachindex(names)
+#         index[i] = dict[names[i]]
+#     end
+#     index
+# end
+#
+# function _name2index(dict::OrderedDict{K,Int}, i::Not{K}) where K
+#     setdiff(1:length(dict), dict[i.index])
+# end
+#
+# _name2index(dict::OrderedDict{K,Int}, name::Name{K}) where K = dict[name.name]

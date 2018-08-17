@@ -23,25 +23,37 @@ defaultdimnames(ndim::Integer) = ntuple(defaultdimname, ndim)
 defaultdimnames(a::AbstractArray) = defaultdimnames(ndims(a))
 
 ## disambiguation (Argh...)
-NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}, dimnames::NTuple{N, Any}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
-NamedArray{T,N}(a::AbstractArray{T,N}, names::Tuple{}) = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
+function NamedArray(a::AbstractArray{T,N},
+                    names::Tuple{},
+                    dimnames::NTuple{N, Any}) where {T,N}
+    NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
+end
+
+function NamedArray(a::AbstractArray{T,N}, names::Tuple{}) where {T,N}
+    NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
+end
 
 ## Basic constructor: array, tuple of dicts
 ## dimnames created as default, then inner constructor called
-function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,OrderedDict})
-    NamedArray{T, N, typeof(array), typeof(names)}(array, names, defaultdimnames(array)) ## inner constructor
+function NamedArray(array::AbstractArray{T,N},
+                    names::NTuple{N,OrderedDict}) where {T,N}
+    ## inner constructor
+    NamedArray{T, N, typeof(array), typeof(names)}(array, names, defaultdimnames(array))
 end
 
 ## constructor with array, names and dimnames (dict is created from names)
-function NamedArray{T,N}(array::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N, Any}=defaultdimnames(array))
+function NamedArray(array::AbstractArray{T,N},
+                    names::NTuple{N,Vector},
+                    dimnames::NTuple{N, Any}=defaultdimnames(array)) where {T,N}
     dicts = defaultnamesdict(names)
     NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)
 end
 
 ## vectors instead of tuples, with defaults (incl. no names or dimnames at all)
-function NamedArray{T,N,VT}(array::AbstractArray{T,N},
-                            names::Vector{VT}=[defaultnames(d) for d in size(array)],
-                            dimnames::Vector = [defaultdimname(i) for i in 1:ndims(array)])
+function NamedArray(array::AbstractArray{T,N},
+                    names::Vector{VT}=[defaultnames(d) for d in size(array)],
+                    dimnames::Vector=[defaultdimname(i) for i in 1:ndims(array)]) where
+                    {T,N,VT}
     length(names) == length(dimnames) == N || error("Dimension mismatch")
     if VT == Union{} ## edge case, array == Array{}()
         dicts = ()
@@ -59,6 +71,6 @@ end
 `NamedArray(T::Type, dims::Int...)` creates an uninitialized array with default names
 for the dimensions (`:A`, `:B`, ...) and indices (`"1"`, `"2"`, ...).
 """
-NamedArray(T::DataType, dims::Int...) = NamedArray(Array{T}(dims...))
+NamedArray(T::DataType, dims::Int...) = NamedArray(Array{T}(undef, dims...))
 
-(::Type{NamedArray{T}}){T}(n...) = NamedArray(Array{T}(n...))
+(::Type{NamedArray{T}})(n...) where {T} = NamedArray(Array{T}(undef, n...))
