@@ -13,7 +13,7 @@
 import Base.print, Base.show, Base.summary, Base.display
 
 ## fallback
-function summary{T,N,AT}(n::NamedArray{T,N,AT})
+function summary(n::NamedArray{T,N,AT}) where {T,N,AT}
     return Base.dims2string(size(n)) * string(" Named ", AT)
 end
 
@@ -47,7 +47,7 @@ function show(io::IO, n::NamedArray)
         end
         maxrepeat = displaysize(io)[1] ÷ (maxnrow + 4)
         i = 1
-        for idx in CartesianRange(size(n)[3:end])
+        for idx in CartesianIndices(size(n)[3:end])
             if i > maxrepeat
                 print(io, "\n⋮")
                 break
@@ -148,7 +148,7 @@ function show(io::IO, n::NamedMatrix, maxnrow::Int)
 end
 
 ## special case of sparse matrix, based on base/sparse/sparsematrix.c
-function show{T1,T2}(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}})
+function show(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}}) where {T1,T2}
     S = n.array
     if nnz(S) != 0
         print(io, S.m, "×", S.n, " Named sparse matrix with ", nnz(S), " ", eltype(S), " nonzero entries", nnz(S) == 0 ? "" : ":")

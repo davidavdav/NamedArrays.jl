@@ -6,8 +6,6 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-__precompile__()
-
 module NamedArrays
 
 using Statistics

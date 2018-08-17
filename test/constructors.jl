@@ -6,7 +6,7 @@
 ## See the file LICENSE.md in this distribution
 
 using DataStructures
-using Base.Test
+using Test
 
 print("construction, ")
 ## constructors
@@ -23,7 +23,7 @@ n5 = @inferred NamedArray(a, [[Char(64+i) for i in 1:d] for d in 2:3], ["a", "b"
 n6 = @inferred NamedArray(a, [[Char(64+i) for i in 1:d] for d in 2:3])
 n7 = @inferred NamedArray(a)
 
-n1 = @inferred NamedArray(Complex64, 5, 8)
+n1 = @inferred NamedArray(ComplexF32, 5, 8)
 n2 = @inferred NamedArray(a, (["s", "t"],[:a, :b, :c]), ("string", :symbol))
 
 n = @inferred NamedArray(rand(2,4))
@@ -36,11 +36,11 @@ n4 = @inferred NamedArray(a, (OrderedDict("a"=>1,"b"=>2), OrderedDict("C"=>1,"D"
 
 @test n3.array == n4.array == a
 @test dimnames(n3) == dimnames(n4) == Any[:A,:B]
-@test names(n3,1) == names(n4,1) == ["a","b"]
-@test names(n3,2) == names(n4,2) == ["C","D","E"]
+@test names(n3, all=1) == names(n4, all=1) == ["a","b"]
+@test names(n3, all=2) == names(n4, all=2) == ["C","D","E"]
 
 ## 0-dim case #21
-n0 = @inferred NamedArray(Array{Int}())
+n0 = @inferred NamedArray(Array{Int}(undef))
 @test size(n0) == ()
 @test n0[1] == n0.array[1]
 

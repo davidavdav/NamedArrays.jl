@@ -13,7 +13,7 @@ dotops = [:.+, :.-, :.*, :./]
 x = NamedArray(randn(5, 10))
 @test @inferred -x == -(x.array)
 for op in vcat([:+, :-, :*], dotops)
-	if VERSION < v"0.6.0-pre" || op ∉ dotops
+	if op ∉ dotops
 		@eval begin
 			for y in (true, Int8(3), Int16(3), Int32(3), Int64(3), Float32(π), Float64(π), BigFloat(π))
 				z = ($op)(x, y)
@@ -29,7 +29,7 @@ for op in vcat([:+, :-, :*], dotops)
 end
 for op in vcat([:+, :-], dotops)
 	for T in (Bool, Int8, Int16, Int32, Int64, Float32, Float64)
-		if VERSION < v"0.6.0-pre" || op ∉ dotops
+		if op ∉ dotops
 			@eval begin
 				z = ($op)(x, x)
 				@test z.array == ($op)(x.array, x.array)
@@ -50,19 +50,6 @@ for op in vcat([:+, :-], dotops)
 end
 
 include("init-namedarrays.jl")
-
-if VERSION < v"0.6.0-pre"
-	for op in [:.*, :+, .-]
-		@eval for b in NamedArray[bv, bm] ## NamedArray[] for julia-0.4
-			@test (($op)(b, BitArray(b))).array == ($op)(b.array, BitArray(b))
-			@test names(($op)(b, BitArray(b))) == names(b)
-			@test ($op)(BitArray(b), b).array == ($op)(BitArray(b), b.array)
-			@test names(($op)(BitArray(b), b)) == names(b)
-			@test ($op)(b, true).array == ($op)(b.array, true)
-			@test ($op)(true, b).array == ($op)(true, b.array)
-		end
-	end
-end
 
 
 @test n / π == π \ n
@@ -92,8 +79,8 @@ for m in (NamedArray(rand(4)), NamedArray(rand(4,3)))
     @test isapprox(m.array' * n', m.array' * n.array')
 end
 ## bug #34
-@test unique(names(n * n'))[1] == names(n,1)
-@test unique(names(n' * n))[1] == names(n,2)
+@test unique(names(n * n'))[1] == names(n, all=1)
+@test unique(names(n' * n))[1] == names(n, all=2)
 
 ## \
 v = NamedArray(randn(2))
@@ -102,30 +89,30 @@ m = NamedArray(randn(2, 5))
 @test v \ v == v.array \ v == v.array \ v.array
 
 @test (n \ v).array == n.array \ v.array
-@test names(n \ v, 1) == names(n, 2)
+@test names(n \ v, all=1) == names(n, all=2)
 @test dimnames(n \ v, 1) == dimnames(n, 2)
 
 @test (v \ n).array == v.array \ n.array
-@test names(v \ n, 2) == names(n, 2)
+@test names(v \ n, all=2) == names(n, all=2)
 @test dimnames(v \ n, 2) == dimnames(n, 2)
 
 @test (v \ n.array) == v.array \ n.array
 @test (n \ m.array).array == n.array \ m.array
-@test names(n \ m.array, 1) == names(n, 2)
+@test names(n \ m.array, all=1) == names(n, all=2)
 @test dimnames(n \ m.array, 1) == dimnames(n, 2)
 
 @test (n \ m).array == n.array \ m.array
-@test names(n \ m, 1) == names(n, 2)
-@test names(n \ m, 2) == names(m, 2)
+@test names(n \ m, all=1) == names(n, all=2)
+@test names(n \ m, all=2) == names(m, all=2)
 
 @test n.array \ v == n.array \ v.array
 @test (v.array \ n).array == v.array \ n.array
-@test names(v.array \ n, 2) == names(n, 2)
+@test names(v.array \ n, all=2) == names(n, all=2)
 @test dimnames(v.array \ n, 2) == dimnames(n, 2)
 
 @test (n.array \ m).array == n.array \ m.array
-@test names(n.array \ m, 2) == names(m, 2)
-@test names(n.array \ m, 1) == NamedArrays.defaultnames(n.array, 2)
+@test names(n.array \ m, all=2) == names(m, all=2)
+@test names(n.array \ m, all=1) == NamedArrays.defaultnames(n.array, 2)
 @test dimnames(n.array \ m, 2) == dimnames(m, 2)
 
 m = NamedArray((x = randn(100, 10); x'x))
@@ -150,9 +137,9 @@ lufn = lufact(n)
 lufa = lufact(n.array)
 @test lufn[:U].array == lufa[:U]
 @test lufn[:L].array == lufa[:L]
-@test names(lufn[:U], 2) == names(n, 2)
+@test names(lufn[:U], all=2) == names(n, all=2)
 @test dimnames(lufn[:U], 2) == dimnames(n, 2)
-@test names(lufn[:L], 1) == names(n, 1)
+@test names(lufn[:L], all=1) == names(n, all=1)
 @test dimnames(lufn[:L], 1) == dimnames(n, 1)
 @test lufn[:p] == lufa[:p]
 @test lufn[:P] == lufa[:P]
@@ -191,7 +178,7 @@ end
 @test svdvals(s) == svdvals!(copy(s)) == svdvals(s.array)
 
 @test diag(s).array == diag(s.array)
-@test names(diag(s), 1) == names(s, 1)
+@test names(diag(s), all=1) == names(s, all=1)
 @test dimnames(diag(s), 1) == dimnames(s, 1)
 
 @test diagm(v).array == diagm(v.array)

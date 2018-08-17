@@ -36,8 +36,8 @@ end
 @test_throws BoundsError ind2sub(n, 0)
 @test_throws BoundsError ind2sub(n, 9)
 
-writedlm(STDOUT, n)
-writedlm(STDOUT, v)
+writedlm(stdout, n)
+writedlm(stdout, v)
 
 ## Issue #60
 for func in [similar, zeros, ones, n -> hcat(n, n), n -> vcat(n, n)]

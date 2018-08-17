@@ -215,7 +215,7 @@ General functions
 
 ```julia
 names(n::NamedArray) ## get all index names for all dimensions
-names(n::NamedArray, dim::Integer) ## just for dimension `dim`
+names(n::NamedArray, all=dim::Integer) ## just for dimension `dim`
 dimnames(n::NamedArray) ## the names of the dimensions
 
 @show names(n);
@@ -273,7 +273,7 @@ the names are reinitialized to the default "1", "2", ...
 
 ```julia
 ' ## transpose post-fix operator '
-ctranspose
+adjoint
 transpose
 permutedims
 circshift

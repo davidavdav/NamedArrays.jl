@@ -8,14 +8,14 @@ print("re-arrange, ")
 @test dimnames(n') == reverse(dimnames(n))
 
 @test v'.array == v.array'
-@test names(v', 2) == names(v, 1)
+@test names(v', all=2) == names(v, all=1)
 @test dimnames(v')[2] == dimnames(v)[1]
 
 for d in 1:2
 	o = 3 - d ## other dim
 	@test flipdim(n, d).array == flipdim(n.array, d)
-	@test names(flipdim(n, d), d) == reverse(names(n, d))
-	@test names(flipdim(n, d), o) == names(n, o)
+	@test names(flipdim(n, d), all=d) == reverse(names(n, all=d))
+	@test names(flipdim(n, d), all=o) == names(n, all=o)
 end
 
 for i in 1:10
@@ -29,13 +29,13 @@ end
 @test vec(n) == vec(n.array)
 
 @test rotl90(n).array == rotl90(n.array)
-@test names(rotl90(n), 1) == reverse(names(n, 2))
-@test names(rotl90(n), 2) == names(n, 1)
+@test names(rotl90(n), all=1) == reverse(names(n, all=2))
+@test names(rotl90(n), all=2) == names(n, all=1)
 @test dimnames(rotl90(n)) == reverse(dimnames(n))
 
 @test rotr90(n).array == rotr90(n.array)
-@test names(rotr90(n), 2) == reverse(names(n, 1))
-@test names(rotr90(n), 1) == names(n, 2)
+@test names(rotr90(n), all=2) == reverse(names(n, all=1))
+@test names(rotr90(n), all=1) == names(n, all=2)
 @test dimnames(rotr90(n)) == reverse(dimnames(n))
 
 @test rot180(n).array == rot180(n.array)
@@ -45,7 +45,7 @@ end
 for i in 1:10
 	p = rand(1:factorial(length(v)))
 	@test nthperm(v, p).array == nthperm(v.array, p)
-	@test names(nthperm(v, p), 1) == nthperm(names(v, 1), p)
+	@test names(nthperm(v, p), all=1) == nthperm(names(v, all=1), p)
 	v1 = @inferred deepcopy(v)
 	a1 = deepcopy(v.array)
 	@inferred nthperm!(v1, p)
@@ -56,23 +56,23 @@ for i in 1:10
 	a1 = deepcopy(v.array)
 	@inferred permute!(v1, perm)
 	permute!(a1, perm)
-	name = copy(names(v, 1))
+	name = copy(names(v, all=1))
 	permute!(name, perm)
 	@test v1.array == a1
-	@test names(v1, 1) == name
-	@inferred ipermute!(v1, perm)
+	@test names(v1, all=1) == name
+	@inferred invpermute!(v1, perm)
 	@test v1.array == v.array
-	@test names(v1, 1) == names(v, 1)
+	@test names(v1, all=1) == names(v, all=1)
 	vs = @inferred shuffle(v)
-	@test vs[sortperm(names(vs, 1))] == v
+	@test vs[sortperm(names(vs, all=1))] == v
 	@inferred shuffle!(v1)
-	@test v1[sortperm(names(v1, 1))] == v
+	@test v1[sortperm(names(v1, all=1))] == v
 	start, stop = sort(perm[1:2])
 	r = @inferred reverse(v, start, stop)
 	@test r.array == reverse(v.array, start, stop)
-	@test names(r, 1) == reverse(names(v, 1), start, stop)
+	@test names(r, all=1) == reverse(names(v, all=1), start, stop)
 	r = @inferred deepcopy(v)
 	@inferred reverse!(r, start, stop)
 	@test r.array == reverse(v.array, start, stop)
-	@test names(r, 1) == reverse(names(v, 1), start, stop)
+	@test names(r, all=1) == reverse(names(v, all=1), start, stop)
 end

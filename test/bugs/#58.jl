@@ -1,4 +1,4 @@
-using NamedArrays, BenchmarkTools, Base.Test
+using NamedArrays, BenchmarkTools, Test
 
 function f1()
     x = Vector{Int}(10^6)

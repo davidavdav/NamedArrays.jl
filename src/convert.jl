@@ -19,4 +19,4 @@ convert(::Type{NamedVector}, a::AbstractArray) = NamedArray(a)
 ## convert{T,N}(::Type{AbstractArray}, a::NamedArray{T,N}) = a.array
 
 ## to other type
-convert{T}(::Type{NamedArray{T}}, n::NamedArray) = NamedArray(convert(Array{T}, n.array), n.dicts, n.dimnames)
+convert(::Type{NamedArray{T}}, n::NamedArray) where {T} = NamedArray(convert(Array{T}, n.array), n.dicts, n.dimnames)

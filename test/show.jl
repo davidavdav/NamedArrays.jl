@@ -15,7 +15,7 @@ function showlines(x...; kwargs...)
     return split(String(buf), "\n")
 end
 
-lines = showlines(NamedArray(Array{Int}()))
+lines = showlines(NamedArray(Array{Int}(undef)))
 @test length(lines) == 2
 @test lines[1] == "0-dimensional Named Array{Int64,0}"
 

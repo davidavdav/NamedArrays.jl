@@ -14,11 +14,11 @@ bm = @inferred NamedArray(rand(Bool, 10, 10))
 
 if !isdefined(:namesanddim)
 	namesanddim(n::NamedArray) = (names(n), dimnames(n))
-	namesanddim(n::NamedArray, d::Int) = (names(n, d), dimnames(n, d))
+	namesanddim(n::NamedArray, d::Int) = (names(n, all=d), dimnames(n, d))
 end
 
 if !isdefined(:hasdefaultnames)
-	hasdefaultnames(n::NamedArray, d) = names(n, d) == map(string, 1:size(n, d))
+	hasdefaultnames(n::NamedArray, d) = names(n, all=d) == map(string, 1:size(n, d))
 	hasdefaultnames(n::NamedArray) = all(Bool[hasdefaultnames(n, d) for d in 1:ndims(n)])
 end
 

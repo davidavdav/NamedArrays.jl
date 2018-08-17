@@ -20,8 +20,8 @@ end
 include("init-namedarrays.jl")
 
 @test n[:] == view(n, :) == n.array[:] ## values
-@test names(n[:], 1)[2] == ("two", "a")
-@test names(n[:], 1)[5] == ("one", "c")
+@test names(n[:], all=1)[2] == ("two", "a")
+@test names(n[:], all=1)[5] == ("one", "c")
 @test dimnames(n[:], 1) == (:A, :B)
 
 n1 = @inferred NamedArray(rand(10))
@@ -35,8 +35,8 @@ first = n.array[1,:]
 @test names(n[Not("two"), :]) == names(n[1:1, :])
 @test n[:, ["b", "d"]] == view(n, :, ["b", "d"]) == n[:, [2, 4]]
 
-@test names(n[Not("one"), :],1) == ["two"]
-@test names(n[1:1, Not("a")], 2) == ["b", "c", "d"]
+@test names(n[Not("one"), :], all=1) == ["two"]
+@test names(n[1:1, Not("a")], all=2) == ["b", "c", "d"]
 ## indexing by pair
 @test n[:B=>"a", :A=>"two"] == n[2, 1]
 @test n[:A=>"one", :B=>"d"] == n[1, 4]
@@ -47,7 +47,7 @@ first = n.array[1,:]
 bi = [false, true, false, true] ## Array{Bool}
 for i in 1:2
     @test n[:, bi] == view(n, :, bi) == n.array[:, bi]
-    @test names(n[:, bi], 2) == ["b", "d"]
+    @test names(n[:, bi], all=2) == ["b", "d"]
     bi = BitArray(bi)
 end
 

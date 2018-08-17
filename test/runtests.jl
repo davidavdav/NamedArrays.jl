@@ -7,7 +7,7 @@
 ## See the file LICENSE.md in this distribution
 
 using NamedArrays
-using Base.Test
+using Test
 using DataStructures
 using Combinatorics
 

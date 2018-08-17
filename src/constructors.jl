@@ -73,4 +73,4 @@ for the dimensions (`:A`, `:B`, ...) and indices (`"1"`, `"2"`, ...).
 """
 NamedArray(T::DataType, dims::Int...) = NamedArray(Array{T}(undef, dims...))
 
-(::Type{NamedArray{T}})(n...) where {T} = NamedArray(Array{T}(undef, n...))
+NamedArray{T}(n...) where {T} = NamedArray(Array{T}(undef, n...))

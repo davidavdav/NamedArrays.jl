@@ -25,7 +25,7 @@ function flattenednames(n::NamedArray)
     for d in 1:ndims(n)
         nlevels = size(n, d)
         nrep = L ÷ (nlevels * factor)
-        data = repmat(vcat([fill(x, factor) for x in names(n, d)]...), nrep)
+        data = repmat(vcat([fill(x, factor) for x in names(n, all=d)]...), nrep)
         push!(cols, data)
         factor *= nlevels
     end
@@ -41,51 +41,51 @@ getindex(n::NamedArray, ::Colon) = NamedArray(n.array[:], [flattenednames(n)] , 
 
 getindex(n::NamedArray{T, N, AT, DT}, I::Vararg{Any,N}) where {T, N, AT, DT} = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...)
 
-Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Union{AbstractArray,Colon,Real},N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
-Base.view{T,N}(n::NamedArray{T,N}, I::Vararg{Any,N}) = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
+Base.view(n::NamedArray{T,N}, I::Vararg{Union{AbstractArray,Colon,Real},N}) where {T,N} = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
+Base.view(n::NamedArray{T,N}, I::Vararg{Any,N}) where {T,N} = namedgetindex(n, map((d,i)->indices(d, i), n.dicts, I)...; useview=true)
 
 ## indices computes numeric indices from named or other
 
 ## indices(::Associative, index) converts any type `index` to Integer
 
 ## single index
-indices(dict::Associative{K,V}, i::Integer) where {K, V<:Integer} = i ## integer index takes precedence
+indices(dict::AbstractDict{K,V}, i::Integer) where {K, V<:Integer} = i ## integer index takes precedence
 ## indices(dict::Associative{K,V}, i::K) where {K<:Real, V<:Integer} = dict[i]
 ## indices(dict::Associative{K,V}, i::Real) where {K, V<:Integer} = Base.to_index(i)
-indices(dict::Associative{K,V}, i::K) where {K, V<:Integer} = dict[i]
-indices(dict::Associative{K,V}, i::Name) where {K, V<:Integer} = dict[i.name]
+indices(dict::AbstractDict{K,V}, i::K) where {K, V<:Integer} = dict[i]
+indices(dict::AbstractDict{K,V}, i::Name) where {K, V<:Integer} = dict[i.name]
 
 
 ## ambiguity if dict key is CartesionIndex, this should never happen
-indices{K<:CartesianIndex,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
-indices(dict::Associative, ci::CartesianIndex) = ci
+indices(dict::AbstractDict{K,V}, i::K) where {K<:CartesianIndex,V<:Integer} = dict[i]
+indices(dict::AbstractDict, ci::CartesianIndex) = ci
 
 ## multiple indices
 ## the following two lines are partly because of ambiguity
 #indices(dict::Associative{T,V}, i::AbstractArray{T}) where {T<:Integer,V<:Integer} = [dict[k] for k in i]
 #indices(dict::Associative{T,V}, i::AbstractArray{T}) where {T<:Real,V<:Integer} = [dict[k] for k in i]
 
-indices(dict::Associative{K,V}, i::AbstractArray) where {K,V<:Integer} = [indices(dict, k) for k in i]
+indices(dict::AbstractDict{K,V}, i::AbstractArray) where {K,V<:Integer} = [indices(dict, k) for k in i]
 #indices(dict::Associative{K,V}, i::AbstractArray{T}) where {T<:Integer,K,V<:Integer} = i
 #indices(dict::Associative{K,V}, i::AbstractArray{K}) where {K,V<:Integer} = [dict[k] for k in i]
 #indices(dict::Associative{K,V}, i::AbstractArray{Name{K}}) where {K, V<:Integer} = [dict[k.name] for k in i]
 ## in 0.4, we need to take care of : ourselves it seems
-indices{K,V<:Integer}(dict::Associative{K,V}, ::Colon) = collect(1:length(dict))
+indices(dict::AbstractDict{K,V}, ::Colon) where {K,V<:Integer} = collect(1:length(dict))
 
 ## negation
-indices{K<:Not,V<:Integer}(dict::Associative{K,V}, i::K) = dict[i]
-indices(dict::Associative, i::Not) = setdiff(1:length(dict), indices(dict, i.index))
+indices(dict::AbstractDict{K,V}, i::K) where {K<:Not,V<:Integer} = dict[i]
+indices(dict::AbstractDict, i::Not) = setdiff(1:length(dict), indices(dict, i.index))
 
 ## namedgetindex collects the elements from the array, and takes care of the index names
 ## `index` is an integer now, or an array of integers, or a cartesianindex
 ## and has been computed by `indices()`
 
 ## Simple scalar indexing
-@inline namedgetindex{N}(n::NamedArray, I::Vararg{Integer,N}) = getindex(n.array, I...)
+@inline namedgetindex(n::NamedArray, I::Vararg{Integer,N}) where {N} = getindex(n.array, I...)
 
 dimkeepingtype(x) = false
 dimkeepingtype(x::AbstractArray) = true
-dimkeepingtype(x::Range) = true
+dimkeepingtype(x::AbstractRange) = true
 dimkeepingtype(x::BitArray) = true
 
 ## Slices etc.
@@ -112,7 +112,7 @@ function namedgetindex(n::NamedArray, index...; useview=false)
                 push!(newdimnames, Symbol(string(n.dimnames[d], "_", dimname)))
             end
         else
-            push!(newnames, names(n, d)[index[d]])
+            push!(newnames, names(n, all=d)[index[d]])
             push!(newdimnames, n.dimnames[d])
         end
     end
@@ -136,12 +136,12 @@ end
 getindex(n::NamedArray, I::Pair...) = getindex(n.array, indices(n, I...)...)
 ## 0.6 ambiguity
 getindex(n::NamedVector, I::CartesianIndex{1}) = getindex(n.array, I)
-getindex{T,N}(n::NamedArray{T,N}, I::CartesianIndex{N}) = getindex(n.array, I)
+getindex(n::NamedArray{T,N}, I::CartesianIndex{N}) where {T,N} = getindex(n.array, I)
 
 ## Setindex is remarkably more simple than getindex.  I wonder why...
 
 ## This takes care of most cases
-@inline function setindex!{T,N}(n::NamedArray{T,N}, x, I::Vararg{Any,N})
+@inline function setindex!(n::NamedArray{T,N}, x, I::Vararg{Any,N}) where {T,N}
     II = map((d,i)->indices(d, i), n.dicts, I)
     setindex!(n.array, x, II...)
 end
