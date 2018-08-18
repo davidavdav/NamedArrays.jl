@@ -106,7 +106,7 @@ function show(io::IO, n::NamedMatrix, maxnrow::Int)
     limit = get(io, :limit, true)
     ## rows
     rowrange, totrowrange = compute_range(maxnrow, nrow)
-    s = [sprint(showcompact, n.array[i,j]) for i=totrowrange, j=1:ncol]
+    s = [sprint(show, n.array[i,j], context=:compact => true) for i=totrowrange, j=1:ncol]
     rowname, colname = strnames(n)
     strlen(x) = length(string(x))
     colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
@@ -184,7 +184,7 @@ function show(io::IO, v::NamedVector, maxnrow::Int)
     nrow = size(v, 1)
     rownames = strnames(v,1)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
-    s = [sprint(showcompact, v.array[i]) for i=totrowrange]
+    s = [sprint(show, v.array[i], context=:compact => true) for i=totrowrange]
     colwidth = maximum(map(length,s))
     rownamewidth = max(maximum(map(length, rownames)), 1+length(strdimnames(v)[1]))
     ## header

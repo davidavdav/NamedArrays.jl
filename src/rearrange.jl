@@ -55,7 +55,9 @@ rotl90(n::NamedArray) = transpose(flipdim(n, 2))
 rot180(n::NamedArray) = NamedArray(rot180(n.array), tuple([reverse(name) for name in names(n)]...), n.dimnames)
 
 import Combinatorics.nthperm, Combinatorics.nthperm!
-import Base.permute!, Base.invpermute!, Base.shuffle, Base.shuffle!, Base.reverse, Base.reverse!
+import Base.permute!, Base.invpermute!, Base.reverse, Base.reverse!
+import Random.shuffle, Random.shuffle!
+
 function nthperm(v::NamedVector, n::Int)
     newnames = nthperm(names(v, 1), n)
     NamedArray(nthperm(v.array,n), (newnames,), v.dimnames)

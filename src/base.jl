@@ -30,7 +30,7 @@ Base.similar(n::NamedArray, t::Type) = NamedArray(similar(n.array, t), n.dicts, 
 
 function Base.similar(n::NamedArray{T,N}, t::Type, dims::Base.Dims) where {T,N}
     nd = length(dims)
-    dicts = Array{OrderedDict{Any,Int}}(nd)
+    dicts = Array{OrderedDict{Any,Int}}(undef, nd)
     dimnames = Array{Any}(undef, nd)
     for d in 1:length(dims)
         if d ≤ ndims(n) && dims[d] == size(n, d)
@@ -47,7 +47,9 @@ function Base.similar(n::NamedArray{T,N}, t::Type, dims::Base.Dims) where {T,N}
 end
 
 ## our own interpretation of ind2sub
-Base.ind2sub(n::NamedArray, index::Integer) = tuple(map(x -> names(n, x[1])[x[2]], enumerate(ind2sub(size(n), index)))...)
+# Base.ind2sub(n::NamedArray, index::Integer) = tuple(map(x -> names(n, x[1])[x[2]], enumerate(ind2sub(size(n), index)))...)
+# `ind2sub(dims, ind)` is deprecated, use `Tuple(CartesianIndices(dims)[ind])` for a 
+# direct replacement. In many cases, the conversion to `Tuple` is not necessary.
 
 ## simplified text representation of namedarray
 DelimitedFiles.writedlm(io, n::NamedVecOrMat) = writedlm(io, hcat(names(n, 1), n.array))

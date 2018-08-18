@@ -50,9 +50,9 @@ n0 = @inferred NamedArray(Array{Int}(undef))
 
 ## new uninitialized construction syntax, #46
 for i in 1:5
-	dims = 2*ones(Int, i)
-	n1 = @inferred NamedArray(Int, dims...)
-	n2 = @inferred NamedArray{Int}(dims...)
+	dims = 2*fill(1, i)
+	global n1 = @inferred NamedArray(Int, dims...) # implicit assignment to global variable `n1`
+	global n2 = @inferred NamedArray{Int}(dims...) # implicit assignment to global variable `n2`
 end
 
 ## repeated indices #63

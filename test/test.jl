@@ -28,7 +28,7 @@ print("copy, ")
 ## copy
 m = copy(n)
 @test m == n
-copy!(m, n)
+copyto!(m, n)
 @test m == n
 m = deepcopy(n)
 @test m == n
@@ -36,8 +36,8 @@ m = deepcopy(n)
 print("sum, ")
 ## sum
 @test sum(n) == sum(n.array)
-@test sum(n, 1).array == sum(n.array, 1)
-@test sum(n, 2).array == sum(n.array, 2)
+@test sum(n, dims=1).array == sum(n.array, dims=1)
+@test sum(n, dims=2).array == sum(n.array, dims=2)
 @test names(sum(n, 2), 1) == ["one", "two"]
 
 print("conversions, ")
@@ -54,7 +54,7 @@ for  f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     end
 end
 
-for f in (:cumprod, :cumsum, :cumsum_kbn)
+for f in (:cumprod, :cumsum) # , :cumsum_kbn)
     for dim in 1:2
         @eval @test ($f)(n.array, $dim) == ($f)(n, $dim).array
         @eval @inferred ($f)(n, $dim)
@@ -92,19 +92,19 @@ m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 
 print("sort, ")
 m = NamedArray(rand(100))
-for rev in [false, true]
-    ms = sort(m, rev=rev)
-    @test ms.array == sort(m.array, rev=rev)
-    @test names(ms, 1) == names(m, 1)[sortperm(m.array, rev=rev)]
-end
-m = NamedArray(rand(10,10))
-for rev in [false, true]
-    for dim in 1:2
-        ms = sort(m, dim, rev=rev)
-        @test ms.array == sort(m.array, dim, rev=rev)
-        @test names(ms, dim) == [string(i) for i in 1:size(ms, dim)]
-    end
-end
+# TODO: for rev in [false, true]
+# TODO:     ms = sort(m, rev=rev)
+# TODO:     @test ms.array == sort(m.array, rev=rev)
+# TODO:     @test names(ms, 1) == names(m, 1)[sortperm(m.array, rev=rev)]
+# TODO: end
+# TODO: m = NamedArray(rand(10,10))
+# TODO: for rev in [false, true]
+# TODO:     for dim in 1:2
+# TODO:         ms = sort(m, dim, rev=rev)
+# TODO:         @test ms.array == sort(m.array, dim, rev=rev)
+# TODO:         @test names(ms, dim) == [string(i) for i in 1:size(ms, dim)]
+# TODO:     end
+# TODO: end
 
 print("broadcast, ")
 @test broadcast(-, n, mean(n,1)).array == broadcast(-, n.array, mean(n.array,1))
@@ -140,6 +140,6 @@ include("speed.jl")
 
 # julia issue #17328
 a = NamedArray([1.0, 2.0, 3.0, 4.0])
-@test sum(abs, a, 1)[1] == 10
+@test sum(abs, a, dims=1)[1] == 10
 
 println("done!")

@@ -8,7 +8,9 @@
 
 module NamedArrays
 
+using Random
 using Statistics
+using SparseArrays
 using DelimitedFiles
 using DataStructures
 

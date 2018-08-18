@@ -4,15 +4,15 @@ include("init-namedarrays.jl")
 
 nn = @inferred similar(n)
 
-@test copy!(nn, 1, n, 1, length(n)) == n
-@test copy!(nn, 1, n.array, 1, length(n)) == n
+@test copyto!(nn, 1, n, 1, length(n)) == n
+@test copyto!(nn, 1, n.array, 1, length(n)) == n
 
-@test_throws BoundsError copy!(nn, 1, n.array, 1, length(n)+1)
-@test_throws BoundsError copy!(nn, 0, n.array, 1, length(n))
-@test_throws BoundsError copy!(nn, 2, n.array, 1, length(n))
-@test_throws BoundsError copy!(nn, length(n)+1, n.array, 1, 1)
-@test_throws BoundsError copy!(nn, 1, n.array, 0, length(n))
-@test_throws BoundsError copy!(nn, 1, n.array, length(n)+1, length(n))
+@test_throws BoundsError copyto!(nn, 1, n.array, 1, length(n)+1)
+@test_throws BoundsError copyto!(nn, 0, n.array, 1, length(n))
+@test_throws BoundsError copyto!(nn, 2, n.array, 1, length(n))
+@test_throws BoundsError copyto!(nn, length(n)+1, n.array, 1, 1)
+@test_throws BoundsError copyto!(nn, 1, n.array, 0, length(n))
+@test_throws BoundsError copyto!(nn, 1, n.array, length(n)+1, length(n))
 
 nn = @inferred similar(n, Int)
 @test namesanddim(nn) == namesanddim(n)
@@ -31,16 +31,21 @@ for i in [1,3]
 	@test hasdefaultdimnames(nn, i)
 end
 
+# `ind2sub(dims, ind)` is deprecated, use `Tuple(CartesianIndices(dims)[ind])` for a
+# direct replacement. In many cases, the conversion to `Tuple` is not necessary.
+# @test ind2sub(n, 4) == ("two", "b")
+# @test_throws BoundsError ind2sub(n, 0)
+# @test_throws BoundsError ind2sub(n, 9)
 
-@test ind2sub(n, 4) == ("two", "b")
-@test_throws BoundsError ind2sub(n, 0)
-@test_throws BoundsError ind2sub(n, 9)
-
-writedlm(stdout, n)
-writedlm(stdout, v)
+DelimitedFiles.writedlm(stdout, n)
+DelimitedFiles.writedlm(stdout, v)
 
 ## Issue #60
-for func in [similar, zeros, ones, n -> hcat(n, n), n -> vcat(n, n)]
+for func in [similar,
+             a -> fill!(similar(a), zero(eltype(a))),
+             a -> fill!(similar(a), one(eltype(a))),
+             n -> hcat(n, n),
+             n -> vcat(n, n)]
     fn = @inferred func(n)
     @test keytype.(fn.dicts) == (String, String)
 end

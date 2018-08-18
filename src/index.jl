@@ -25,7 +25,7 @@ function flattenednames(n::NamedArray)
     for d in 1:ndims(n)
         nlevels = size(n, d)
         nrep = L ÷ (nlevels * factor)
-        data = repmat(vcat([fill(x, factor) for x in names(n, d)]...), nrep)
+        data = repeat(vcat([fill(x, factor) for x in names(n, d)]...), nrep)
         push!(cols, data)
         factor *= nlevels
     end
@@ -53,12 +53,13 @@ indices(dict::AbstractDict{K,V}, i::Integer) where {K, V<:Integer} = i ## intege
 ## indices(dict::Associative{K,V}, i::K) where {K<:Real, V<:Integer} = dict[i]
 ## indices(dict::Associative{K,V}, i::Real) where {K, V<:Integer} = Base.to_index(i)
 indices(dict::AbstractDict{K,V}, i::K) where {K, V<:Integer} = dict[i]
-indices(dict::AbstractDict{K,V}, i::Name) where {K, V<:Integer} = dict[i.name]
+indices(dict::AbstractDict{K,V}, i::Name{K}) where {K, V<:Integer} = dict[i.name]
 
 
 ## ambiguity if dict key is CartesionIndex, this should never happen
-indices(dict::AbstractDict{K,V}, i::K) where {K<:CartesianIndex,V<:Integer} = dict[i]
+# indices(dict::AbstractDict{K,V}, i::K) where {K<:CartesianIndex,V<:Integer} = dict[i]
 indices(dict::AbstractDict, ci::CartesianIndex) = ci
+indices(dict::AbstractDict{Any,V}, ci::CartesianIndex) where {V<:Integer} = ci
 
 ## multiple indices
 ## the following two lines are partly because of ambiguity
@@ -96,6 +97,9 @@ function namedgetindex(n::NamedArray, index...; useview=false)
     else
         a = getindex(n.array, index...)
     end
+    if !isa(a, AbstractArray)
+        return(a)
+    end
     N = length(index)
     keeping = filter(i -> dimkeepingtype(index[i]), 1:N)
     if ndims(a) < length(keeping) ## || length(dims) == 1 && ndims(n) > 1
@@ -123,7 +127,7 @@ end
 function indices(n::NamedArray, I::Pair...)
     dict = Dict{Any,Any}(I...)
     Set(keys(dict)) ⊆ Set(n.dimnames) || error("Dimension name mismatch")
-    result = Vector{Union{Int,Colon}}(ndims(n))
+    result = Vector{Union{Int,Colon}}(undef, ndims(n))
     fill!(result, :) ## unspecified dimensions act as colon
     for (i, dim) in enumerate(n.dimnames)
         if dim in keys(dict)
@@ -143,7 +147,7 @@ getindex(n::NamedArray{T,N}, I::CartesianIndex{N}) where {T,N} = getindex(n.arra
 ## This takes care of most cases
 @inline function setindex!(n::NamedArray{T,N}, x, I::Vararg{Any,N}) where {T,N}
     II = map((d,i)->indices(d, i), n.dicts, I)
-    setindex!(n.array, x, II...)
+    n.array[II...] = x
 end
 
 ## assignment via n[:B => "two"] = [...]
@@ -163,5 +167,4 @@ end
 # function _name2index(dict::OrderedDict{K,Int}, i::Not{K}) where K
 #     setdiff(1:length(dict), dict[i.index])
 # end
-#
 # _name2index(dict::OrderedDict{K,Int}, name::Name{K}) where K = dict[name.name]

@@ -1,7 +1,7 @@
 using DataStructures
 
 include("compat.jl")
-if !isdefined(:NamedArray)
+if ! @isdefined NamedArray
     include("namedarraytypes.jl")
 end
 

@@ -12,7 +12,7 @@ include("init-namedarrays.jl")
 function showlines(x...; kwargs...)
     buf = IOBuffer()
     show(IOContext(buf; kwargs...), x...)
-    return split(String(buf), "\n")
+    return split(String(take!(copy(buf))), "\n")
 end
 
 lines = showlines(NamedArray(Array{Int}(undef)))
@@ -74,7 +74,7 @@ for ndim in 1:5
     if (ndim == 1)
         line1 = "2-element Named Array{Float64,1}"
     else
-        line1 = join(repmat(["2"], ndim), "×") * " Named Array{Float64,$ndim}"
+        line1 = join(repeat(["2"], ndim), "×") * " Named Array{Float64,$ndim}"
     end
     @test lines[1] == line1
     if ndim ≥ 3
@@ -93,18 +93,18 @@ lines = showlines(NamedArray(sprand(1000,1000, 1e-4), (nms, nms)))
 @test length(lines) > 7
 @test startswith(lines[1], "1000×1000 Named sparse matrix with")
 @test endswith(lines[1], "Float64 nonzero entries:")
-@test sum([contains(line, "⋮") for line in lines]) == 1
+@test sum([occursin("⋮", line) for line in lines]) == 1
 
-## array with Nullable names
-lines = showlines(NamedArray(rand(2, 2), (Nullable["a", Nullable()], Nullable["c", "d"])))
-@test lines[1] == "2×2 Named Array{Float64,2}"
-@test split(lines[2]) == ["A", "╲", "B", "│", "\"c\"", "\"d\""]
-@test startswith(lines[4], "\"a\"")
-@test startswith(lines[5], "#NULL")
+# DEPRECATED: ## array with Nullable names
+# DEPRECATED: lines = showlines(NamedArray(rand(2, 2), (Nullable["a", Nullable()], Nullable["c", "d"])))
+# DEPRECATED: @test lines[1] == "2×2 Named Array{Float64,2}"
+# DEPRECATED: @test split(lines[2]) == ["A", "╲", "B", "│", "\"c\"", "\"d\""]
+# DEPRECATED: @test startswith(lines[4], "\"a\"")
+# DEPRECATED: @test startswith(lines[5], "#NULL")
 
 ## no limits
 for dims in [(1000,), (1000, 2)]
-    lines = showlines(NamedArray(rand(dims...)), limit=false)
+    global lines = showlines(NamedArray(rand(dims...)), limit=false)
     @test length(lines) == 1003
     @test startswith(lines[end-500], "500 ")
 end

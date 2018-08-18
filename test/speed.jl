@@ -18,18 +18,19 @@ end
 
 n = @inferred NamedArray(rand(1000,1000))
 t1 = t2 = t3 = 0.0
-for j = 1:2
-    t1 = @elapsed sgetindex(n)
-    t2 = @elapsed sgetindex(n.array)
+for _ = 1:2
+    global t1 = @elapsed sgetindex(n)
+    global t2 = @elapsed sgetindex(n.array)
     si, sj = names(n)
-    t3 = @elapsed sgetindex(n, si, sj)
+    global t3 = @elapsed sgetindex(n, si, sj)
 end
 println("Timing named index: ", t1, ", array index: ", t2, ", named key: ", t3)
 
+# TODO: It is too slow now
 s = sparse(rand(1:1000, 10), rand(1:1000, 10), true)
 n = @inferred NamedArray(s)
-for j = 1:2
-    t1 = @elapsed for i=1:1000 sum(s, 1) end
-    t2 = @elapsed for i=1:1000 sum(n, 1) end
+for _ = 1:2
+    global t1 = @elapsed for _=1:10 sum(s, dims=1) end
+    global t2 = @elapsed for _=1:10 sum(n, dims=1) end
 end
 println("Timing sum large sparse array: ", t1, ", named: ", t2)

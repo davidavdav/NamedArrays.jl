@@ -10,5 +10,8 @@ using NamedArrays
 using Test
 using DataStructures
 using Combinatorics
+using LinearAlgebra
+using SparseArrays
+using DelimitedFiles
 
 include("test.jl")

@@ -23,7 +23,7 @@ dimnames(a::AbstractArray) = [defaultdimnames(a)...]
 dimnames(a::AbstractArray, d::Integer) = defaultdimname(d)
 
 ## string versions of the above
-strnames(dict::AbstractDict) = [isa(name, String) ? name : sprint(showcompact, name) for name in names(dict)]
+strnames(dict::AbstractDict) = [isa(name, String) ? name : sprint(show, name, context=:compact => true) for name in names(dict)]
 strnames(n::NamedArray) = [strnames(d) for d in n.dicts]
 strnames(n::NamedArray, d::Integer) = strnames(n.dicts[d])
 strdimnames(n::NamedArray) = [string(dn) for dn in n.dimnames]
@@ -50,7 +50,7 @@ function setnames!(n::NamedArray, v, d::Integer, i::Integer)
     1 <= d <= ndims(n) || throw(BoundsError("dimension"))
     1 <= i <= size(n, d) || throw(BoundsError("index"))
     isa(v, keytype(n.dicts[d])) || throw(TypeError(:setnames!, "second argument", keytype(n.dicts[d]), typeof(v)))
-    filter!((k,v) -> v!=i, n.dicts[d]) # remove old name
+    filter!(pair -> pair[2]!=i, n.dicts[d]) # remove old name
     n.dicts[d][v] = i
 end
 
