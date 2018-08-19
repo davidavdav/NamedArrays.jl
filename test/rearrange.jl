@@ -11,14 +11,14 @@ print("re-arrange, ")
 @test names(v', 2) == names(v, 1)
 @test dimnames(v')[2] == dimnames(v)[1]
 
-for d in 1:2
-	o = 3 - d ## other dim
-	@test flipdim(n, d).array == flipdim(n.array, d)
-	@test names(flipdim(n, d), d) == reverse(names(n, d))
-	@test names(flipdim(n, d), o) == names(n, o)
+for j in 1:2
+	o = 3 - j ## other dim
+	@test reverse(n, dims=j).array == reverse(n.array, dims=j)
+	@test names(reverse(n, dims=j), j) == reverse(names(n, j))
+	@test names(reverse(n, dims=j), o) == names(n, o)
 end
 
-for i in 1:10
+for _ in 1:10
 	p = randperm(6)
 	@test permutedims(m, p).array == permutedims(m.array, p)
 	@test names(permutedims(m, p)) == names(m)[p]
@@ -42,7 +42,7 @@ end
 @test names(rot180(n)) == [reverse(name) for name in names(n)]
 @test dimnames(rot180(n)) == dimnames(n)
 
-for i in 1:10
+for _ in 1:10
 	p = rand(1:factorial(length(v)))
 	@test nthperm(v, p).array == nthperm(v.array, p)
 	@test names(nthperm(v, p), 1) == nthperm(names(v, 1), p)

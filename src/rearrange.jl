@@ -16,13 +16,13 @@ function adjoint(a::NamedArray)
     end
 end
 
-import Base.flipdim
-function flipdim(a::NamedArray{T,N}, d::Int) where {T,N}
-    vdicts = Array{OrderedDict}(N)
-    n = size(a,d)+1
+import Base.reverse
+function reverse(a::NamedArray{T,N}; dims::Int) where {T,N}
+    vdicts = Array{OrderedDict}(undef, N)
+    n = size(a,dims)+1
     for i=1:N
         dict = copy(a.dicts[i])
-        if i==d
+        if i==dims
             newnames = reverse(names(dict))
             empty!(dict)
             for (ind,k) in enumerate(newnames)
@@ -31,7 +31,7 @@ function flipdim(a::NamedArray{T,N}, d::Int) where {T,N}
         end
         vdicts[i] = dict
     end
-    NamedArray(flipdim(a.array,d), tuple(vdicts...), a.dimnames)
+    NamedArray(reverse(a.array, dims=dims), tuple(vdicts...), a.dimnames)
 end
 
 ## circshift automagically works...
@@ -50,8 +50,8 @@ import Base.vec
 vec(a::NamedArray) = vec(a.array)
 
 import Base.rotl90, Base.rot180, Base.rotr90
-rotr90(n::NamedArray) = transpose(flipdim(n, 1))
-rotl90(n::NamedArray) = transpose(flipdim(n, 2))
+rotr90(n::NamedArray) = transpose(reverse(n, dims=1))
+rotl90(n::NamedArray) = transpose(reverse(n, dims=2))
 rot180(n::NamedArray) = NamedArray(rot180(n.array), tuple([reverse(name) for name in names(n)]...), n.dimnames)
 
 import Combinatorics.nthperm, Combinatorics.nthperm!

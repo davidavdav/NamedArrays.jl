@@ -3,24 +3,26 @@ print("matrixops, ")
 
 ## TODO I am not convinced this does anything related to NamedArrays...
 
+using LinearAlgebra
+
 for t in (Float32, Float64)
-    a = rand(t, 10, 10)
+    global a = rand(t, 10, 10)
     b = rand(t, 10, 5)
-    c = rand(t, 10, 10)
+    global c = rand(t, 10, 10)
     apd = a' * a
     asym = a' + a
-    luf = lufact(a)
-    chf = cholfact(apd)
-    qrf = qrfact(a)
-    eif = eigfact(a)
+    luf = lu(a)
+    chf = cholesky(apd, Val(false))
+    qrf = qr(a)
+    eif = eigen(a)
     eigvals(a)
-    hsf = hessfact(a)
-    scf = schurfact(a)
-    scf1 = schurfact(a, c)
-    svdf = svdfact(a)
+    hsf = hessenberg(a)
+    scf = schur(a)
+    scf1 = schur(a, c)
+    svdf = svd(a)
     svdvals(a)
-    d = diag(a)
-    diagm(d)
+    global d = Matrix(Diagonal(a))
+    Matrix(Diagonal(d))
     cond(a)
     nullspace(a)
     kron(a, a)

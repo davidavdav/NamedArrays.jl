@@ -29,6 +29,6 @@ println(n)
 @test_throws TypeError setnames!(n, [:a, :v], 1)
 @test_throws TypeError setnames!(n, :a, 1, 1)
 @test_throws DimensionMismatch setnames!(n, ["a"], 1)
-for i in [0,5], d in 1:2
-	@test_throws BoundsError setnames!(n, "a", d, i)
+for i in [0,5], j in 1:2
+	@test_throws BoundsError setnames!(n, "a", j, i)
 end
