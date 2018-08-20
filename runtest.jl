@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-include("src/NamedArrays.jl")
+# include("src/NamedArrays.jl")
 using NamedArrays
 #using Base.Test
 #using DataStructures
