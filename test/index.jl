@@ -20,6 +20,8 @@ end
 include("init-namedarrays.jl")
 
 @test n[:] == view(n, :) == n.array[:] ## values
+println(n)
+println(names(n[:],1))
 @test names(n[:], 1)[2] == ("two", "a")
 @test names(n[:], 1)[5] == ("one", "c")
 @test dimnames(n[:], 1) == (:A, :B)

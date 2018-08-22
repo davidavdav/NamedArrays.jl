@@ -23,6 +23,6 @@ if ! @isdefined hasdefaultnames
 end
 
 if ! @isdefined hasdefaultdimnames
-	hasdefaultdimnames(n::NamedArray, d) = dimnames(n, d) == Letters[d]
+	hasdefaultdimnames(n::NamedArray, d) = dimnames(n, d) == Symbol(Letters[d])
 	hasdefaultdimnames(n::NamedArray) = all([hasdefaultdimnames(n, d) for d in 1:ndims(n)])
 end

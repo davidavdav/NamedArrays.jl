@@ -23,10 +23,11 @@ end
 
 ## I forgot what `fan` stands for.  Function Apply Name?
 function fan(f::Function, fname::AbstractString, a::NamedArray{T,N}, dim::Int) where {T,N}
-    dimnames = Array{Any}(N)
+    DimNamType = eltype(a.dimnames)
+    dimnames = Array{DimNamType}(undef, N)
     for i=1:N
         if i==dim
-            dimnames[i] = string(fname, "(", a.dimnames[dim], ")")
+            dimnames[i] = DimNamType(string(fname, "(", a.dimnames[dim], ")"))
         else
             dimnames[i] = a.dimnames[i]
         end

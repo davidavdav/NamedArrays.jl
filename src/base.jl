@@ -30,15 +30,16 @@ Base.similar(n::NamedArray, t::Type) = NamedArray(similar(n.array, t), n.dicts, 
 
 function Base.similar(n::NamedArray{T,N}, t::Type, dims::Base.Dims) where {T,N}
     nd = length(dims)
-    dicts = Array{OrderedDict{Any,Int}}(undef, nd)
-    dimnames = Array{Any}(undef, nd)
+    dicts = Array{eltype(n.dicts)}(undef, nd)
+    DimNamType = eltype(n.dimnames)
+    dimnames = Array{DimNamType}(undef, nd)
     for d in 1:length(dims)
         if d ≤ ndims(n) && dims[d] == size(n, d)
             dicts[d] = n.dicts[d]
             dimnames[d] = n.dimnames[d]
         else
             dicts[d] = defaultnamesdict(dims[d])
-            dimnames[d] = letter(d)
+            dimnames[d] = DimNamType(letter(d))
         end
     end
     tdicts = tuple(dicts...)
@@ -48,7 +49,7 @@ end
 
 ## our own interpretation of ind2sub
 # Base.ind2sub(n::NamedArray, index::Integer) = tuple(map(x -> names(n, x[1])[x[2]], enumerate(ind2sub(size(n), index)))...)
-# `ind2sub(dims, ind)` is deprecated, use `Tuple(CartesianIndices(dims)[ind])` for a 
+# `ind2sub(dims, ind)` is deprecated, use `Tuple(CartesianIndices(dims)[ind])` for a
 # direct replacement. In many cases, the conversion to `Tuple` is not necessary.
 
 ## simplified text representation of namedarray

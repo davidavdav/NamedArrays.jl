@@ -7,10 +7,26 @@
 import Base: getindex, setindex!
 
 ## AbstractArray Interface, integers have precedence over everything else
-getindex(n::NamedArray{T, N, AT, DT}, i::Int) where {T, N, AT, DT} = getindex(n.array, i)
-getindex(n::NamedArray{T, N, AT, DT}, I::Vararg{Int, N}) where {T, N, AT, DT} = getindex(n.array, I...)
-setindex!(n::NamedArray{T, N, AT, DT}, v, i::Int) where {T, N, AT, DT} = setindex!(n.array, v, i::Int)
-setindex!(n::NamedArray{T, N, AT, DT}, v, I::Vararg{Int, N}) where {T, N, AT, DT} = setindex!(n.array, v, I...)
+@inline Base.@propagate_inbounds function Base.getindex(n::NamedArray{T, N, AT, DT},
+    i::Int) where {T, N, AT, DT}
+    getindex(n.array, i)
+end
+
+@inline Base.@propagate_inbounds function Base.getindex(n::NamedArray{T, N, AT, DT},
+    I::Vararg{Int, N}) where {T, N, AT, DT}
+    getindex(n.array, I...)
+end
+
+@inline Base.@propagate_inbounds function Base.setindex!(n::NamedArray{T, N, AT, DT},
+     v, i::Int) where {T, N, AT, DT}
+     setindex!(n.array, v, i::Int)
+end
+
+@inline Base.@propagate_inbounds function Base.setindex!(n::NamedArray{T, N, AT, DT},
+     v, I::Vararg{Int, N}) where {T, N, AT, DT}
+     setindex!(n.array, v, I...)
+end
+
 ## optional methods
 Base.IndexStyle(n::NamedArray) = IndexStyle(n.array)
 
@@ -33,7 +49,7 @@ function flattenednames(n::NamedArray)
 end
 
 ## from subarray.jl
-getindex(n::NamedVector, ::Colon) = n
+@inline Base.@propagate_inbounds getindex(n::NamedVector, ::Colon) = n
 getindex(n::NamedArray, ::Colon) = NamedArray(n.array[:], [flattenednames(n)] , [tuple(dimnames(n)...)])
 
 ## special 0-dimensional case
@@ -58,8 +74,8 @@ indices(dict::AbstractDict{K,V}, i::Name{K}) where {K, V<:Integer} = dict[i.name
 
 ## ambiguity if dict key is CartesionIndex, this should never happen
 # indices(dict::AbstractDict{K,V}, i::K) where {K<:CartesianIndex,V<:Integer} = dict[i]
-indices(dict::AbstractDict, ci::CartesianIndex) = ci
-indices(dict::AbstractDict{Any,V}, ci::CartesianIndex) where {V<:Integer} = ci
+@inline indices(dict::AbstractDict, ci::CartesianIndex) = ci
+@inline indices(dict::AbstractDict{Any,V}, ci::CartesianIndex) where {V<:Integer} = ci
 
 ## multiple indices
 ## the following two lines are partly because of ambiguity
@@ -84,14 +100,14 @@ indices(dict::AbstractDict, i::Not) = setdiff(1:length(dict), indices(dict, i.in
 ## Simple scalar indexing
 @inline namedgetindex(n::NamedArray, I::Vararg{Integer,N}) where {N} = getindex(n.array, I...)
 
-dimkeepingtype(x) = false
-dimkeepingtype(x::AbstractArray) = true
-dimkeepingtype(x::AbstractRange) = true
-dimkeepingtype(x::BitArray) = true
+@inline dimkeepingtype(x) = false
+@inline dimkeepingtype(x::AbstractArray) = true
+@inline dimkeepingtype(x::AbstractRange) = true
+@inline dimkeepingtype(x::BitArray) = true
 
 ## Slices etc.
-namedgetindex(n::NamedArray, index::CartesianIndex) = getindex(n.array, index)
-function namedgetindex(n::NamedArray, index...; useview=false)
+@inline Base.@propagate_inbounds namedgetindex(n::NamedArray, index::CartesianIndex) = getindex(n.array, index)
+Base.@propagate_inbounds function namedgetindex(n::NamedArray, index...; useview::Bool=false)
     if useview
         a = view(n.array, index...)
     else
@@ -106,18 +122,21 @@ function namedgetindex(n::NamedArray, index...; useview=false)
         warn("Dropped names for ", typeof(n.array), " with index ", index)
         return a;               # number of dimension changed, this should not happen
     end
-    newnames = Any[]
-    newdimnames = []
+    newnames = Array{Any}(undef, ndims(a))
+    newdimnames = Array{eltype(n.dimnames)}(undef, ndims(a))
+    count = 0
     for d in keeping
         if ndims(index[d]) > 1
             ## take over the names of the index for this dimension
             for (name, dimname) in zip(defaultnames(index[d]), dimnames(index[d]))
-                push!(newnames, name)
-                push!(newdimnames, Symbol(string(n.dimnames[d], "_", dimname)))
+                count += 1
+                newnames[count] = name
+                newdimnames[count] = Symbol(string(n.dimnames[d], "_", dimname))
             end
         else
-            push!(newnames, names(n, d)[index[d]])
-            push!(newdimnames, n.dimnames[d])
+            count += 1
+            newnames[count] = names(n, d)[index[d]]
+            newdimnames[count] = n.dimnames[d]
         end
     end
     return NamedArray(a, tuple(newnames...), tuple(newdimnames...))
@@ -125,7 +144,7 @@ end
 
 ## work out n[:A => "1", :C => "5"]
 function indices(n::NamedArray, I::Pair...)
-    dict = Dict{Any,Any}(I...)
+    dict = Dict(I...)
     Set(keys(dict)) ⊆ Set(n.dimnames) || error("Dimension name mismatch")
     result = Vector{Union{Int,Colon}}(undef, ndims(n))
     fill!(result, :) ## unspecified dimensions act as colon
@@ -137,18 +156,18 @@ function indices(n::NamedArray, I::Pair...)
     return result
 end
 
-getindex(n::NamedArray, I::Pair...) = getindex(n.array, indices(n, I...)...)
+@inline Base.@propagate_inbounds getindex(n::NamedArray, I::Pair...) = getindex(n.array, indices(n, I...)...)
 ## 0.6 ambiguity
-getindex(n::NamedVector, I::CartesianIndex{1}) = getindex(n.array, I)
-getindex(n::NamedArray{T,N}, I::CartesianIndex{N}) where {T,N} = getindex(n.array, I)
+@inline Base.@propagate_inbounds getindex(n::NamedVector, I::CartesianIndex{1}) = getindex(n.array, I)
+@inline Base.@propagate_inbounds getindex(n::NamedArray{T,N}, I::CartesianIndex{N}) where {T,N} = getindex(n.array, I)
 
 ## Setindex is remarkably more simple than getindex.  I wonder why...
 
 ## This takes care of most cases
-@inline function setindex!(n::NamedArray{T,N}, x, I::Vararg{Any,N}) where {T,N}
+@inline Base.@propagate_inbounds function setindex!(n::NamedArray{T,N}, x, I::Vararg{Any,N}) where {T,N}
     II = map((d,i)->indices(d, i), n.dicts, I)
     n.array[II...] = x
 end
 
 ## assignment via n[:B => "two"] = [...]
-@inline setindex!(n::NamedArray, x, I::Vararg{Pair}) = setindex!(n.array, x, indices(n, I...)...)
+@inline Base.@propagate_inbounds setindex!(n::NamedArray, x, I::Vararg{Pair}) = setindex!(n.array, x, indices(n, I...)...)
