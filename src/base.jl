@@ -39,7 +39,7 @@ function Base.similar(n::NamedArray{T,N}, t::Type, dims::Base.Dims) where {T,N}
             dimnames[d] = n.dimnames[d]
         else
             dicts[d] = defaultnamesdict(dims[d])
-            dimnames[d] = DimNamType(letter(d))
+            dimnames[d] = DimNamType === Symbol ? Symbol(letter(d)) : letter(d)
         end
     end
     tdicts = tuple(dicts...)

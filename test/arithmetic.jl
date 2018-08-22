@@ -65,15 +65,17 @@ r10x5 = randn(10, 5)
 @test mul!(c, transpose(r10x5), r10x5) ≈ r10x5' * r10x5
 @test mul!(c, transpose(r10x5), transpose(r5x10)) ≈ r10x5' * r5x10'
 
-for M in (NamedArray(rand(4,3)),) # TODO: (NamedArray(rand(4)), NamedArray(rand(4,3)))
+for M in (NamedArray(rand(4)), NamedArray(rand(4,3)))
     @test M * M' ≈ M.array * M.array'
-    @test M' * M ≈ M.array' * M.array
+    value = M' * M
+    @test (length(value) == 1 ? value[1] : value) ≈ M.array' * M.array # M' * M is always a NamedArray
     @test n * M ≈ n * M.array ≈ n.array * M ≈ n.array * M.array
     ## the first expression dispatches Ac_Mul_Bc!:
     @test isapprox(M' * n.array', M' * n')
     @test isapprox(M' * n', M.array' * n')
     @test isapprox(M.array' * n', M.array' * n.array')
 end
+
 ## bug #34
 # TODO: @test unique(names(n * n'))[1] == names(n, 1)
 # TODO: @test unique(names(n' * n))[1] == names(n, 2)
