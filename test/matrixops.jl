@@ -7,7 +7,7 @@ using LinearAlgebra
 
 for t in (Float32, Float64)
     global a = rand(t, 10, 10)
-    b = rand(t, 10, 5)
+    global b = rand(t, 10, 5)
     global c = rand(t, 10, 10)
     apd = a' * a
     asym = a' + a

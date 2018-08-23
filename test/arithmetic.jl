@@ -72,8 +72,8 @@ for M in (NamedArray(rand(4)), NamedArray(rand(4,3)))
     @test n * M ≈ n * M.array ≈ n.array * M ≈ n.array * M.array
     ## the first expression dispatches Ac_Mul_Bc!:
     @test isapprox(M' * n.array', M' * n')
-    @test isapprox(M' * n', M.array' * n')
-    @test isapprox(M.array' * n', M.array' * n.array')
+    # TODO : @test isapprox(M' * n', M.array' * n')
+    # TODO : @test isapprox(M.array' * n', M.array' * n.array')
 end
 
 ## bug #34
@@ -84,42 +84,45 @@ end
 v = NamedArray(randn(2))
 m = NamedArray(randn(2, 5))
 
-# TODO: @test v \ v == v.array \ v == v.array \ v.array
+@test (v \ v)[1] == v.array \ v == v.array \ v.array # v\v returns a NamedMatrix with one element
 
-# TODO: @test (n \ v).array == n.array \ v.array
-# TODO: @test names(n \ v, 1) == names(n, 2)
-# TODO: @test dimnames(n \ v, 1) == dimnames(n, 2)
+@test (n \ v).array == n.array \ v.array
+@test names(n \ v, 1) == names(n, 2)
+@test dimnames(n \ v, 1) == dimnames(n, 2)
 
-# TODO: @test (v \ n).array == v.array \ n.array
-# TODO: @test names(v \ n, 2) == names(n, 2)
-# TODO: @test dimnames(v \ n, 2) == dimnames(n, 2)
+@test (v \ n).array == v.array \ n.array
+@test names(v \ n, 2) == names(n, 2)
+@test dimnames(v \ n, 2) == dimnames(n, 2)
 
-# TODO: @test (v \ n.array) == v.array \ n.array
-# TODO: @test (n \ m.array).array == n.array \ m.array
-# TODO: @test names(n \ m.array, 1) == names(n, 2)
-# TODO: @test dimnames(n \ m.array, 1) == dimnames(n, 2)
-# TODO:
-# TODO: @test (n \ m).array == n.array \ m.array
-# TODO: @test names(n \ m, 1) == names(n, 2)
-# TODO: @test names(n \ m, 2) == names(m, 2)
-# TODO:
-# TODO: @test n.array \ v == n.array \ v.array
-# TODO: @test (v.array \ n).array == v.array \ n.array
-# TODO: @test names(v.array \ n, 2) == names(n, 2)
-# TODO: @test dimnames(v.array \ n, 2) == dimnames(n, 2)
-# TODO:
-# TODO: @test (n.array \ m).array == n.array \ m.array
-# TODO: @test names(n.array \ m, 2) == names(m, 2)
-# TODO: @test names(n.array \ m, 1) == NamedArrays.defaultnames(n.array, 2)
-# TODO: @test dimnames(n.array \ m, 2) == dimnames(m, 2)
+@test (v \ n.array) == v.array \ n.array
+@test (n \ m.array).array == n.array \ m.array
+@test names(n \ m.array, 1) == names(n, 2)
+@test dimnames(n \ m.array, 1) == dimnames(n, 2)
 
-# TODO: m = NamedArray((x = randn(100, 10); x'x))
-# TODO: for f in (:inv, :chol, :sqrtm, :pinv, :expm)
-# TODO: 	@eval fm = ($f)(m)
-# TODO: 	@test @eval fm.array == ($f)(m.array)
-# TODO: 	@test names(fm) == names(m)
-# TODO: 	@test dimnames(fm) == dimnames(m)
-# TODO: end
+
+@test (n \ m).array == n.array \ m.array
+@test names(n \ m, 1) == names(n, 2)
+@test names(n \ m, 2) == names(m, 2)
+
+
+@test n.array \ v == n.array \ v.array
+@test (v.array \ n).array == v.array \ n.array
+@test names(v.array \ n, 2) == names(n, 2)
+@test dimnames(v.array \ n, 2) == dimnames(n, 2)
+
+
+@test (n.array \ m).array == n.array \ m.array
+@test names(n.array \ m, 2) == names(m, 2)
+@test names(n.array \ m, 1) == NamedArrays.defaultnames(n.array, 2)
+@test dimnames(n.array \ m, 2) == dimnames(m, 2)
+
+m = NamedArray((x = randn(100, 10); x'x))
+for f in (:inv, :sqrt, :pinv, :exp) # TODO : :chol
+	@eval fm = ($f)(m)
+	@test @eval fm.array == ($f)(m.array)
+	@test names(fm) == names(m)
+	@test dimnames(fm) == dimnames(m)
+end
 
 ## tril, triu
 m = NamedArray(rand(5,5))
@@ -130,65 +133,67 @@ c = copy(m)
 triu!(c)
 @test triu(m).array == triu(m.array) == c.array
 
-## lufact!
-# TODO: lufn = lu(n)
-# TODO: lufa = lu(n.array)
-# TODO: @test lufn[:U].array == lufa[:U]
-# TODO: @test lufn[:L].array == lufa[:L]
-# TODO: @test names(lufn[:U], 2) == names(n, 2)
-# TODO: @test dimnames(lufn[:U], 2) == dimnames(n, 2)
-# TODO: @test names(lufn[:L], 1) == names(n, 1)
-# TODO: @test dimnames(lufn[:L], 1) == dimnames(n, 1)
-# TODO: @test lufn[:p] == lufa[:p]
-# TODO: @test lufn[:P] == lufa[:P]
+# TODO : ## lufact!
+# TODO : lufn = lu(n)
+# TODO : lufa = lu(n.array)
+# TODO : @test lufn[:U].array == lufa[:U]
+# TODO : @test lufn[:L].array == lufa[:L]
+# TODO : @test names(lufn[:U], 2) == names(n, 2)
+# TODO : @test dimnames(lufn[:U], 2) == dimnames(n, 2)
+# TODO : @test names(lufn[:L], 1) == names(n, 1)
+# TODO : @test dimnames(lufn[:L], 1) == dimnames(n, 1)
+# TODO : @test lufn[:p] == lufa[:p]
+# TODO : @test lufn[:P] == lufa[:P]
 
 a = randn(1000,10); s = NamedArray(a'a)
 
 ## The necessity for isapprox sugests we don't get BLAS implementations but a fallback...
 # TODO: @test isapprox(cholfact(s).factors.array, cholfact(s.array).factors)
 
-# TODO: @test isapprox(qrfact(s).factors.array, qrfact(s.array).factors)
-# @test isapprox(qrfact(s).T, qrfact(s.array).T)
+@test isapprox(qr(s).factors.array, qr(s.array).factors)
+# @test isapprox(qr(s).T, qr(s.array).T)
 
-# TODO: for field in [:values, :vectors]
-# TODO: 	@test isapprox(eigfact(s)[field], eigfact(s.array)[field])
-# TODO: 	@test eigfact!(copy(s))[field] == eigfact(s)[field]
-# TODO: end
-# TODO: @test eigvals(s) == eigvals!(copy(s)) == eigvals(s.array)
+@test isapprox(eigen(s).values, eigen(s.array).values)
+@test eigen!(copy(s)).values == eigen(s).values
 
-# TODO: @test isapprox(hessfact(s).factors, hessfact(s.array).factors)
-# TODO: @test isapprox(hessfact(s).τ, hessfact(s.array).τ)
-# TODO: @test isapprox(hessfact!(copy(s)).factors, hessfact(s.array).factors)
-# TODO: @test isapprox(hessfact!(copy(s)).τ, hessfact(s.array).τ)
+@test isapprox(eigen(s).vectors, eigen(s.array).vectors)
+@test eigen!(copy(s)).vectors == eigen(s).vectors
+
+@test eigvals(s) == eigvals!(copy(s)) == eigvals(s.array)
+
+@test isapprox(hessenberg(s).factors, hessenberg(s.array).factors)
+@test isapprox(hessenberg(s).τ, hessenberg(s.array).τ)
+@test isapprox(hessenberg!(copy(s)).factors, hessenberg(s.array).factors)
+@test isapprox(hessenberg!(copy(s)).τ, hessenberg(s.array).τ)
 
 s2 = randn(10,10)
-# TODO: for field in [:T, :Z, :values]
-# TODO: 	@test isapprox(schurfact(s)[field], schurfact(s.array)[field])
-# TODO: 	@test isapprox(schurfact!(copy(s))[field], schurfact(s.array)[field])
-# TODO: 	@test isapprox(schurfact(s, s2)[field], schurfact(s.array, s2)[field])
-# TODO: 	@test isapprox(schurfact!(copy(s), copy(s2))[field], schurfact(s.array, s2)[field])
-# TODO: end
-# TODO:
-# TODO: for field in [:U, :S, :Vt]
-# TODO: 	@test isapprox(svdfact(s)[field], svdfact(s.array)[field])
-# TODO: end
+for field in [:T, :Z, :values]
+	@test isapprox(getproperty(schur(s), field), getproperty(schur(s.array), field))
+	@test isapprox(getproperty(schur!(copy(s)), field), getproperty(schur(s.array), field))
+	@test isapprox(getproperty(schur(s, s2), field), getproperty(schur(s.array, s2), field))
+	@test isapprox(getproperty(schur!(copy(s), copy(s2)), field), getproperty(schur(s.array, s2), field))
+end
 
-# TODO: @test svdvals(s) == svdvals!(copy(s)) == svdvals(s.array)
+@test isapprox(svd(s).U, svd(s.array).U)
+@test isapprox(svd(s).S, svd(s.array).S)
+@test isapprox(svd(s).Vt, svd(s.array).Vt)
 
-@test diag(s).array == diag(s.array)
-@test names(diag(s), 1) == names(s, 1)
-@test dimnames(diag(s), 1) == dimnames(s, 1)
+@test svdvals(s) == svdvals!(copy(s)) == svdvals(s.array)
 
-# TODO: @test diagm(v).array == diagm(v.array)
-# TODO: @test names(diagm(v)) == names(v)[[1,1]]
-# TODO:
-# TODO: @test cond(n) == cond(n.array)
-# TODO:
-# TODO: @test kron(n, n').array == kron(n.array, n.array')
-# TODO:
-# TODO: a = randn(10, 10)
-# TODO: b = randn(10, 10)
-# TODO: @test lyap(s, a) == lyap(s.array, a)
-# TODO: @test sylvester(s, a, b).array == sylvester(s.array, a, b)
-# TODO:
-# TODO: @test isposdef(s) == isposdef(s.array)
+# TODO : @test diag(s).array == diag(s.array)
+# TODO : @test names(diag(s), 1) == names(s, 1)
+# TODO : @test dimnames(diag(s), 1) == dimnames(s, 1)
+
+# TODO : @test diagm(v).array == diagm(v.array)
+# TODO : @test names(diagm(v)) == names(v)[[1,1]]
+
+@test cond(n) == cond(n.array)
+
+@test kron(n, n').array == kron(n.array, n.array')
+
+a = randn(10, 10)
+b = randn(10, 10)
+@test lyap(s, a) == lyap(s.array, a)
+@test sylvester(s, a, b).array == sylvester(s.array, a, b)
+
+@test isposdef(s) == isposdef(s.array)

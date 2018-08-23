@@ -38,12 +38,21 @@ end
 ## :' automagically works, how is this possible? it is ctranspose!
 
 import Base.permutedims
+
+function permutedims(v::NamedVector)
+    NamedArray(reshape(v.array, (1, length(v.array))),
+        (["1"], names(v, 1)),
+        ("_", v.dimnames[1]))
+end
+
 function permutedims(a::NamedArray, perm::Vector{Int})
     dicts = a.dicts[perm]
     dimnames = a.dimnames[perm]
     NamedArray(permutedims(a.array, perm), dicts, dimnames)
 end
+
 import Base.transpose
+transpose(a::NamedVector) = permutedims(a)
 transpose(a::NamedArray) = permutedims(a, [2,1])
 
 import Base.vec

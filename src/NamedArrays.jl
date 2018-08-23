@@ -23,7 +23,7 @@ include("namedarraytypes.jl")
 export names, dimnames, defaultnames, setnames!, setdimnames!, array
 
 include("constructors.jl")
-#include("arithmetic.jl")
+include("arithmetic.jl")
 include("linearalgebra.jl")
 include("base.jl")
 include("changingnames.jl")

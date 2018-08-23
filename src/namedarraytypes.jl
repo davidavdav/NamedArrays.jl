@@ -62,10 +62,8 @@ const NamedMatrix{T} = NamedArray{T,2}
 const NamedVecOrMat{T} = Union{NamedVector{T},NamedMatrix{T}}
 const ArrayOrNamed{T,N} = Union{Array{T,N}, NamedArray{T,N,Array}}
 
-# # WARNING: Base.RowVector is deprecated: it has been moved to the standard library package `LinearAlgebra`.
-# # Add `using LinearAlgebra` to your imports.
-# if isdefined(Base, :RowVector)
-#     NamedRowVector{T,RVT<:AbstractVector} = NamedArray{T,2,RowVector{T,RVT}}
-# end
+if @isdefined RowVector
+    NamedRowVector{T,RVT<:AbstractVector} = NamedArray{T,2,RowVector{T,RVT}}
+end
 
 end
