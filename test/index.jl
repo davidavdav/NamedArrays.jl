@@ -31,8 +31,7 @@ n1 = @inferred NamedArray(rand(10))
 @test [x for x in n] == [x for x in n.array]
 
 ## more indexing
-first = n.array[1,:]
-@test convert(Array, n["one", :]) == first
+@test convert(Array, n["one", :]) == n.array[1,:]
 @test n[Not("two"), :].array == n.array[1:1,:]
 @test names(n[Not("two"), :]) == names(n[1:1, :])
 @test n[:, ["b", "d"]] == view(n, :, ["b", "d"]) == n[:, [2, 4]]

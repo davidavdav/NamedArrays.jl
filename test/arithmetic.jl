@@ -77,8 +77,8 @@ for M in (NamedArray(rand(4)), NamedArray(rand(4,3)))
 end
 
 ## bug #34
-# TODO: @test unique(names(n * n'))[1] == names(n, 1)
-# TODO: @test unique(names(n' * n))[1] == names(n, 2)
+@test unique(names(n * n'))[1] == names(n, 1)
+@test unique(names(n' * n))[1] == names(n, 2)
 
 ## \
 v = NamedArray(randn(2))
