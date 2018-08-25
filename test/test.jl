@@ -51,8 +51,7 @@ for  f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     println("    ", f)
     for dim in 1:2
         @eval @test ($f)(n.array, dims=$dim) == ($f)(n, dims=$dim).array
-        # TODO: @eval @inferred ($f)(n, dims=$dim)
-        # for maximum Base._mapreduce_dim is inferred as AbstractArray
+        @eval @inferred ($f)(n, dims=$dim)
     end
 end
 
@@ -94,23 +93,22 @@ m = NamedArray(rand(4), ([4, 3, 2, 1],), ("reverse confusion",))
 
 print("sort, ")
 m = NamedArray(rand(100))
-# TODO: for rev in [false, true]
-# TODO:     ms = sort(m, rev=rev)
-# TODO:     @test ms.array == sort(m.array, rev=rev)
-# TODO:     @test names(ms, 1) == names(m, 1)[sortperm(m.array, rev=rev)]
-# TODO: end
-# TODO: m = NamedArray(rand(10,10))
-# TODO: for rev in [false, true]
-# TODO:     for dim in 1:2
-# TODO:         ms = sort(m, dim, rev=rev)
-# TODO:         @test ms.array == sort(m.array, dim, rev=rev)
-# TODO:         @test names(ms, dim) == [string(i) for i in 1:size(ms, dim)]
-# TODO:     end
-# TODO: end
+for rev in [false, true]
+    ms = sort(m, rev=rev)
+    @test ms.array == sort(m.array, rev=rev)
+    @test names(ms, 1) == names(m, 1)[sortperm(m.array, rev=rev)]
+end
+m = NamedArray(rand(10,10))
+for rev in [false, true]
+    for dim in 1:2
+        ms = sort(m, dims=dim, rev=rev)
+        @test ms.array == sort(m.array, dims=dim, rev=rev)
+        @test names(ms, dim) == [string(i) for i in 1:size(ms, dim)]
+    end
+end
 
 print("broadcast, ")
-# TODO: @test broadcast(-, n, mean(n, dims=1)).array == broadcast(-, n.array, mean(n.array, dims=1))
-# Array has no field array
+@test broadcast(-, n, mean(n, dims=1)).array == broadcast(-, n.array, mean(n.array, dims=1))
 
 print("vectorized, ")
 

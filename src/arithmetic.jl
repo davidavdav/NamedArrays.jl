@@ -154,40 +154,34 @@ end
 LinearAlgebra.tril!(n::NamedMatrix, k::Integer) = (tril!(n.array, k); n)
 LinearAlgebra.triu!(n::NamedMatrix, k::Integer) = (triu!(n.array, k); n)
 
-# TODO : ## LU factorization
-# TODO : function lu!(n::NamedArray{T, N, AT, DT}, pivot = Val(true); kargs...) where {T, N, AT, DT}
-# TODO :     luf = lu!(n.array, pivot; kargs...)
-# TODO :     LU{T,typeof(n),}(n, luf.ipiv, luf.info)
-# TODO : end
+## LU factorization
+function LinearAlgebra.lu!(n::NamedArray{T, N, AT, DT}, pivot = Val(true); kargs...) where {T, N, AT, DT}
+    luf = lu!(n.array, pivot; kargs...)
+    LU(n, luf.ipiv, luf.info)
+end
 
-# TODO : ## after lu.jl, this could be merged at Base.
-# TODO : function Base.getindex(A::LU{T,NamedArray{T,2,AT,DT}}, d::Symbol) where {T, AT, DT}
-# TODO :     m, n = size(A)
-# TODO :     if d == :L
-# TODO :         L = tril!(A.factors[1:m, 1:min(m,n)])
-# TODO :         for i = 1:min(m,n); L[i,i] = one(T); end
-# TODO :         setnames!(L, defaultnames(L,2), 2)
-# TODO :         setdimnames!(L, :LU, 2)
-# TODO :         return L
-# TODO :     end
-# TODO :     if d == :U
-# TODO :         U = triu!(A.factors[1:min(m,n), 1:n])
-# TODO :         setnames!(U, defaultnames(U,1), 1)
-# TODO :         setdimnames!(U, :LU, 1)
-# TODO :         return U
-# TODO :     end
-# TODO :     d == :p && return ipiv2perm(A.ipiv, m)
-# TODO :     if d == :P
-# TODO :         p = A[:p]
-# TODO :         P = zeros(T, m, m)
-# TODO :         for i in 1:m
-# TODO :             P[i,p[i]] = one(T)
-# TODO :         end
-# TODO :         return P
-# TODO :     end
-# TODO :     throw(KeyError(d))
-# TODO : end
-
+# From /stdlib/LinearAlgebra/src/lu.jl
+function Base.getproperty(A::LU{T,NamedArray{T, N, AT, DT}}, d::Symbol) where {T, N, AT, DT}
+    m, n = size(A)
+    if d == :L
+        L = tril!(getfield(A, :factors)[1:m, 1:min(m,n)])
+        for i = 1:min(m,n); L[i,i] = one(T); end
+        setnames!(L, defaultnames(L,2), 2)
+        setdimnames!(L, :LU, 2)
+        return L
+    elseif d == :U
+        U = triu!(getfield(A, :factors)[1:min(m,n), 1:n])
+        setnames!(U, defaultnames(U,1), 1)
+        setdimnames!(U, :LU, 1)
+        return U
+    elseif d == :p
+        return ipiv2perm(getfield(A, :ipiv), m)
+    elseif d == :P
+        return Matrix{T}(I, m, m)[:,invperm(A.p)]
+    else
+        getfield(F, d)
+    end
+end
 
 # TODO: function cholfact!(n::NamedArray{T}, uplo::Symbol=:U) where T<:LinearAlgebra.BlasFloat
 # TODO:     ishermitian(n) || LinearAlgebra.non_hermitian_error("cholfact!")

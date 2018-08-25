@@ -26,7 +26,6 @@ for _ = 1:2
 end
 println("Timing named index: ", t1, ", array index: ", t2, ", named key: ", t3)
 
-# TODO: It is too slow now
 s = sparse(rand(1:1000, 10), rand(1:1000, 10), true)
 n = @inferred NamedArray(s)
 for _ = 1:2

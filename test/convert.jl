@@ -6,10 +6,10 @@ n = NamedArray(randn(5, 10))
 @test convert(NamedArray, n) == n
 
 for T in [Float32, Float16]
- 	for m in (map(T, n), convert(NamedArray{T}, n))
- 		@test m.array == map(T, n.array)
- 		@test names(m) == names(n)
- 		@test dimnames(m) == dimnames(n)
+ 	for matrix in (map(T, n), convert(NamedArray{T}, n))
+ 		@test matrix.array == map(T, n.array)
+ 		@test names(matrix) == names(n)
+ 		@test dimnames(matrix) == dimnames(n)
  	end
 end
 

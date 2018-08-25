@@ -85,12 +85,8 @@ sort(v::NamedVector; kws...) = sort!(copy(v); kws...)
 ## Note: I can't think of a sensible way to define sort!(a::NamedArray, dim>1)
 
 ## drop name of sorted dimension, as each index along that dimension is sorted individually
-function sort(n::NamedArray, dim::Integer; kws...)
-    if ndims(n)==1 && dim==1
-        return sort(n; kws...)
-    else
-        nms = names(n)
-        nms[dim] = [string(i) for i in 1:size(n, dim)]
-        return NamedArray(sort(n.array, dim; kws...), tuple(nms...), n.dimnames)
-    end
+function sort(n::NamedArray; dims::Integer, kws...)
+    nms = names(n)
+    nms[dims] = [string(i) for i in 1:size(n, dims)]
+    NamedArray(sort(n.array; dims=dims, kws...), tuple(nms...), n.dimnames)
 end

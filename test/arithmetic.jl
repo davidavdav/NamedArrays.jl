@@ -133,17 +133,17 @@ c = copy(m)
 triu!(c)
 @test triu(m).array == triu(m.array) == c.array
 
-# TODO : ## lufact!
-# TODO : lufn = lu(n)
-# TODO : lufa = lu(n.array)
-# TODO : @test lufn[:U].array == lufa[:U]
-# TODO : @test lufn[:L].array == lufa[:L]
-# TODO : @test names(lufn[:U], 2) == names(n, 2)
-# TODO : @test dimnames(lufn[:U], 2) == dimnames(n, 2)
-# TODO : @test names(lufn[:L], 1) == names(n, 1)
-# TODO : @test dimnames(lufn[:L], 1) == dimnames(n, 1)
-# TODO : @test lufn[:p] == lufa[:p]
-# TODO : @test lufn[:P] == lufa[:P]
+## lufact!
+lufn = lu(n)
+lufa = lu(n.array)
+@test lufn.U == lufa.U
+@test lufn.L == lufa.L
+@test names(lufn.U, 2) == names(n, 2) # lu doesn't return NamedArrays now
+@test dimnames(lufn.U, 2) == dimnames(n, 2)
+@test names(lufn.L, 1) == names(n, 1)
+@test dimnames(lufn.L, 1) == dimnames(n, 1)
+@test lufn.p == lufa.p
+@test lufn.P == lufa.P
 
 a = randn(1000,10); s = NamedArray(a'a)
 

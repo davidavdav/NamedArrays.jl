@@ -62,7 +62,7 @@ setdimnames!(n::NamedArray, dn::Vector) = setdimnames!(n, tuple(dn...))
 
 function setdimnames!(n::NamedArray{T,N}, v, d::Integer) where {T,N}
     1 <= d <= N || throw(BoundsError(size(n), d))
-    vdimnames = Array{Any}(N)
+    vdimnames = Array{Any}(undef, N)
     for i=1:N
         if i==d
             vdimnames[i] = v
