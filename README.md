@@ -46,9 +46,9 @@ A ╲ B │    1     2     3     4
 one   │  4.0   5.0   6.0   7.0
 two   │ 11.0  12.0  13.0  14.0
 
-@show sum(n, 1);
+@show sum(n, dims=1);
 
-sum(n, 1) = 1×4 Named Array{Float64,2}
+sum(n, dims=1) = 1×4 Named Array{Float64,2}
  A ╲ B │    1     2     3     4
 ───────┼───────────────────────
 sum(A) │ 15.0  17.0  19.0  21.0
@@ -219,10 +219,13 @@ names(n::NamedArray, dim::Integer) ## just for dimension `dim`
 dimnames(n::NamedArray) ## the names of the dimensions
 
 @show names(n);
-names(n) = [String["one", "two"], Symbol[:a, :b, :c]]
+names(n) = Array{T,1} where T[["one", "two"], Symbol[:a, :b, :c]]
 
 @show names(n, 1)
-names(n, 1) = String["one", "two"]
+names(n, 1) = ["one", "two"]
+2-element Array{String,1}:
+ "one"
+ "two"
 
 @show dimnames(n);
 dimnames(n) = Symbol[:A, :B]
