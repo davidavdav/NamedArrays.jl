@@ -39,7 +39,6 @@ function fan(f::Function, fname::AbstractString, a::NamedArray{T,N}, dim::Int) w
 end
 
 ## rename a dimension
-# cumsum_kbn has been moved to the package KahanSummation.jl
 for f in (:cumprod, :cumsum)
     @eval Base.$f(a::NamedArray, d::Integer) = fan($f, string($f), a, d)
 end

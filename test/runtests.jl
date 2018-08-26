@@ -16,4 +16,6 @@ using DelimitedFiles
 using Statistics
 using Random
 
+using KahanSummation
+
 include("test.jl")

@@ -55,12 +55,18 @@ for  f = (:sum, :prod, :maximum, :minimum, :mean, :std, :var)
     end
 end
 
-for f in (:cumprod, :cumsum) # , :cumsum_kbn)
+for f in (:cumprod, :cumsum)
     for dim in 1:2
         @eval @test ($f)(n.array, dims=$dim) == ($f)(n, dims=$dim).array
         @eval @inferred ($f)(n, dims=$dim)
     end
 end
+
+# NOTE: KahanSummation do not support Julia 0.7 dims keyword argument at the moment
+@test cumsum_kbn(n.array, 1) == cumsum_kbn(n, 1).array
+@test cumsum_kbn(n.array, 2) == cumsum_kbn(n, 2).array
+@inferred cumsum_kbn(n, 1)
+@inferred cumsum_kbn(n, 2)
 
 print("multi-dimensional, ")
 #multidimensional

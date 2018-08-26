@@ -8,6 +8,7 @@
 
 module NamedArrays
 
+using Requires
 using Random
 using Statistics
 using SparseArrays
@@ -33,5 +34,18 @@ include("names.jl")
 include("rearrange.jl")
 include("show.jl")
 include("convert.jl")
+
+
+function __init__()
+    @require KahanSummation="8e2b3108-d4c1-50be-a7a2-16352aec75c3" begin
+
+        # NOTE: KahanSummation do not support Julia 0.7 dims keyword argument at the moment
+
+        ## rename a dimension
+        function KahanSummation.cumsum_kbn(a::NamedArray, dims::Integer)
+            NamedArrays.fan(KahanSummation.cumsum_kbn, "cumsum_kbn", a, dims)
+        end
+    end
+end
 
 end
