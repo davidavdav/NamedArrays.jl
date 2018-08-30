@@ -16,7 +16,6 @@ for op in dotops
 	@eval begin
 		for y in (true, Int8(3), Int16(3), Int32(3), Int64(3), Float32(π), Float64(π), BigFloat(π))
 			z = ($op)(x, y)
-			println($op, z)
 			@test z.array == ($op)(x.array, y)
 			@test names(z) == names(x)
 			z = ($op)(y, x)
