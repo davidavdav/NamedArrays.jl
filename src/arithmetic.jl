@@ -53,7 +53,7 @@ end
 /(x::NamedArray{T1}, y::T2) where {T1<:Number,T2<:Number} = NamedArray(x.array / y, x.dicts, x.dimnames)
 \(x::T1, y::NamedArray{T2}) where {T1<:Number,T2<:Number} = NamedArray(x \ y.array, y.dicts, y.dimnames)
 
-import LinearAlgebra: A_mul_B!, A_mul_Bc!, A_mul_Bc, A_mul_Bt!, A_mul_Bt, Ac_mul_B, Ac_mul_B!, Ac_mul_Bc, Ac_mul_Bc!, At_mul_B, At_mul_B!, At_mul_Bt, At_mul_Bt!
+# import LinearAlgebra: A_mul_B!, A_mul_Bc!, A_mul_Bc, A_mul_Bt!, A_mul_Bt, Ac_mul_B, Ac_mul_B!, Ac_mul_Bc, Ac_mul_Bc!, At_mul_B, At_mul_B!, At_mul_Bt, At_mul_Bt!
 
 ## Assume dimensions/names are correct
 for op in (:A_mul_B!, :A_mul_Bc!, :A_mul_Bt!, :Ac_mul_B!, :Ac_mul_Bc!, :At_mul_B!, :At_mul_Bt!)
@@ -82,8 +82,8 @@ for op in (:Ac_mul_Bc, :At_mul_Bt)
     end
 end
 
-import LinearAlgebra: Givens, LinearAlgebra.BlasFloat, lu!, lu, LU, ipiv2perm, cholfact!, cholfact, qr!, qr, eigen!, eigen, eigvals!,
-    eigvals, hessenberg, hessenberg!, schur!, schur, svd!, svd, svdvals!, svdvals, svd, diag, scale!,
+import LinearAlgebra: Givens, LinearAlgebra.BlasFloat, lu!, lu, LU, ipiv2perm, qr!, qr, eigen!, eigen, eigvals!,
+    eigvals, hessenberg, hessenberg!, schur!, schur, svd!, svd, svdvals!, svdvals, svd, diag,
     cond, kron, lyap, sylvester, isposdef
 
 ## matmul
