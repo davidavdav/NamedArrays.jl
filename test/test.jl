@@ -10,6 +10,8 @@
 
 print("Starting test, no assertions should fail... ")
 
+include("bugs.jl")
+
 include("base.jl")
 
 include("constructors.jl")
@@ -128,10 +130,6 @@ for f in  (:sin, :cos, :tan,  :sinpi, :cospi, :sinh, :cosh, :tanh, :asin, :acos,
         @test namesanddim(m) == namesanddim(n)
     end
 end
-#39
-v = n[1, :]
-@test sin.(v).array == sin.(v.array)
-@test namesanddim(sin.(v)) == namesanddim(v)
 
 include("rearrange.jl")
 

@@ -69,7 +69,7 @@ indices(dict::AbstractDict{K,V}, i::Integer) where {K, V<:Integer} = i ## intege
 ## indices(dict::Associative{K,V}, i::K) where {K<:Real, V<:Integer} = dict[i]
 ## indices(dict::Associative{K,V}, i::Real) where {K, V<:Integer} = Base.to_index(i)
 indices(dict::AbstractDict{K,V}, i::K) where {K, V<:Integer} = dict[i]
-indices(dict::AbstractDict{K,V}, i::Name{K}) where {K, V<:Integer} = dict[i.name]
+indices(dict::AbstractDict{K,V}, i::Name{IK}) where IK <: K where {K, V<:Integer} = dict[i.name]
 
 
 ## ambiguity if dict key is CartesionIndex, this should never happen
