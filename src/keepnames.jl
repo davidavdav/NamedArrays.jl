@@ -1,6 +1,6 @@
-## index.jl  methods for NamedArray that keep the names (some checking may be done)
+## keepnames.jl  methods for NamedArray that keep the names (some checking may be done)
 
-## (c) 2013, 2014, 2017 David A. van Leeuwen
+## (c) 2013, 2014, 2017, 2018 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
@@ -52,10 +52,8 @@ end
 Base.BroadcastStyle(::Type{A}) where {A <: NamedArray} = Broadcast.ArrayStyle{A}()
 function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{A}},
                       ::Type{T}) where {A <: NamedArray, T}
-    println("....................")
     namedarray = find_namedarray(bc)
-    println(namedarray)
-    similar(namedarray, T)
+    return similar(namedarray, T)
 end
 "`find_namedarray(As)` returns the first NamedArray among the arguments."
 find_namedarray(bc::Base.Broadcast.Broadcasted) = find_namedarray(bc.args)
