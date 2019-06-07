@@ -91,7 +91,7 @@ indices(dict::AbstractDict{K,V}, ::Colon) where {K,V<:Integer} = collect(1:lengt
 
 ## negation
 indices(dict::AbstractDict{K,V}, i::K) where {K<:Not,V<:Integer} = dict[i]
-indices(dict::AbstractDict, i::Not) = setdiff(1:length(dict), indices(dict, i.index))
+indices(dict::AbstractDict, i::Not) = setdiff(1:length(dict), indices(dict, i.skip))
 
 ## namedgetindex collects the elements from the array, and takes care of the index names
 ## `index` is an integer now, or an array of integers, or a cartesianindex

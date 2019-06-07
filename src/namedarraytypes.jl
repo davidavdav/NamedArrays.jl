@@ -52,11 +52,6 @@ mutable struct NamedArray{T,N,AT,DT} <: AbstractArray{T,N}
     end
 end
 
-## a type that negates any index
-struct Not{T}
-    index::T
-end
-
 const NamedVector{T} = NamedArray{T,1}
 const NamedMatrix{T} = NamedArray{T,2}
 const NamedVecOrMat{T} = Union{NamedVector{T},NamedMatrix{T}}
