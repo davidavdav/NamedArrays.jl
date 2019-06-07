@@ -3,9 +3,3 @@ language: julia
 julia:
  - 1.0
  - 1.1
-#before_install:
-# - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-#script:
-# - julia --check-bounds=yes --inline=yes --code-coverage=user -e 'using InteractiveUtils; using Pkg; versioninfo();  Pkg.add(Pkg.PackageSpec(path=pwd())); Pkg.build("NamedArrays"); Pkg.test("NamedArrays", coverage=true)'
-#after_success:
-# - julia -e 'using Pkg; using NamedArrays; cd(dirname(pathof(NamedArrays))); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
