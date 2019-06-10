@@ -3,6 +3,9 @@ uuid = "86f7a689-2022-50b4-a561-43c23ac3c673"
 authors = ["David A. van Leeuwen <david.vanleeuwen@gmail.com>"]
 version = "0.9.3"
 
+[compat]
+julia = "1"
+
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
