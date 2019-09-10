@@ -90,3 +90,35 @@ function reverse!(v::NamedVector, start=1, stop=length(v))
     reverse!(v.array, start, stop)
     v
 end
+
+import Base: _sortslices, _negdims, DimSelector
+
+function my_compute_itspace(A, ::Val{dims}) where {dims}
+    negdims = _negdims(ndims(A), dims)
+    axs = Iterators.product(ntuple(DimSelector{dims}(A), ndims(A))...)
+    vec(permutedims(collect(axs), (dims..., negdims...))), negdims
+end
+
+function _sortslices(A::NamedArray, d::Val{dims}; kws...) where dims
+    itspace, negdims = my_compute_itspace(A, d)
+    vecs = map(its->view(A, its...), itspace)
+    p = sortperm(vecs; kws...)
+    if ndims(A) == 2 && isa(dims, Integer) && isa(A.array, Array)
+        # At the moment, the performance of the generic version is subpar
+        # (about 5x slower). Hardcode a fast-path until we're able to
+        # optimize this.
+        return dims == 1 ? A[p, :] : A[:, p]
+    else
+        B = similar(A)
+        for (x, its) in zip(p, itspace)
+            B[its...] = vecs[x]
+        end
+        if ndims(A) == 2
+            nd = negdims[1]
+            setnames!(B, names(B, nd)[p], nd)
+        else
+            @warn("Can't keep dimnames in sortslices() for ndims ≠ 2")
+        end
+        B
+    end
+end

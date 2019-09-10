@@ -76,3 +76,8 @@ for _ in 1:10
 	@test r.array == reverse(v.array, start, stop)
 	@test names(r, 1) == reverse(names(v, 1), start, stop)
 end
+
+## Issue #79
+nn = NamedArray([ 2 1 4; 1 2 3; 2 1 3 ])
+@test names(sortslices(nn, dims=1), 1) == ["2", "3", "1"]
+@test names(sortslices(nn, dims=2), 2) == ["2", "1", "3"]
