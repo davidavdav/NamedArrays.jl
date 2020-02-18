@@ -26,6 +26,15 @@ setdimnames!(n, ["magnificent", 7]) ## can't infer mixed types
 
 println(n)
 
+for (dim, numerals) in enumerate(defaultnames(n.array))
+	for (index, name) in enumerate(numerals)
+		setnames!(n, name, dim, index)
+		@test names(n, dim)[index] == name
+	end
+end
+
+println(n)
+
 @test_throws TypeError setnames!(n, [:a, :v], 1)
 @test_throws TypeError setnames!(n, :a, 1, 1)
 @test_throws DimensionMismatch setnames!(n, ["a"], 1)
