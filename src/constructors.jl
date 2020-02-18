@@ -10,7 +10,7 @@ letter(i) = string(Char((64+i) % 256))
 
 ## helpers for constructing names dictionaries
 defaultnames(dim::Integer) = map(string, 1:dim)
-function defaultnamesdict(names::Vector)
+function defaultnamesdict(names::AbstractVector)
     dict = OrderedDict(zip(names, 1:length(names)))
     length(dict) == length(names) || error("Cannot have duplicated names for indices")
     return dict
@@ -43,7 +43,7 @@ end
 
 ## constructor with array, names and dimnames (dict is created from names)
 function NamedArray(array::AbstractArray{T,N},
-                    names::NTuple{N,Vector},
+                    names::NTuple{N,AbstractVector},
                     dimnames::NTuple{N, Any}=defaultdimnames(array)) where {T,N}
     dicts = defaultnamesdict(names)
     NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)

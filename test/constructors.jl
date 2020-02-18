@@ -39,6 +39,12 @@ n4 = @inferred NamedArray(a, (OrderedDict("a"=>1,"b"=>2), OrderedDict("C"=>1,"D"
 @test names(n3, 1) == names(n4, 1) == ["a","b"]
 @test names(n3, 2) == names(n4, 2) == ["C","D","E"]
 
+n1 = @inferred NamedArray([1], (BitArray([true]),))
+n2 = @inferred NamedArray([1], [BitArray([true])])
+n3 = @inferred NamedArray([1], [[true]])
+@test n1 == n2 == n3
+@test names(n1) == names(n2) == names(n3)
+
 ## 0-dim case #21
 n0 = @inferred NamedArray(Array{Int}(undef))
 @test size(n0) == ()
