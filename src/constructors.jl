@@ -51,7 +51,7 @@ end
 
 ## vectors instead of tuples, with defaults (incl. no names or dimnames at all)
 function NamedArray(array::AbstractArray{T,N},
-                    names::Vector{VT}=[defaultnames(d) for d in size(array)],
+                    names::AbstractArray{VT}=[defaultnames(d) for d in size(array)],
                     dimnames::Vector=[defaultdimname(i) for i in 1:ndims(array)]) where
                     {T,N,VT}
     length(names) == length(dimnames) == N || error("Dimension mismatch")
