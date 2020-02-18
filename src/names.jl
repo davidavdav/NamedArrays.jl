@@ -50,7 +50,9 @@ function setnames!(n::NamedArray, v, d::Integer, i::Integer)
     1 <= d <= ndims(n) || throw(BoundsError("dimension"))
     1 <= i <= size(n, d) || throw(BoundsError("index"))
     isa(v, keytype(n.dicts[d])) || throw(TypeError(:setnames!, "second argument", keytype(n.dicts[d]), typeof(v)))
-    n.dicts[d].keys[i] = v ## hacking OrderedDict
+    newnames = names(n, d)
+    newnames[i] = v
+    setnames!(n, newnames, d)
 end
 
 function setdimnames!(n::NamedArray{T,N}, dn::NTuple{N,Any}) where {T,N}

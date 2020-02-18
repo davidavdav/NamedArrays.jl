@@ -33,6 +33,11 @@ for (dim, numerals) in enumerate(defaultnames(n.array))
 	end
 end
 
+## I am sure this can be done more nicely with CartesianIndices
+for i in 1:2, j in 1:4
+	@test n[string(i), string(j)] == n[i, j]
+end
+
 println(n)
 
 @test_throws TypeError setnames!(n, [:a, :v], 1)
