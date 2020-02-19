@@ -1,4 +1,4 @@
-## (c) 2016 David A. van Leeuwen
+## (c) 2016--2020 David A. van Leeuwen
 
 ## Unit tests for ../src/constructors.jl
 
@@ -57,3 +57,6 @@ end
 
 ## repeated indices #63
 @test_throws ErrorException @inferred n[["one", "one"], :]
+
+## Simplify vector constructor, #86
+n8 = @inferred NamedArray([1, 2, 3], ["a", "b", "c"])

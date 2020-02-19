@@ -1,5 +1,5 @@
 ## names.jl retrieve and set dimension names
-## (c) 2013 David A. van Leeuwen
+## (c) 2013--2020 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution

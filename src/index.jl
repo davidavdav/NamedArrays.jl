@@ -1,5 +1,5 @@
 # index.jl getindex and setindex methods for NamedArray
-## (c) 2013--2018 David A. van Leeuwen
+## (c) 2013--2020 David A. van Leeuwen
 
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
@@ -50,7 +50,7 @@ end
 
 ## from subarray.jl
 @inline Base.@propagate_inbounds getindex(n::NamedVector, ::Colon) = n
-getindex(n::NamedArray, ::Colon) = NamedArray(n.array[:], [flattenednames(n)] , [tuple(dimnames(n)...)])
+getindex(n::NamedArray, ::Colon) = NamedArray(n.array[:], (flattenednames(n),) , (tuple(dimnames(n)...),))
 
 ## special 0-dimensional case
 ## getindex{T}(n::NamedArray{T,0}, i::Real) = getindex(n.array, i)

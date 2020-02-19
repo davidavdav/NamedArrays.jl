@@ -1,5 +1,5 @@
 ## constructors.jl
-## (c) 2014--2017 David A. van Leeuwen
+## (c) 2014--2020 David A. van Leeuwen
 
 ## Constructors related to the types in namedarraytypes.jl
 
@@ -65,6 +65,11 @@ function NamedArray(array::AbstractArray{T,N},
     NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, tuple(dimnames...))
 end
 
+## special case for 1-dim array to circumvent Julia tuple-comma-oddity, #86
+NamedArray(array::AbstractVector{T}, 
+           names::AbstractVector{VT}=defaultnames(length(array)), 
+           dimname=defaultdimname(1)) where {T,VT} = 
+    NamedArray(array, (names,), (dimname,))
 
 ## Type and dimensions
 """

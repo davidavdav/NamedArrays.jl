@@ -1,3 +1,6 @@
+## Test names.jl retrieve and set dimension names
+## (c) 2013--2020 David A. van Leeuwen
+
 include("init-namedarrays.jl")
 
 @test names(n) == Array[["one", "two"], ["a", "b", "c", "d"]]
@@ -26,6 +29,7 @@ setdimnames!(n, ["magnificent", 7]) ## can't infer mixed types
 
 println(n)
 
+## replacing a single index name, and then accessing it was never tested, #83
 for (dim, numerals) in enumerate(defaultnames(n.array))
 	for (index, name) in enumerate(numerals)
 		setnames!(n, name, dim, index)
