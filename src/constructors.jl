@@ -29,31 +29,30 @@ function NamedArray(a::AbstractArray{T,N},
     NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
 end
 
-function NamedArray(a::AbstractArray{T,N}, names::Tuple{}) where {T,N}
-    NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
-end
+NamedArray(a::AbstractArray{T,N}, names::Tuple{}) where {T,N} = NamedArray{T,N,typeof(a),Tuple{}}(a, (), ())
+NamedArray(a::AbstractArray{T,0}, ::Tuple{}, ::Tuple{}) where T = NamedArray{T,0,typeof(a),Tuple{}}(a, (), ())
 
-## Basic constructor: array, tuple of dicts
-## dimnames created as default, then inner constructor called
+## Basic constructor: array, tuple of dicts, tuple of dimnames
 function NamedArray(array::AbstractArray{T,N},
-                    names::NTuple{N,OrderedDict}) where {T,N}
+                    names::NTuple{N,OrderedDict},
+                    dimnames::NTuple{N}=defaultdimnames(array)) where {T,N}
     ## inner constructor
-    NamedArray{T, N, typeof(array), typeof(names)}(array, names, defaultdimnames(array))
+    NamedArray{T, N, typeof(array), typeof(names)}(array, names, dimnames)
 end
 
 ## constructor with array, names and dimnames (dict is created from names)
 function NamedArray(array::AbstractArray{T,N},
-                    names::NTuple{N,AbstractVector},
+                    names::NTuple{N,AbstractVector}=tuple((defaultnames(d) for d in size(array))...),
                     dimnames::NTuple{N, Any}=defaultdimnames(array)) where {T,N}
     dicts = defaultnamesdict(names)
     NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)
 end
 
+## Deprecated: use tuples, as above
 ## vectors instead of tuples, with defaults (incl. no names or dimnames at all)
 function NamedArray(array::AbstractArray{T,N},
-                    names::AbstractArray{VT}=[defaultnames(d) for d in size(array)],
-                    dimnames::Vector=[defaultdimname(i) for i in 1:ndims(array)]) where
-                    {T,N,VT}
+                    names::AbstractVector{VT},
+                    dimnames::AbstractVector=[defaultdimname(i) for i in 1:ndims(array)]) where {T,N,VT}
     length(names) == length(dimnames) == N || error("Dimension mismatch")
     if VT == Union{} ## edge case, array == Array{}()
         dicts = ()
@@ -64,6 +63,9 @@ function NamedArray(array::AbstractArray{T,N},
     end
     NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, tuple(dimnames...))
 end
+
+## I can't get this working
+## @Base.deprecate NamedArray(array::AbstractArray{T,N}, names::AbstractVector{<:AbstractVector}, dimnames::AbstractVector) where {T,N} NamedArray(array::AbstractArray{T,N}, names::NTuple{N}, dimnames::NTuple{N}) where {T,N}
 
 ## special case for 1-dim array to circumvent Julia tuple-comma-oddity, #86
 NamedArray(array::AbstractVector{T}, 
