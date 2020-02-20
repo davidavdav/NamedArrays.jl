@@ -73,6 +73,11 @@ NamedArray(array::AbstractVector{T},
            dimname=defaultdimname(1)) where {T,VT} = 
     NamedArray(array, (names,), (dimname,))
 
+function NamedArray(array::AbstractArray{T,N}, names::NamedTuple) where {T, N}
+    length(names) == N || error("Dimension mismatch")
+    return NamedArray(array, values(names), keys(names))
+end
+
 ## Type and dimensions
 """
 `NamedArray(T::Type, dims::Int...)` creates an uninitialized array with default names

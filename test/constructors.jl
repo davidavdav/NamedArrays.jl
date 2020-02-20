@@ -39,6 +39,12 @@ n4 = @inferred NamedArray(a, (OrderedDict("a"=>1,"b"=>2), OrderedDict("C"=>1,"D"
 @test names(n3, 1) == names(n4, 1) == ["a","b"]
 @test names(n3, 2) == names(n4, 2) == ["C","D","E"]
 
+## named tuples
+n4 = @inferred NamedArray(a, (一=["α", "β"], 二=["أ", "ب", "ج"]))
+@test dimnames(n4) == [:一, :二]
+@test names(n4, 1) == ["α", "β"]
+@test names(n4, 2) == ["أ", "ب", "ج"]
+
 n1 = @inferred NamedArray([1], (BitArray([true]),))
 n2 = @inferred NamedArray([1], BitArray([true]))
 n3 = @inferred NamedArray([1], [true])
