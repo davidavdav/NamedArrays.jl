@@ -62,8 +62,3 @@ DelimitedFiles.writedlm(io, n::NamedVecOrMat) = writedlm(io, hcat(names(n, 1), n
 ## Turn a NamedVector into a dict, #61
 Base.Dict(n::NamedVector) = Dict(name => n[name] for name in names(n, 1))
 
-
-# Iterator for NamedArray
-Base.iterate(n::NamedArray, state=1) = state > length(n) ? nothing : begin 
-	( (flattenednames(n)[state],n[flattenednames(n)[state]...]), state +1)
-end
