@@ -243,6 +243,29 @@ Because the type of the keys are encoded in the type of the `NamedArray`, you ca
 
 sets all the names of dimension `dim`, or only the name at index `index`, or the name of the dimension `dim`.
 
+### Enameration
+
+Similar to the iterator `enumerate` this package provides an `enamerate` function for iterating simultaneously over both names and values.
+
+```julia
+enamerate(a::NamedArray)
+```
+
+Example below:
+```
+n = NamedArray([1 2 3; 4 5 6], (["one", "two"], [:a, :b, :c]))
+for (name,val) in enamerate(n)
+           println("$name ==  $val")
+       end
+("one", :a) ==  1
+("two", :a) ==  4
+("one", :b) ==  2
+("two", :b) ==  5
+("one", :c) ==  3
+("two", :c) ==  6
+```
+
+
 ### Copy
 
 ```julia
