@@ -1,21 +1,7 @@
 using .Base: 
 	@propagate_inbounds, tail
 import .Base:
-	size, length, iterate
-# Overriding the base iterator gives errors when tested, probably best leave it alone.
-#= Base.iterate(n::NamedArray, state=1) = state > length(n) ? nothing : begin  =#
-#= 	( (flattenednames(n)[state],n[flattenednames(n)[state]...]), state +1) =#
-#= end =#
-
-#= function enamerate(n::NamedArray, state=1)  =#
-#= 	if state > length(n) =#
-#= 		return nothing =#
-#= 	else =#
-#= 		return ( (flattenednames(n)[state],n[flattenednames(n)[state]...]), state +1) =#
-#= 	end =#
-#= end =#
-
-# Named Iterator for NamedArray implemented similarly to enumerate from Iterators.jl
+	size, length, iterate, IteratorSize
 
 struct Enamerate
     na::NamedArray
@@ -25,25 +11,9 @@ end
 """
     enamerate(iter)
 
-An iterator that yields `(i, x)` where `i` is a counter starting at 1,
-and `x` is the `i`th value from the given iterator. It's useful when
-you need not only the values `x` over which you are iterating, but
-also the number of iterations so far. Note that `i` may not be valid
-for indexing `iter`; it's also possible that `x != iter[i]`, if `iter`
-has indices that do not start at 1. See the `pairs(IndexLinear(),
-iter)` method if you want to ensure that `i` is an index.
-
-# Examples
-```jldoctest
-julia> a = ["a", "b", "c"];
-
-julia> for (index, value) in enumerate(a)
-           println("\$index \$value")
-       end
-1 a
-2 b
-3 c
-```
+An iterator that yields `(n, x)` where `n` is a tuple corresponding to
+the names in the corresponding dimension of value x. Similar to enumerate
+but with names.
 """
 enamerate(n::NamedArray) = Enamerate(n)
 
@@ -57,8 +27,10 @@ size(e::Enamerate) = size(e.na)
 		return (flattenednames(e.na)[i], n[1]), (i+1, n[2])
 end
 
-#= eltype(::Type{Enumerate{I}}) where {I} = Tuple{Int, eltype(I)} =#
-#= IteratorSize(::Type{Enumerate{I}}) where {I} = IteratorSize(I) =#
+# Possibly TODO:
+# adapt this from enumerate
+# eltype(::Type{Enumerate{I}}) where {I} = Tuple{Int, eltype(I)}
+# IteratorSize(::Type{Enumerate{I}}) where {I} = IteratorSize(I)
 #= IteratorEltype(::Type{Enumerate{I}}) where {I} = IteratorEltype(I) =#
 
 #= @inline function iterate(r::Reverse{<:Enumerate}) =#
