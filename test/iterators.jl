@@ -1,3 +1,7 @@
+include("init-namedarrays.jl")
+
+print("enameration, ")
+
 @testset "Enameration" begin
 	names = [("one", "a"), ("two", "a"), ("one", "b"), ("two", "b"), ("one", "c"), ("two", "c"), ("one", "d"), ("two", "d")]
 	i = 1 

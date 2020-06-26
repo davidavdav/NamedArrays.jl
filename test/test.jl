@@ -16,6 +16,8 @@ include("base.jl")
 
 include("constructors.jl")
 
+include("iterators.jl")
+
 include("arithmetic.jl")
 
 include("convert.jl")
@@ -148,5 +150,6 @@ include("speed.jl")
 # julia issue #17328
 a = NamedArray([1.0, 2.0, 3.0, 4.0])
 @test sum(abs, a, dims=1)[1] == 10
+
 
 println("done!")
