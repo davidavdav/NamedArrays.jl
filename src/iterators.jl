@@ -1,4 +1,5 @@
-using .Base: @propagate_inbounds
+using .Base: 
+	@propagate_inbounds, tail
 import .Base:
 	size, length, iterate
 # Overriding the base iterator gives errors when tested, probably best leave it alone.
@@ -6,13 +7,13 @@ import .Base:
 #= 	( (flattenednames(n)[state],n[flattenednames(n)[state]...]), state +1) =#
 #= end =#
 
-function enamerate(n::NamedArray, state=1) 
-	if state > length(n)
-		return nothing
-	else
-		return ( (flattenednames(n)[state],n[flattenednames(n)[state]...]), state +1)
-	end
-end
+#= function enamerate(n::NamedArray, state=1)  =#
+#= 	if state > length(n) =#
+#= 		return nothing =#
+#= 	else =#
+#= 		return ( (flattenednames(n)[state],n[flattenednames(n)[state]...]), state +1) =#
+#= 	end =#
+#= end =#
 
 # Named Iterator for NamedArray implemented similarly to enumerate from Iterators.jl
 
@@ -44,7 +45,7 @@ julia> for (index, value) in enumerate(a)
 3 c
 ```
 """
-enamerate(n) = Enamerate(n)
+enamerate(n::NamedArray) = Enamerate(n)
 
 length(e::Enamerate) = length(e.na)
 size(e::Enamerate) = size(e.na)
@@ -53,7 +54,7 @@ size(e::Enamerate) = size(e.na)
     n = iterate(e.na, rest...)
     n === nothing && return n
     #= (i, n[1]), (i+1, n[2]) =#
-		return (flattenednames(e.na)[i], n[1]), (flattenednames(e.na)[i+1], n[2])
+		return (flattenednames(e.na)[i], n[1]), (i+1, n[2])
 end
 
 #= eltype(::Type{Enumerate{I}}) where {I} = Tuple{Int, eltype(I)} =#
