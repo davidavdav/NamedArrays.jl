@@ -36,4 +36,12 @@ using DataFrames
 	@test all(map(x-> x in propertynames(cn), dimnames(n)))
 	@test ccn isa NamedArray
 	@test ccn == n
+
+	cm = convert(DataFrame,m)
+	ccm = convert(NamedArray,cm)
+	@test cm isa DataFrame
+	@test all(map(x-> x in m, cm[!,:Values]))
+	@test all(map(x-> x in propertynames(cm), dimnames(m)))
+	@test ccm isa NamedArray
+	@test ccm == m
 end
