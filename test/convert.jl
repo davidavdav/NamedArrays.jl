@@ -20,17 +20,20 @@ x = @inferred NamedArray(Array([1 2; 3 4]), (["a","b"], [10,11]), (:rows,:cols))
 
 # Test convert don't change array type
 
+using SparseArrays
 n_sparray = NamedArray(SparseArrays.sprand(Int, 5, 5, 0.5))
 @test isa(n_sparray.array, SparseMatrixCSC{Int,Int})
 @test isa(convert(NamedArray{Float64}, n_sparray).array, SparseMatrixCSC{Float64,Int})
 
 using DataFrames
 
-@testset "DataFrame <-> NamedArray" begin
+@testset "convert DataFrame <-> NamedArray" begin
 	# Test conversions to and from DataFrame.
 	cn = convert(DataFrame,n)
 	ccn = convert(NamedArray,cn)
 	@test cn isa DataFrame
+	@test all(map(x-> x in n, cn[!,:Values]))
+	@test all(map(x-> x in propertynames(cn), dimnames(n)))
 	@test ccn isa NamedArray
 	@test ccn == n
 end
