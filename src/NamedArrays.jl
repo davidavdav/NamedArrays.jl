@@ -22,7 +22,7 @@ export NamedArray, NamedVector, NamedMatrix, Name, Not
 ## type definition
 include("namedarraytypes.jl")
 
-export names, dimnames, defaultnames, setnames!, setdimnames!, array, enamerate
+export names, dimnames, defaultnames, setnames!, setdimnames!, array, enamerate, selectdim
 
 include("constructors.jl")
 include("arithmetic.jl")

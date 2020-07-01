@@ -62,3 +62,16 @@ DelimitedFiles.writedlm(io, n::NamedVecOrMat) = writedlm(io, hcat(names(n, 1), n
 ## Turn a NamedVector into a dict, #61
 Base.Dict(n::NamedVector) = Dict(name => n[name] for name in names(n, 1))
 
+import Base.selectdim
+
+"""
+Returns a view with all the elements in dimension dimname with values of dimval selected.
+"""
+function selectdim(n::NamedArray, dimname, dimval)
+	# calculate the dimension index
+	dimidx = findfirst(x->x==dimname,dimnames(n))
+	viewVarargs = fill(:,length(names(n)))
+	viewVarargs = convert(Array{Any},viewVarargs)
+	viewVarargs[dimidx] = dimval 
+	return view(n,viewVarargs...)
+end
