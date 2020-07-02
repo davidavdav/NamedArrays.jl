@@ -22,5 +22,5 @@ include("init-namedarrays.jl")
 
 	NamedArrays.write("testm4d.csv",m4d)
 	rereadm4d = DataFrame(CSV.File("testm4d.csv"))
-	@test rereadm4d == expM 
+	@test rereadm4d == expm4d 
 end
