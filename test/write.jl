@@ -1,11 +1,11 @@
 using Test
-using NamedArrays
 using CSV
+using NamedArrays
+using DataFrames
 
 f = NamedArray([0 1 ; 2 3])
-expected = CSV.read("writetest.csv")
-println(expected)
+expected = DataFrame(CSV.File("writetest.csv"))
 
 NamedArrays.write("test.csv",f)
-reread = CSV.read("test.csv")
+reread = DataFrame(CSV.File("test.csv"))
 @test reread == expected
