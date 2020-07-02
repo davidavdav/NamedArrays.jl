@@ -1,0 +1,17 @@
+A,B,C,D,Values
+A,x,11,DO,1
+B,x,11,DO,2
+A,y,11,DO,3
+B,y,11,DO,4
+A,x,22,DO,5
+B,x,22,DO,6
+A,y,22,DO,7
+B,y,22,DO,8
+A,x,11,RE,9
+B,x,11,RE,10
+A,y,11,RE,11
+B,y,11,RE,12
+A,x,22,RE,13
+B,x,22,RE,14
+A,y,22,RE,15
+B,y,22,RE,16
