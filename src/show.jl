@@ -11,6 +11,7 @@
 ## what gets called how in which circumstance.
 
 import Base.print, Base.show, Base.summary, Base.display
+import SparseArrays: nonzeros, getcolptr, rowvals, nnz
 
 ## fallback
 function summary(n::NamedArray{T,N,AT}) where {T,N,AT}
@@ -150,34 +151,48 @@ end
 ## special case of sparse matrix, based on base/sparse/sparsematrix.c
 function show(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}}) where {T1,T2}
     S = n.array
-    if nnz(S) != 0
-        print(io, S.m, "×", S.n, " Named sparse matrix with ", nnz(S), " ", eltype(S), " nonzero entries", nnz(S) == 0 ? "" : ":")
-    end
-    limit = get(io, :limit, true)
-    if limit
-        maxnrow = displaysize(io)[1]
-        half_screen_rows = div(maxnrow - 5, 2)
-    else
-        half_screen_rows = typemax(Int)
-    end
+    print(io, S.m, "×", S.n, " Named sparse matrix with ", nnz(S), " ", eltype(S), " nonzero entries", nnz(S) == 0 ? "" : ":")
+
     rownames, colnames = strnames(n)
     rowpad = maximum([length(s) for s in rownames])
     colpad = maximum([length(s) for s in colnames])
-    k = 0
     sep = "\n\t"
-    for col = 1:S.n, k = S.colptr[col] : (S.colptr[col+1]-1)
-        if k < half_screen_rows || k > nnz(S)-half_screen_rows
-            print(io, sep, '[', rpad(rownames[S.rowval[k]], rowpad), ", ", lpad(colnames[col], colpad), "]  =  ")
-            if isassigned(S.nzval, k)
-                Base.show(io, S.nzval[k])
-            else
-                print(io, Base.undef_ref_str)
-            end
-        elseif k == half_screen_rows
-            print(io, sep, lpad("⋮", rowpad + colpad + 7))
+
+    function format_line(r, col, rowpad, colpad)
+        print(io, sep, '[', rpad(rownames[rowvals(S)[r]], rowpad), ", ", lpad(colnames[col], colpad), "]  =  ")
+        if isassigned(nonzeros(S), r)
+            Base.show(io, nonzeros(S)[r])
+        else
+            print(io, Base.undef_ref_str)
         end
-        k += 1
     end
+
+    function get_cols(from, to)
+        idx = eltype(getcolptr(S))[]
+        c = searchsortedlast(getcolptr(S), from)
+        for i = from:to
+            while i == getcolptr(S)[c+1]
+                c +=1
+            end
+            push!(idx, c)
+        end
+        idx
+    end
+
+    maxnrows = displaysize(io)[1] - 4
+    if !get(io, :limit, true) || maxnrows >= nnz(S)
+        cols = get_cols(1, nnz(S))
+        format_line.(1:nnz(S), cols, rowpad, colpad)
+    else
+        s1, e1 = 1, div(maxnrows - 1, 2) # -1 accounts for \vdots
+        s2, e2 = nnz(S) - (maxnrows - 1 - e1) + 1, nnz(S)
+        cols1 = get_cols(s1, e1)
+        format_line.(s1:e1, cols1, rowpad, colpad)
+        print(io, sep, lpad("⋮", rowpad + colpad + 7))
+        cols2 = get_cols(s2, e2)
+        format_line.(s2:e2, cols2, rowpad, colpad)
+    end
+    nothing
 end
 
 function show(io::IO, v::NamedVector, maxnrow::Int)
