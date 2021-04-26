@@ -27,14 +27,14 @@ Base.show(io::IO, ::MIME"text/plain", n::NamedArray) = show(io, n)
 function show(io::IO, n::NamedArray)
     print(io, summary(n))
     s = size(n)
-    limit = get(io, :limit, true)
+    limit = get(io, :limit, false)
     if ndims(n) == 0
         println(io)
         show(io, n.array[1])
     elseif ndims(n) == 2
         println(io)
         if limit
-            maxnrow = displaysize(io)[1] - 5 # summary, header, dots, + 2 empty lines...
+            maxnrow = displaysize(io)[1] - 7 # summary, header, dots, + 2 empty lines, + 2 Julia prompt...
             show(io, n, min(maxnrow, s[1]))
         else
             show(io, n, s[1])
@@ -66,10 +66,10 @@ end
 
 function show(io::IO, v::NamedVector)
     println(io, summary(v))
-    limit = get(io, :limit, true)
+    limit = get(io, :limit, false)
     if size(v) != (0,)
         if limit
-            maxnrow = displaysize(io)[1] - 5
+            maxnrow = displaysize(io)[1] - 7
             show(io, v, min(maxnrow, length(v)))
         else
             show(io, v, length(v))
@@ -104,7 +104,7 @@ end
 function show(io::IO, n::NamedMatrix, maxnrow::Int)
     @assert ndims(n)==2
     nrow, ncol = size(n)
-    limit = get(io, :limit, true)
+    limit = get(io, :limit, false)
     ## rows
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(show, n.array[i,j], context=:compact => true) for i=totrowrange, j=1:ncol]
@@ -180,7 +180,7 @@ function show(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}}) where {T1,T2}
     end
 
     maxnrows = displaysize(io)[1] - 4
-    if !get(io, :limit, true) || maxnrows >= nnz(S)
+    if !get(io, :limit, false) || maxnrows >= nnz(S)
         cols = get_cols(1, nnz(S))
         format_line.(1:nnz(S), cols, rowpad, colpad)
     else
