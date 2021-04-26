@@ -35,7 +35,7 @@ function fan(f::Function, fname::AbstractString, a::NamedArray{T,N}, dim::Int) w
             dimnames[i] = a.dimnames[i]
         end
     end
-     NamedArray(f(a.array,dim), a.dicts, tuple(dimnames...))
+     NamedArray(f(a.array, dims=dim), a.dicts, tuple(dimnames...))
 end
 
 ## rename a dimension

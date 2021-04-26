@@ -84,8 +84,8 @@ end
 invpermute!(v::NamedVector, perm::AbstractVector) = permute!(v, invperm(perm))
 shuffle(v::NamedVector) = permute!(copy(v), randperm(length(v)))
 shuffle!(v::NamedVector) = permute!(v, randperm(length(v)))
-reverse(v::NamedVector, start=1, stop=length(v)) = NamedArray(reverse(v.array, start, stop),  (reverse(names(v, 1), start, stop),), v.dimnames)
-function reverse!(v::NamedVector, start=1, stop=length(v))
+reverse(v::NamedVector, start::Integer=1, stop::Integer=length(v)) = NamedArray(reverse(v.array, start, stop),  (reverse(names(v, 1), start, stop),), v.dimnames)
+function reverse!(v::NamedVector, start::Integer=1, stop::Integer=length(v))
     setnames!(v, reverse(names(v, 1), start, stop), 1)
     reverse!(v.array, start, stop)
     v

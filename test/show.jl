@@ -23,22 +23,38 @@ end
 
 lines = showlines(NamedArray(Array{Int}(undef)))
 @test length(lines) == 2
-@test lines[1] == "0-dimensional Named Array{Int64,0}"
+if VERSION >= v"1.5.0"
+    @test lines[1] == "0-dimensional Named Array{Int64, 0}"
+else
+    @test lines[1] == "0-dimensional Named Array{Int64,0}"
+end
 
 lines = showlines(NamedArray([]))
 @test length(lines) == 2
-@test lines[1] == "0-element Named Array{Any,1}"
+if VERSION >= v"1.5.0"
+    @test lines[1] == "0-element Named Vector{Any}"
+else
+    @test lines[1] == "0-element Named Array{Any,1}"
+end
 
 for _lines in Any[showlines(n), showlines(MIME"text/plain"(), n)]
     @test length(_lines) == 5
-    @test _lines[1] == "2×4 Named Array{Float64,2}"
+    if VERSION >= v"1.5.0"
+        @test _lines[1] == "2×4 Named Matrix{Float64}"
+    else
+        @test _lines[1] == "2×4 Named Array{Float64,2}"
+    end
     @test split(_lines[2]) == vcat(["A", "╲", "B", "│"], letters[1:4])
 end
 
 ## wide array abbreviated
-lines = showlines(NamedArray(randn(2,1000)))
+lines = showlines(NamedArray(randn(2,1000)), :limit => true)
 @test length(lines) == 5
-@test lines[1] == "2×1000 Named Array{Float64,2}"
+if VERSION >= v"1.5.0"
+    @test lines[1] == "2×1000 Named Matrix{Float64}"
+else
+    @test lines[1] == "2×1000 Named Array{Float64,2}"
+end
 header = split(lines[2])
 @test header[vcat(1:5, end)] == ["A", "╲", "B", "│", "1", "1000"]
 @test "…" in header
@@ -47,17 +63,25 @@ for (_i, _line) in enumerate(lines[end-1:end])
 end
 
 ## tall array abbreviated
-lines = showlines(NamedArray(randn(1000,2)))
+lines = showlines(NamedArray(randn(1000,2)), :limit => true)
 @test length(lines) > 7
-@test lines[1] == "1000×2 Named Array{Float64,2}"
+if VERSION >= v"1.5.0"
+    @test lines[1] == "1000×2 Named Matrix{Float64}"
+else
+    @test lines[1] == "1000×2 Named Array{Float64,2}"
+end
 @test split(lines[2]) == ["A", "╲", "B", "│", "1", "2"]
 @test split(lines[4])[1] == "1"
 @test split(lines[end])[1] == "1000"
 
 ## tall vector abbreviated
-lines = showlines(NamedArray(randn(1000)))
+lines = showlines(NamedArray(randn(1000)), :limit => true)
 @test length(lines) > 7
-@test lines[1] == "1000-element Named Array{Float64,1}"
+if VERSION >= v"1.5.0"
+    @test lines[1] == "1000-element Named Vector{Float64}"
+else
+    @test lines[1] == "1000-element Named Array{Float64,1}"
+end
 @test split(lines[2]) == ["A", "│"]
 @test split(lines[4])[1] == "1"
 @test split(lines[end])[1] == "1000"
@@ -66,7 +90,11 @@ lines = showlines(NamedArray(randn(1000)))
 zo = [0,1]
 lines = showlines(NamedArray(rand(2,2,2), (zo, zo, zo), ("base", "zero", "indexing")))
 @test length(lines) == 13
-@test lines[1] == "2×2×2 Named Array{Float64,3}"
+if VERSION >= v"1.5.0"
+    @test lines[1] == "2×2×2 Named Array{Float64, 3}"
+else
+    @test lines[1] == "2×2×2 Named Array{Float64,3}"
+end
 
 for (index, offset) in ([0, 3], [1, 9])
     @test lines[offset] == "[:, :, indexing=$index] ="
@@ -77,10 +105,20 @@ end
 
 for ndim in 1:5
     global lines = showlines(NamedArray(rand(fill(2,ndim)...)))
-    if (ndim == 1)
-        line1 = "2-element Named Array{Float64,1}"
+    if VERSION >= v"1.5.0"
+        if (ndim == 1)
+            line1 = "2-element Named Vector{Float64}"
+        elseif (ndim == 2)
+            line1 = "2×2 Named Matrix{Float64}"
+        else
+            line1 = join(repeat(["2"], ndim), "×") * " Named Array{Float64, $ndim}"
+        end
     else
-        line1 = join(repeat(["2"], ndim), "×") * " Named Array{Float64,$ndim}"
+        if (ndim == 1)
+            line1 = "2-element Named Array{Float64,1}"
+        else
+            line1 = join(repeat(["2"], ndim), "×") * " Named Array{Float64,$ndim}"
+        end
     end
     @test lines[1] == line1
     if ndim ≥ 3
@@ -95,7 +133,7 @@ println(NamedArray(rand(2,2,1)))
 
 ## sparse array
 nms = [string(hash(i)) for i in 1:1000]
-lines = showlines(NamedArray(sprand(1000,1000, 1e-4), (nms, nms)))
+lines = showlines(NamedArray(sprand(1000,1000, 1e-4), (nms, nms)), :limit => true)
 @test length(lines) > 7
 @test startswith(lines[1], "1000×1000 Named sparse matrix with")
 @test endswith(lines[1], "Float64 nonzero entries:")
