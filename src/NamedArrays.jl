@@ -44,7 +44,7 @@ function __init__()
         # NOTE: KahanSummation does not support Julia 0.7 dims keyword argument at the moment
 
         ## rename a dimension
-        function KahanSummation.cumsum_kbn(a::NamedArray, dims::Integer)
+        function KahanSummation.cumsum_kbn(a::NamedArray; dims::Integer)
             NamedArrays.fan(KahanSummation.cumsum_kbn, "cumsum_kbn", a, dims)
         end
     end

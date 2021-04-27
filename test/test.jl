@@ -67,10 +67,10 @@ for f in (:cumprod, :cumsum)
 end
 
 # NOTE: KahanSummation do not support Julia 0.7 dims keyword argument at the moment
-@test cumsum_kbn(n.array, 1) == cumsum_kbn(n, 1).array
-@test cumsum_kbn(n.array, 2) == cumsum_kbn(n, 2).array
-@inferred cumsum_kbn(n, 1)
-@inferred cumsum_kbn(n, 2)
+@test cumsum_kbn(n.array, dims=1) == cumsum_kbn(n, dims=1).array
+@test cumsum_kbn(n.array, dims=2) == cumsum_kbn(n, dims=2).array
+@inferred cumsum_kbn(n, dims=1)
+@inferred cumsum_kbn(n, dims=2)
 
 print("multi-dimensional, ")
 #multidimensional
