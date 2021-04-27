@@ -23,7 +23,7 @@ end
 
 lines = showlines(NamedArray(Array{Int}(undef)))
 @test length(lines) == 2
-if VERSION >= v"1.5.0"
+if VERSION >= v"1.6.0"
     @test lines[1] == "0-dimensional Named Array{Int64, 0}"
 else
     @test lines[1] == "0-dimensional Named Array{Int64,0}"
@@ -31,7 +31,7 @@ end
 
 lines = showlines(NamedArray([]))
 @test length(lines) == 2
-if VERSION >= v"1.5.0"
+if VERSION >= v"1.6.0"
     @test lines[1] == "0-element Named Vector{Any}"
 else
     @test lines[1] == "0-element Named Array{Any,1}"
@@ -39,7 +39,7 @@ end
 
 for _lines in Any[showlines(n), showlines(MIME"text/plain"(), n)]
     @test length(_lines) == 5
-    if VERSION >= v"1.5.0"
+    if VERSION >= v"1.6.0"
         @test _lines[1] == "2×4 Named Matrix{Float64}"
     else
         @test _lines[1] == "2×4 Named Array{Float64,2}"
@@ -50,7 +50,7 @@ end
 ## wide array abbreviated
 lines = showlines(NamedArray(randn(2,1000)), :limit => true)
 @test length(lines) == 5
-if VERSION >= v"1.5.0"
+if VERSION >= v"1.6.0"
     @test lines[1] == "2×1000 Named Matrix{Float64}"
 else
     @test lines[1] == "2×1000 Named Array{Float64,2}"
@@ -65,7 +65,7 @@ end
 ## tall array abbreviated
 lines = showlines(NamedArray(randn(1000,2)), :limit => true)
 @test length(lines) > 7
-if VERSION >= v"1.5.0"
+if VERSION >= v"1.6.0"
     @test lines[1] == "1000×2 Named Matrix{Float64}"
 else
     @test lines[1] == "1000×2 Named Array{Float64,2}"
@@ -77,7 +77,7 @@ end
 ## tall vector abbreviated
 lines = showlines(NamedArray(randn(1000)), :limit => true)
 @test length(lines) > 7
-if VERSION >= v"1.5.0"
+if VERSION >= v"1.6.0"
     @test lines[1] == "1000-element Named Vector{Float64}"
 else
     @test lines[1] == "1000-element Named Array{Float64,1}"
@@ -90,7 +90,7 @@ end
 zo = [0,1]
 lines = showlines(NamedArray(rand(2,2,2), (zo, zo, zo), ("base", "zero", "indexing")))
 @test length(lines) == 13
-if VERSION >= v"1.5.0"
+if VERSION >= v"1.6.0"
     @test lines[1] == "2×2×2 Named Array{Float64, 3}"
 else
     @test lines[1] == "2×2×2 Named Array{Float64,3}"
@@ -105,7 +105,7 @@ end
 
 for ndim in 1:5
     global lines = showlines(NamedArray(rand(fill(2,ndim)...)))
-    if VERSION >= v"1.5.0"
+    if VERSION >= v"1.6.0"
         if (ndim == 1)
             line1 = "2-element Named Vector{Float64}"
         elseif (ndim == 2)
