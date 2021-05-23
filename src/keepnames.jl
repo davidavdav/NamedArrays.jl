@@ -49,7 +49,7 @@ function Base.vcat(N::NamedVector...)
 end
 
 ## broadcast v1.0
-Base.BroadcastStyle(::Type{A}) where {A <: NamedArray} = Broadcast.ArrayStyle{A}()
+Base.BroadcastStyle(::Type{A}) where {A <: NamedArray} = Broadcast.ArrayStyle{NamedArray}()
 function Base.similar(bc::Broadcast.Broadcasted{Broadcast.ArrayStyle{A}},
                       ::Type{T}) where {A <: NamedArray, T}
     namedarray = find_namedarray(bc)

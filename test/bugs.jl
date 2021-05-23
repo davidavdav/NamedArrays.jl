@@ -11,3 +11,8 @@ v = n[1, :]
 @test sin.(v).array == sin.(v.array)
 @test namesanddim(sin.(v)) == namesanddim(v)
 
+#110
+n = NamedArray([1 2; 3 4], ([11,12], [13,14]))
+s = sum(n, dims=1)
+table = n ./ s 
+@test namesanddim(table) == namesanddim(n)
