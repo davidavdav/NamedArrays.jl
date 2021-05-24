@@ -122,3 +122,18 @@ function _sortslices(A::NamedArray, d::Val{dims}; kws...) where dims
         B
     end
 end
+
+function Base.filter!(f, n::NamedVector)
+    j = firstindex(n)
+    for (name, i) in n.dicts[1]
+        if f(n.array[i])
+            n.array[j] = n.array[i]
+            n.dicts[1][name] = j
+            j += 1
+        else
+            delete!(n.dicts[1], name)
+        end
+    end
+    deleteat!(n.array, j:length(n.array))
+    return n
+end

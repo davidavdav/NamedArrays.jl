@@ -16,3 +16,10 @@ n = NamedArray([1 2; 3 4], ([11,12], [13,14]))
 s = sum(n, dims=1)
 table = n ./ s 
 @test namesanddim(table) == namesanddim(n)
+
+#105
+a = [10, 20, 30]
+n = NamedArray(a)
+filter!(x -> x > 15, n)
+@test n == a == [20, 30]
+@test names(n, 1) == ["2", "3"]
