@@ -349,3 +349,19 @@ These functions, when operating along one dimension, keep the names in the other
 The current goal is to reduce complexity of the implementation.  Where possible, we want to use more of the `Base.AbstractArray` implementation.
 
 A longer term goal is to improve type stability, this might have a repercussion to the semantics of some operations.
+
+## Related Packages
+
+The Julia ecosystem now has a number of packages implementing the general idea of attaching names to arrays. For some purposes they may be interchangeable. For others, flexibility or speed or support for particular functions may make one preferable.
+
+* [AxisArrays.jl](https://github.com/JuliaArrays/AxisArrays.jl) is of comparable age. It attaches a Symbol to each dimension; this is part of the type thus cannot be mutated after creation.
+
+* [DimensionalData.jl](https://github.com/rafaqz/DimensionalData.jl), [AxisKeys.jl](https://github.com/mcabbott/AxisKeys.jl) and [AxisIndices.jl](https://github.com/Tokazama/AxisIndices.jl) are, to first approximation, post-Julia 1.0 re-writes of that. DimensionalData.jl similarly builds in dimension names, in AxisKeys.jl they are provided by composition with NamedDims.jl, and AxisIndices.jl does not support them. All allow some form of named indexing but the notation varies.
+
+Packages with some overlap but a different focus include:
+
+* [NamedDims.jl](https://github.com/invenia/NamedDims.jl) only attaches a name to each dimension, allowing `sum(A, dims = :time)` and `A[time=3]` but keeping indices the usual integers.
+
+* [LabelledArrays.jl](https://github.com/SciML/LabelledArrays.jl) instead attaches names to individual elements, allowing `A.second == A[2]`.
+
+* [OffsetArrays.jl](https://github.com/JuliaArrays/OffsetArrays.jl) shifts the indices of an array, allowing say `A[-3]` to `A[3]` to be the first & last elements.
