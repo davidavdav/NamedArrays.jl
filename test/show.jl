@@ -30,11 +30,26 @@ else
 end
 
 lines = showlines(NamedArray([]))
-@test length(lines) == 2
+@test length(lines) == 3
 if VERSION >= v"1.6.0"
     @test lines[1] == "0-element Named Vector{Any}"
 else
     @test lines[1] == "0-element Named Array{Any,1}"
+end
+@test split(lines[2]) == ["A", "│"]
+
+for k in 0:5, (m,n) in ((k,0), (0,k))
+    local lines = showlines(NamedArray(Matrix{Int}(undef, m, n)))
+    @test length(lines) == 3 + m
+    if VERSION >= v"1.6.0"
+        @test lines[1] == "$m×$n Named Matrix{Int64}"
+    else
+        @test lines[1] == "$m×$n Named Array{Int64,2}"
+    end
+    @test split(lines[2]) == [["A", "╲", "B", "│"]; string.(1:n)]
+    for i in 1:m
+        @test split(lines[3+i])[1] == string(i)
+    end
 end
 
 for _lines in Any[showlines(n), showlines(MIME"text/plain"(), n)]
