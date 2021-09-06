@@ -67,13 +67,11 @@ end
 function show(io::IO, v::NamedVector)
     println(io, summary(v))
     limit = get(io, :limit, false)
-    if size(v) != (0,)
-        if limit
-            maxnrow = displaysize(io)[1] - 7
-            show(io, v, min(maxnrow, length(v)))
-        else
-            show(io, v, length(v))
-        end
+    if limit
+        maxnrow = displaysize(io)[1] - 7
+        show(io, v, min(maxnrow, length(v)))
+    else
+        show(io, v, length(v))
     end
 end
 
@@ -110,8 +108,8 @@ function show(io::IO, n::NamedMatrix, maxnrow::Int)
     s = [sprint(show, n.array[i,j], context=:compact => true) for i=totrowrange, j=1:ncol]
     rowname, colname = strnames(n)
     strlen(x) = length(string(x))
-    colwidth = max(maximum(map(length, s)), maximum(map(strlen, colname)))
-    rownamewidth = max(maximum(map(strlen, rowname)), sum(map(length, strdimnames(n)))+3)
+    colwidth = max(maximum(map(length, s); init=0), maximum(map(strlen, colname); init=0))
+    rownamewidth = max(maximum(map(strlen, rowname); init=0), sum(map(length, strdimnames(n)))+3)
     if limit
         maxncol = div(displaysize(io)[2] - rownamewidth - 4, colwidth+2) # dots, spaces between
     else
@@ -200,8 +198,8 @@ function show(io::IO, v::NamedVector, maxnrow::Int)
     rownames = strnames(v,1)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
     s = [sprint(show, v.array[i], context=:compact => true) for i=totrowrange]
-    colwidth = maximum(map(length,s))
-    rownamewidth = max(maximum(map(length, rownames)), 1+length(strdimnames(v)[1]))
+    colwidth = maximum(map(length,s); init = 0)
+    rownamewidth = max(maximum(map(length, rownames); init = 0), 1+length(strdimnames(v)[1]))
     ## header
     println(io, string(leftalign(strdimnames(v, 1), rownamewidth), " │ "))
     print(io, "─"^(rownamewidth+1), "┼", "─"^(colwidth+1))
