@@ -22,6 +22,7 @@ defaultdimname(dim::Integer) = Symbol(letter(dim))
 defaultdimnames(ndim::Integer) = ntuple(defaultdimname, ndim)
 defaultdimnames(a::AbstractArray) = defaultdimnames(ndims(a))
 
+
 ## disambiguation (Argh...)
 function NamedArray(a::AbstractArray{T,N},
                     names::Tuple{},
@@ -41,6 +42,33 @@ function NamedArray(array::AbstractArray{T,N},
 end
 
 ## constructor with array, names and dimnames (dict is created from names)
+"""
+    NamedArray(a::AbstractArray{T,N}, names::Tuple{N,AbstractVector}, dimnames::NTuple{N,Any}))
+
+Construct a NamedArray from array `a`, with names for the indices in each dimesion `names`, 
+and names of the dimensions `dimnames`. 
+
+If `dimnames` is unspecified, dimensions are named `:A, :B, ...`, 
+if `names` are unspecified, names are `"1", "2", "3", ...`.
+
+# Examples
+```jldoctest
+julia> NamedArray([1 2 3; 4 5 6])
+2×3 Named Matrix{Int64}
+A ╲ B │ 1  2  3
+──────┼────────
+1     │ 1  2  3
+2     │ 4  5  6
+
+julia> NamedArray([1 2; 3 4; 5 6], (["一", "二", "三"], ["first", "second"]), ("cmn", "en"))
+3×2 Named Matrix{Int64}
+cmn ╲ en │  first  second
+─────────┼───────────────
+一       │      1       2
+二       │      3       4
+三       │      5       6
+```
+"""
 function NamedArray(array::AbstractArray{T,N},
                     names::NTuple{N,AbstractVector}=tuple((defaultnames(d) for d in size(array))...),
                     dimnames::NTuple{N, Any}=defaultdimnames(array)) where {T,N}

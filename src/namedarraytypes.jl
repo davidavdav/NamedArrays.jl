@@ -14,6 +14,28 @@ using DataStructures: OrderedDict
 
 if ! @isdefined NamedArray
 
+"""
+    Name(name)
+
+Wrapper type to ensure a name is used in an index, and not the numeric value. 
+
+# Example
+```jldoctest
+julia> n = NamedArray([1 2 3; 4 5 6], ([2, 4], [3, 6, 9]))
+2×3 Named Matrix{Int64}
+A ╲ B │ 3  6  9
+──────┼────────
+2     │ 1  2  3
+4     │ 4  5  6
+
+julia> n[2, 3]
+6
+
+julia> n[Name(2), Name(3)]
+1
+
+```
+"""
 struct Name{T}
     name::T
 end
