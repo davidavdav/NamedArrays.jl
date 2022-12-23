@@ -30,6 +30,20 @@ n = @inferred NamedArray(rand(2,4))
 @inferred setnames!(n, ["one", "two"], 1)
 @inferred setnames!(n, ["a", "b", "c", "d"], 2)
 
+# keyword constructors
+n8 = NamedArray(rand(2,2,2); names=( ["a", "b"], ["c", "d"], 1:2), dimnames=("Rows", "Cols", "Z"))
+@test names(n8, 1) == ["a", "b"]
+@test names(n8, 3) == [1, 2]
+
+n9 = NamedArray(rand(2,2,2); dimnames=("Rows", "Cols", "Z"))
+@test dimnames(n9) == ["Rows", "Cols", "Z"]
+
+n10 = NamedArray(rand(2,2,2); names=(["a", "b"], ["c", "d"], 1:2))
+@test names(n10, 1) == ["a", "b"]
+@test names(n10, 2) == ["c", "d"]
+@test names(n10, 3) == [1, 2]
+@test dimnames(n10) == [:A, :B, :C]
+
 a = [1 2 3; 4 5 6]
 n3 = @inferred NamedArray(a, (["a","b"],["C","D","E"]))
 n4 = @inferred NamedArray(a, (OrderedDict("a"=>1,"b"=>2), OrderedDict("C"=>1,"D"=>2,"E"=>3)))
