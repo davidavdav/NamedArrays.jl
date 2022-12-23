@@ -97,6 +97,9 @@ n = NamedArray([1 3; 2 4], ( ["a", "b"], ["c", "d"] ), ("Rows", "Cols"))
 # NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Vector})
 n = NamedArray([1 3; 2 4], ( ["a", "b"], ["c", "d"] ))
 n = NamedArray([1, 2], ( ["a", "b"], ))  # note the comma after ["a", "b"] to ensure evaluation as tuple
+
+# Names can also be set with keyword arguments
+n = NamedArray([1 3; 2 4]; names=( ["a", "b"], ["c", "d"] ), dimnames=("Rows", "Cols"))
 ```
 This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a, dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.).
 
