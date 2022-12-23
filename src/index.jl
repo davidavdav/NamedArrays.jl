@@ -150,6 +150,9 @@ function indices(n::NamedArray, I::Pair...)
     fill!(result, :) ## unspecified dimensions act as colon
     for (i, dim) in enumerate(n.dimnames)
         if dim in keys(dict)
+            if dict[dim] isa Colon
+                continue
+            end
             result[i] = n.dicts[i][dict[dim]]
         end
     end
