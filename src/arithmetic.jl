@@ -193,15 +193,15 @@ end
 ## ldlt skipped
 
 ## from factorization
-function qr!(n::NamedMatrix, pivot)
-    qr = qr!(n.array, pivot)
+function qr!(n::NamedMatrix, ::Val{false}; kwargs...)
+    qr = qr!(n.array, Val(false), kwargs...)
     LinearAlgebra.QRCompactWY(NamedArray(qr.factors, n.dicts, n.dimnames), qr.T)
 end
-qr!(n::NamedArray) = qr!(n, Val(false))
+qr!(n::NamedArray; kwargs...) = qr!(n, Val(false), kwargs...)
 
 LAPACK.gemqrt!(side::Char, trans::Char, V::NamedArray{BF}, T::StridedMatrix{BF}, C::StridedVecOrMat{BF}) where {BF<:LinearAlgebra.BlasFloat} = LAPACK.gemqrt!(side, trans, V.array, T, C)
 
-qr(n::NamedMatrix{T}, pivot = Val(false)) where {T<:LinearAlgebra.BlasFloat} = qr!(copy(n), pivot)
+qr(n::NamedMatrix{T}, ::Val{false}) where {T<:LinearAlgebra.BlasFloat} = qr!(copy(n), Val(false))
 
 eigen!(n::NamedMatrix; permute::Bool=true, scale::Bool=true) = eigen!(n.array, permute=permute, scale=scale)
 eigen(n::NamedMatrix; permute::Bool=true, scale::Bool=true) = eigen!(copy(n.array), permute=permute, scale=scale)
