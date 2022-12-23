@@ -44,6 +44,7 @@ end
 ## constructor with array, names and dimnames (dict is created from names)
 """
     NamedArray(a::AbstractArray{T,N}, names::Tuple{N,AbstractVector}, dimnames::NTuple{N,Any}))
+    NamedArray(a::AbstractArray{T,N}; names::Tuple{N,AbstractVector}, dimnames::NTuple{N,Any}))
 
 Construct a NamedArray from array `a`, with names for the indices in each dimesion `names`, 
 and names of the dimensions `dimnames`. 
@@ -60,6 +61,22 @@ A ╲ B │ 1  2  3
 1     │ 1  2  3
 2     │ 4  5  6
 
+
+julia> NamedArray([1 2 3; 4 5 6]; names=(["a", "b"], 1:3))
+2×3 Named Matrix{Int64}
+A ╲ B │ 1  2  3
+──────┼────────
+a     │ 1  2  3
+b     │ 4  5  6
+
+
+julia> NamedArray([1 2 3; 4 5 6]; dimnames=("rows", "cols"))
+2×3 Named Matrix{Int64}
+rows ╲ cols │ 1  2  3
+────────────┼────────
+1           │ 1  2  3
+2           │ 4  5  6
+
 julia> NamedArray([1 2; 3 4; 5 6], (["一", "二", "三"], ["first", "second"]), ("cmn", "en"))
 3×2 Named Matrix{Int64}
 cmn ╲ en │  first  second
@@ -70,8 +87,13 @@ cmn ╲ en │  first  second
 ```
 """
 function NamedArray(array::AbstractArray{T,N},
-                    names::NTuple{N,AbstractVector}=tuple((defaultnames(d) for d in size(array))...),
+                    names::NTuple{N,AbstractVector},
                     dimnames::NTuple{N, Any}=defaultdimnames(array)) where {T,N}
+    NamedArray(array; names, dimnames)
+end
+function NamedArray(array::AbstractArray{T,N};
+                    names::NTuple{N,AbstractVector}=tuple((defaultnames(d) for d in size(array))...),
+                    dimnames::NTuple{N,Any}=defaultdimnames(array)) where {T,N}
     dicts = defaultnamesdict(names)
     NamedArray{T, N, typeof(array), typeof(dicts)}(array, dicts, dimnames)
 end
