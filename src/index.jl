@@ -146,11 +146,15 @@ end
 function indices(n::NamedArray, I::Pair...)
     dict = Dict(I...)
     Set(keys(dict)) ⊆ Set(n.dimnames) || error("Dimension name mismatch")
-    result = Vector{Union{Int,Colon}}(undef, ndims(n))
+    result = Vector{Union{Int,Colon,AbstractRange}}(undef, ndims(n))
     fill!(result, :) ## unspecified dimensions act as colon
     for (i, dim) in enumerate(n.dimnames)
         if dim in keys(dict)
             if dict[dim] isa Colon
+                continue
+            end
+            if dict[dim] isa AbstractRange
+                result[i] = dict[dim]
                 continue
             end
             result[i] = n.dicts[i][dict[dim]]
