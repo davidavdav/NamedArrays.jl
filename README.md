@@ -191,8 +191,17 @@ You can also use a dictionary-style indexing, if you don't want to bother about 
 ```julia
 n[:A => "one"] == [1, 2, 3]
 n[:B => :c, :A => "two"] == 6
+n[:A=>:, :B=>:c] == [3, 6]
+
+n[:B=>[:a, :b]] == [1 2; 4 5]
+n[:A=>["one", "two"], :B=>:a] == [1, 4]
+n[:A=>[1, 2], :B=>:a] == [1, 4]
+n[:A=>["one"], :B=>1:2] == [1 2]
+
+# Throws ArgumentError when trying to access non-existant dimension.
+n[:A=>["three"]]
+# ERROR: ArgumentError: Elements for A => ["three"] not found.
 ```
-This style cannot be mixed with other indexing styles, yet.
 
 ### Assignment
 
