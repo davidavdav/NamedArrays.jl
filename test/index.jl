@@ -89,3 +89,4 @@ m = NamedArray(rand(10,2), dimnames=(:rows, :cols))
 @test m[:rows=>1:2:8, :cols=>:] == m[1:2:8, :]
 @test m[:rows=>:, :cols=>"1"] == m[:, 1]
 @test m[:rows=>"1", :cols=>:] == m[1, :]
+@test m[:rows=>[1,2,3], :cols=>:] == m[[1,2,3], :]
