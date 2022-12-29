@@ -146,11 +146,24 @@ end
 function indices(n::NamedArray, I::Pair...)
     dict = Dict(I...)
     Set(keys(dict)) ⊆ Set(n.dimnames) || error("Dimension name mismatch")
-    result = Vector{Union{Int,Colon,AbstractRange}}(undef, ndims(n))
+    result = Vector{Union{Int,Colon,AbstractRange,Vector{Int}}}(undef, ndims(n))
     fill!(result, :) ## unspecified dimensions act as colon
     for (i, dim) in enumerate(n.dimnames)
         if dim in keys(dict)
             if dict[dim] isa Colon
+                continue
+            end
+            if dict[dim] isa AbstractArray
+                if dict[dim] isa AbstractArray{Int}
+                    result[i] = n.dicts[i].vals[dict[dim]]
+                    continue
+                end
+
+                r = get.(Ref(n.dicts[i]), dict[dim], missing)
+                if all(ismissing.(r))
+                    throw(ArgumentError("Elements for $(dim) => $(dict[dim]) not found."))
+                end
+                result[i] = r
                 continue
             end
             if dict[dim] isa AbstractRange
