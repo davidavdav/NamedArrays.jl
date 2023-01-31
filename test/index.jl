@@ -82,3 +82,11 @@ m[[1,9,10]] = 0:2
 
 n[1,1] = π
 @test n.array[1,1] == Float64(π)
+
+m = NamedArray(rand(10,2), dimnames=(:rows, :cols))
+@test m[:rows=>1:5, :cols=>:] == m[1:5, :]
+@test m[:rows=>3:end, :cols=>:] == m[3:end, :]
+@test m[:rows=>1:2:8, :cols=>:] == m[1:2:8, :]
+@test m[:rows=>:, :cols=>"1"] == m[:, 1]
+@test m[:rows=>"1", :cols=>:] == m[1, :]
+@test m[:rows=>[1,2,3], :cols=>:] == m[[1,2,3], :]
