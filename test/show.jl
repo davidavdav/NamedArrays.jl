@@ -21,7 +21,7 @@ function showlines(mime, x, args::Pair...)
     return split(String(take!(copy(buf))), "\n")
 end
 
-lines = showlines(NamedArray(Array{Int}(undef)))
+lines = showlines("text/plain", NamedArray(Array{Int}(undef)))
 @test length(lines) == 2
 if VERSION >= v"1.6.0"
     @test lines[1] == "0-dimensional Named Array{Int64, 0}"
@@ -29,7 +29,7 @@ else
     @test lines[1] == "0-dimensional Named Array{Int64,0}"
 end
 
-lines = showlines(NamedArray([]))
+lines = showlines("text/plain", NamedArray([]))
 @test length(lines) == 3
 if VERSION >= v"1.6.0"
     @test lines[1] == "0-element Named Vector{Any}"
@@ -39,7 +39,7 @@ end
 @test split(lines[2]) == ["A", "│"]
 
 for k in 0:5, (m,n) in ((k,0), (0,k))
-    local lines = showlines(NamedArray(Matrix{Int}(undef, m, n)))
+    local lines = showlines("text/plain", NamedArray(Matrix{Int}(undef, m, n)))
     @test length(lines) == 3 + m
     if VERSION >= v"1.6.0"
         @test lines[1] == "$m×$n Named Matrix{Int64}"
@@ -52,18 +52,17 @@ for k in 0:5, (m,n) in ((k,0), (0,k))
     end
 end
 
-for _lines in Any[showlines(n), showlines(MIME"text/plain"(), n)]
-    @test length(_lines) == 5
-    if VERSION >= v"1.6.0"
-        @test _lines[1] == "2×4 Named Matrix{Float64}"
-    else
-        @test _lines[1] == "2×4 Named Array{Float64,2}"
-    end
-    @test split(_lines[2]) == vcat(["A", "╲", "B", "│"], letters[1:4])
+_lines = showlines(MIME"text/plain"(), n)
+@test length(_lines) == 5
+if VERSION >= v"1.6.0"
+    @test _lines[1] == "2×4 Named Matrix{Float64}"
+else
+    @test _lines[1] == "2×4 Named Array{Float64,2}"
 end
+@test split(_lines[2]) == vcat(["A", "╲", "B", "│"], letters[1:4])
 
 ## wide array abbreviated
-lines = showlines(NamedArray(randn(2,1000)), :limit => true)
+lines = showlines("text/plain", NamedArray(randn(2,1000)), :limit => true)
 @test length(lines) == 5
 if VERSION >= v"1.6.0"
     @test lines[1] == "2×1000 Named Matrix{Float64}"
@@ -78,7 +77,7 @@ for (_i, _line) in enumerate(lines[end-1:end])
 end
 
 ## tall array abbreviated
-lines = showlines(NamedArray(randn(1000,2)), :limit => true)
+lines = showlines("text/plain", NamedArray(randn(1000,2)), :limit => true)
 @test length(lines) > 7
 if VERSION >= v"1.6.0"
     @test lines[1] == "1000×2 Named Matrix{Float64}"
@@ -90,7 +89,7 @@ end
 @test split(lines[end])[1] == "1000"
 
 ## tall vector abbreviated
-lines = showlines(NamedArray(randn(1000)), :limit => true)
+lines = showlines("text/plain", NamedArray(randn(1000)), :limit => true)
 @test length(lines) > 7
 if VERSION >= v"1.6.0"
     @test lines[1] == "1000-element Named Vector{Float64}"
@@ -103,7 +102,7 @@ end
 
 ## non-standard integer indexing
 zo = [0,1]
-lines = showlines(NamedArray(rand(2,2,2), (zo, zo, zo), ("base", "zero", "indexing")))
+lines = showlines("text/plain", NamedArray(rand(2,2,2), (zo, zo, zo), ("base", "zero", "indexing")))
 @test length(lines) == 13
 if VERSION >= v"1.6.0"
     @test lines[1] == "2×2×2 Named Array{Float64, 3}"
@@ -119,7 +118,7 @@ for (index, offset) in ([0, 3], [1, 9])
 end
 
 for ndim in 1:5
-    global lines = showlines(NamedArray(rand(fill(2,ndim)...)))
+    global lines = showlines("text/plain", NamedArray(rand(fill(2,ndim)...)))
     if VERSION >= v"1.6.0"
         if (ndim == 1)
             line1 = "2-element Named Vector{Float64}"
@@ -148,7 +147,7 @@ println(NamedArray(rand(2,2,1)))
 
 ## sparse array
 nms = [string(hash(i)) for i in 1:1000]
-lines = showlines(NamedArray(sprand(1000,1000, 1e-4), (nms, nms)), :limit => true)
+lines = showlines("text/plain", NamedArray(sprand(1000,1000, 1e-4), (nms, nms)), :limit => true)
 @test length(lines) > 7
 @test startswith(lines[1], "1000×1000 Named sparse matrix with")
 @test endswith(lines[1], "Float64 nonzero entries:")
@@ -163,10 +162,17 @@ lines = showlines(NamedArray(sprand(1000,1000, 1e-4), (nms, nms)), :limit => tru
 
 ## no limits
 for dims in [(1000,), (1000, 2)]
-    global lines = showlines(NamedArray(rand(dims...)), :limit => false)
+    global lines = showlines("text/plain", NamedArray(rand(dims...)), :limit => false)
     @test length(lines) == 1003
     @test startswith(lines[end-500], "500 ")
 end
-lines = showlines(NamedArray(rand(10, 1000)), :limit => false)
+lines = showlines("text/plain", NamedArray(rand(10, 1000)), :limit => false)
 @test length(split(lines[2])) == 1004 ##  "A"    "╲"    "B"    "│" ...
 @test length(split(lines[end])) == 1002 # "10"   "│" ...
+
+@test sprint(show, "text/plain", NamedArray([1 2; 3 4], (String1["A", "B"], ["C", "D"]), (String7("First"), String7("Second")))) =="""
+2×2 Named Matrix{Int64}
+First ╲ Second │ C  D
+───────────────┼─────
+A              │ 1  2
+B              │ 3  4"""

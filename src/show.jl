@@ -18,26 +18,23 @@ function summary(n::NamedArray{T,N,AT}) where {T,N,AT}
     return Base.dims2string(size(n)) * string(" Named ", AT)
 end
 
-print(n::NamedArray) = print(n.array)
-
-## This seems to be the essential function to overload for displaying in REPL:
-Base.show(io::IO, ::MIME"text/plain", n::NamedArray) = show(io, n)
+show(io::IO, n::NamedArray) = show(io, n.array)
 
 ## ndims==1 is dispatched below
-function show(io::IO, n::NamedArray)
+function show(io::IO, ::MIME"text/plain", n::NamedArray)
     print(io, summary(n))
     s = size(n)
     limit = get(io, :limit, false)
     if ndims(n) == 0
         println(io)
-        show(io, n.array[1])
+        show(io, MIME"text/plain"(), n.array[1])
     elseif ndims(n) == 2
         println(io)
         if limit
             maxnrow = displaysize(io)[1] - 7 # summary, header, dots, + 2 empty lines, + 2 Julia prompt...
-            show(io, n, min(maxnrow, s[1]))
+            show(io, MIME"text/plain"(), n, min(maxnrow, s[1]))
         else
-            show(io, n, s[1])
+            show(io, MIME"text/plain"(), n, s[1])
         end
     else
         nlinesneeded = prod(s[3:end]) * (s[1] + 3) + 1
@@ -56,22 +53,20 @@ function show(io::IO, n::NamedArray)
             cartnames = [string(strdimnames(n, 2+i), "=", strnames(n, 2+i)[ind]) for (i, ind) in enumerate(idx.I)]
             println(io, "\n")
             println(io, "[:, :, ", join(cartnames, ", "), "] =")
-            show(io, n[:, :, idx], maxnrow)
+            show(io, MIME"text/plain"(), n[:, :, idx], maxnrow)
             i += 1
         end
     end
 end
 
-#show(io::IO, x::NamedVector) = invoke(show, (IO, NamedArray), io, x)
-
-function show(io::IO, v::NamedVector)
+function show(io::IO, ::MIME"text/plain", v::NamedVector)
     println(io, summary(v))
     limit = get(io, :limit, false)
     if limit
         maxnrow = displaysize(io)[1] - 7
-        show(io, v, min(maxnrow, length(v)))
+        show(io, MIME"text/plain"(), v, min(maxnrow, length(v)))
     else
-        show(io, v, length(v))
+        show(io, MIME"text/plain"(), v, length(v))
     end
 end
 
@@ -99,7 +94,7 @@ function sprint_row(namewidth::Int, name, width::Int, names::Tuple; dots="…", 
 end
 
 ## for 2D printing
-function show(io::IO, n::NamedMatrix, maxnrow::Int)
+function show(io::IO, ::MIME"text/plain", n::NamedMatrix, maxnrow::Int)
     @assert ndims(n)==2
     nrow, ncol = size(n)
     limit = get(io, :limit, false)
@@ -147,7 +142,7 @@ function show(io::IO, n::NamedMatrix, maxnrow::Int)
 end
 
 ## special case of sparse matrix, based on base/sparse/sparsematrix.c
-function show(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}}) where {T1,T2}
+function show(io::IO, ::MIME"text/plain", n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}}) where {T1,T2}
     S = n.array
     print(io, S.m, "×", S.n, " Named sparse matrix with ", nnz(S), " ", eltype(S), " nonzero entries", nnz(S) == 0 ? "" : ":")
 
@@ -159,7 +154,7 @@ function show(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}}) where {T1,T2}
     function format_line(r, col, rowpad, colpad)
         print(io, sep, '[', rpad(rownames[rowvals(S)[r]], rowpad), ", ", lpad(colnames[col], colpad), "]  =  ")
         if isassigned(nonzeros(S), r)
-            Base.show(io, nonzeros(S)[r])
+            Base.show(io, MIME"text/plain"(), nonzeros(S)[r])
         else
             print(io, Base.undef_ref_str)
         end
@@ -193,7 +188,7 @@ function show(io::IO, n::NamedArray{T1,2,SparseMatrixCSC{T1,T2}}) where {T1,T2}
     nothing
 end
 
-function show(io::IO, v::NamedVector, maxnrow::Int)
+function show(io::IO, ::MIME"text/plain", v::NamedVector, maxnrow::Int)
     nrow = size(v, 1)
     rownames = strnames(v,1)
     rowrange, totrowrange = compute_range(maxnrow, nrow)
