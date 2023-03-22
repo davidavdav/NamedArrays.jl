@@ -15,6 +15,7 @@ using SparseArrays
 using DelimitedFiles
 using Statistics
 using Random
+using InlineStrings
 
 using KahanSummation
 

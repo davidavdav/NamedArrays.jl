@@ -23,8 +23,9 @@ Requires = "1"
 julia = "1"
 
 [extras]
+InlineStrings = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
 KahanSummation = "8e2b3108-d4c1-50be-a7a2-16352aec75c3"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["KahanSummation", "Test"]
+test = ["InlineStrings", "KahanSummation", "Test"]

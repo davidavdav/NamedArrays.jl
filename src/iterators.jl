@@ -1,7 +1,7 @@
-using .Base: 
-	@propagate_inbounds, tail
+using .Base:
+    @propagate_inbounds, tail
 import .Base:
-	size, length, iterate, IteratorSize
+    size, length, iterate, IteratorSize
 
 struct Enamerate
     na::NamedArray
@@ -24,7 +24,7 @@ size(e::Enamerate) = size(e.na)
     n = iterate(e.na, rest...)
     n === nothing && return n
     #= (i, n[1]), (i+1, n[2]) =#
-		return (flattenednames(e.na)[i], n[1]), (i+1, n[2])
+        return (flattenednames(e.na)[i], n[1]), (i+1, n[2])
 end
 
 # Possibly TODO:
