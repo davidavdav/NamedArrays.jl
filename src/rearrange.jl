@@ -45,11 +45,15 @@ function permutedims(v::NamedVector)
         ("_", v.dimnames[1]))
 end
 
+permutedims(m::NamedMatrix) = permutedims(m, [2, 1])
+
 function permutedims(a::NamedArray, perm::Vector{Int})
     dicts = a.dicts[perm]
     dimnames = a.dimnames[perm]
     NamedArray(permutedims(a.array, perm), dicts, dimnames)
 end
+
+permutedims(n::NamedArray, perm::Tuple{Vararg{Int}}) = permutedims(n, collect(perm))
 
 import Base.transpose
 transpose(a::NamedVector) = permutedims(a)
