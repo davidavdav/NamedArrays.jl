@@ -22,31 +22,40 @@ Synopsis
 --------
 
 ```julia
-using NamedArrays
-n = NamedArray(rand(2,4))
-@show n;
+julia> using NamedArrays
 
-n = 2×4 Named Array{Float64,2}
+julia> n = NamedArray(rand(2,4))
+2×4 Named Matrix{Float64}
 A ╲ B │         1          2          3          4
 ──────┼───────────────────────────────────────────
-1     │  0.833541   0.409606   0.203789   0.724494
-2     │  0.458244   0.908721   0.808201  0.0580882
+1     │  0.640719   0.996256   0.534355   0.610259
+2     │   0.67784   0.281928  0.0112326   0.672123
 
-setnames!(n, ["one", "two"], 1)         # give the names "one" and "two" to the rows (dimension 1)
-n["one", 2:3]
-n["two", :] = 11:14
-n[Not("two"), :] = 4:7                  # all rows but the one called "two"
-@show n;
+julia> setnames!(n, ["one", "two"], 1)         # give the names "one" and "two" to the rows (dimension 1)
+(OrderedCollections.OrderedDict{Any, Int64}("one" => 1, "two" => 2), OrderedCollections.OrderedDict{Any, Int64}("1" => 1, "2" => 2, "3" => 3, "4" => 4))
 
-n = 2×4 Named Array{Float64,2}
+julia> n["one", 2:3]
+2-element Named Vector{Float64}
+B  │
+───┼─────────
+2  │ 0.996256
+3  │ 0.534355
+
+julia> n["two", :] = 11:14
+11:14
+
+julia> n[Not("two"), :] = 4:7                  # all rows but the one called "two"
+4:7
+
+julia> n
+2×4 Named Matrix{Float64}
 A ╲ B │    1     2     3     4
 ──────┼───────────────────────
 one   │  4.0   5.0   6.0   7.0
 two   │ 11.0  12.0  13.0  14.0
 
-@show sum(n, dims=1);
-
-sum(n, dims=1) = 1×4 Named Array{Float64,2}
+julia> sum(n, dims=1)
+1×4 Named Matrix{Float64}
  A ╲ B │    1     2     3     4
 ───────┼───────────────────────
 sum(A) │ 15.0  17.0  19.0  21.0
@@ -57,10 +66,19 @@ Construction
 
 ### Default names for indices and dimensions
 ```julia
-# NamedArray(a::Array)
-n = NamedArray([1 2; 3 4])
-# NamedArray{T}(dims...)
-n = NamedArray{Int}(2, 2)
+julia> n = NamedArray([1 2; 3 4]) ## NamedArray(a::Array)
+2×2 Named Matrix{Int64}
+A ╲ B │ 1  2
+──────┼─────
+1     │ 1  2
+2     │ 3  4
+
+n = NamedArray{Int}(2, 2) ## NamedArray{T}(dims...)
+2×2 Named Matrix{Int64}
+A ╲ B │                 1                  2
+──────┼─────────────────────────────────────
+1     │             33454  72058693549555969
+2     │ 72339073326448640         4318994440
 ```
 
 These constructors add default names to the array of type String, `"1"`,
@@ -74,30 +92,51 @@ NamedArray of element type `T` with the specified dimensions `dims...`.
 
 The key-lookup for names is implemented by using `DataStructures.OrderedDict`s for each dimension.  At a lower level, you can construct `NamedArrays` this way:
 ```julia
-using DataStructures
-n = NamedArray([1 3; 2 4], ( OrderedDict("A"=>1, "B"=>2), OrderedDict("C"=>1, "D"=>2) ),
-               ("Rows", "Cols"))
-@show n;
+julia> using DataStructures
 
-n = 2×2 Named Array{Int64,2}
+julia> n = NamedArray([1 3; 2 4], ( OrderedDict("A"=>1, "B"=>2), OrderedDict("C"=>1, "D"=>2) ),
+                      ("Rows", "Cols"))
+2×2 Named Matrix{Int64}
 Rows ╲ Cols │ C  D
 ────────────┼─────
 A           │ 1  3
 B           │ 2  4
 ```
-This is the basic constructor for a namedarray.  The second argument `names` must be a tuple of `OrderedDict`s whose range (the values) are exacly covering the range `1:size(a,dim)` for each dimension.   The keys in the various dictionaries may be of mixed types, but after construction, the type of the names cannot be altered.  The third argument `dimnames` is a tuple of the names of the dimensions themselves, and these names may be of any type.
+This is the basic constructor for a NamedArray.  The second argument `names` must be a tuple of `OrderedDict`s whose range (the values) are exacly covering the range `1:size(a,dim)` for each dimension.   The keys in the various dictionaries may be of mixed types, but after construction, the type of the names cannot be altered.  The third argument `dimnames` is a tuple of the names of the dimensions themselves, and these names may be of any type.
 
 ### Vectors of names
 
 ```julia
 # NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Vector}, dimnames::NTuple{N})
-n = NamedArray([1 3; 2 4], ( ["a", "b"], ["c", "d"] ), ("Rows", "Cols"))
+julia> n = NamedArray([1 3; 2 4], ( ["a", "b"], ["c", "d"] ), ("Rows", "Cols"))
+2×2 Named Matrix{Int64}
+Rows ╲ Cols │ c  d
+────────────┼─────
+a           │ 1  3
+b           │ 2  4
+
 # NamedArray{T,N}(a::AbstractArray{T,N}, names::NTuple{N,Vector})
-n = NamedArray([1 3; 2 4], ( ["a", "b"], ["c", "d"] ))
-n = NamedArray([1, 2], ( ["a", "b"], ))  # note the comma after ["a", "b"] to ensure evaluation as tuple
+julia> n = NamedArray([1 3; 2 4], ( ["a", "b"], ["c", "d"] ))
+2×2 Named Matrix{Int64}
+A ╲ B │ c  d
+──────┼─────
+a     │ 1  3
+b     │ 2  4
+
+julia> n = NamedArray([1, 2], ( ["a", "b"], ))  # note the comma after ["a", "b"] to ensure evaluation as tuple
+2-element Named Vector{Int64}
+A  │
+───┼──
+a  │ 1
+b  │ 2
 
 # Names can also be set with keyword arguments
-n = NamedArray([1 3; 2 4]; names=( ["a", "b"], ["c", "d"] ), dimnames=("Rows", "Cols"))
+julia> n = NamedArray([1 3; 2 4]; names=( ["a", "b"], ["c", "d"] ), dimnames=("Rows", "Cols"))
+2×2 Named Matrix{Int64}
+Rows ╲ Cols │ c  d
+────────────┼─────
+a           │ 1  3
+b           │ 2  4
 ```
 This is a more friendly version of the basic constructor, where the range of the dictionaries is automatically assigned the values `1:size(a, dim)` for the `names` in order. If `dimnames` is not specified, the default values will be used (`:A`, `:B`, etc.).
 
@@ -108,42 +147,66 @@ Indexing
 
 ### `Integer` indices
 
-Single and multiple integer indices work as for the undelying array:
+Single and multiple integer indices work as for the underlying array:
 
 ```julia
-n[1, 1]
-n[1]
+julia> n[1, 1]
+1
+
+julia> n[1]
+1
 ```
 
 Because the constructed `NamedArray` itself is an `AbstractArray`, integer indices always have precedence:
 
 ```julia
-a = rand(2, 4)
-dodgy = NamedArray(a, ([2, 1], [10, 20, 30, 40]))
-dodgy[1, 1] == a[1, 1] ## true
-dodgy[1, 10] ## BoundsError
+julia> a = rand(2, 4)
+2×4 Matrix{Float64}:
+ 0.272237  0.904488  0.847206  0.20988
+ 0.533134  0.284041  0.370965  0.421939
+
+julia> dodgy = NamedArray(a, ([2, 1], [10, 20, 30, 40]))
+2×4 Named Matrix{Float64}
+A ╲ B │       10        20        30        40
+──────┼───────────────────────────────────────
+2     │ 0.272237  0.904488  0.847206   0.20988
+1     │ 0.533134  0.284041  0.370965  0.421939
+
+julia> dodgy[1, 1] == a[1, 1]
+true
+
+julia> dodgy[1, 10] ## BoundsError
+ERROR: BoundsError: attempt to access 2×4 Matrix{Float64} at index [1, 10]
 ```
 In some cases, e.g., with contingency tables, it would be very handy to be able to use named Integer indices.  In this case, in order to circumvent the normal `AbstractArray` interpretation of the index, you can wrap the indexing argument in the type `Name()`
 ```julia
-dodgy[Name(1), Name(30)] == a[2, 3] ## true
+julia> dodgy[Name(1), Name(30)] == a[2, 3] ## true
+true
 ```
 
 ### Named indices
 
 ```julia
-n = NamedArray([1 2 3; 4 5 6], (["one", "two"], [:a, :b, :c]))
-@show n;
+julia> n = NamedArray([1 2 3; 4 5 6], (["one", "two"], [:a, :b, :c]))
+2×3 Named Matrix{Int64}
+A ╲ B │ a  b  c
+──────┼────────
+one   │ 1  2  3
+two   │ 4  5  6
 
-n = 2×3 Named Array{Int64,2}
-A ╲ B │ :a  :b  :c
-──────┼───────────
-one   │  1   2   3
-two   │  4   5   6
 
-n["one", :a] == 1 ## true
-n[:, :b] == [2, 5] ## true
-n["two", [1, 3]] == [4, 6] ## true
-n["one", [:a, :b]] == [1, 2] ## true
+julia> n["one", :a] == 1
+true
+
+julia> n[:, :b] == [2, 5]
+true
+
+julia> n["two", [1, 3]] == [4, 6]
+true
+
+julia> n["one", [:a, :b]] == [1, 2]
+true
+
 ```
 
 This is the main use of `NamedArrays`.  Names (keys) and arrays of names can be specified as an index, and these can be mixed with other forms of indexing.
@@ -156,20 +219,18 @@ When a single element is selected by an index expression, a scalar value is retu
 
 
 ```julia
-@show n[:, :b]; ## this expression drops the singleton dimensions, and hence the names
-
-n[:, :b] = 2-element Named Array{Int64,1}
+julia> n[:, :b] ## this expression drops the singleton dimensions, and hence the names
+2-element Named Vector{Int64}
 A   │
 ────┼──
 one │ 2
 two │ 5
 
-@show n[["one"], [:a]]; ## this expression keeps the names
-
-n[["one"], [:a]] = 1×1 Named Array{Int64,2}
-A ╲ B │ :a
-──────┼───
-one   │  1
+julia> n[["one"], [:a]] ## this expression keeps the names
+1×1 Named Matrix{Int64}
+A ╲ B │ a
+──────┼──
+one   │ 1
 ```
 
 ### Negation / complement
@@ -177,9 +238,14 @@ one   │  1
 There is a special type constructor `Not()`, whose function is to specify which elements to exclude from the array.  This is similar to negative indices in the language R.  The elements in `Not(elements...)` select all but the indicated elements from the array.
 
 ```julia
-n[Not(1), :] == n[[2], :] ## true, note that `n` stays 2-dimensional
-n[2, Not(:a)] == n[2, [:b, :c]] ## true
-dodgy[1, Not(Name(30))] == dodgy[1, [1, 2, 4]] ## true
+julia> n[Not(1), :] == n[[2], :] ## note that `n` stays 2-dimensional
+true
+
+julia> n[2, Not(:a)] == n[2, [:b, :c]]
+true
+
+julia> dodgy[1, Not(Name(30))] == dodgy[1, [1, 2, 4]]
+true
 ```
 Both integers and names can be negated.
 
@@ -187,32 +253,50 @@ Both integers and names can be negated.
 
 You can also use a dictionary-style indexing, if you don't want to bother about the order of the dimensions, or make a slice using a specific named dimension:
 ```julia
-n[:A => "one"] == [1, 2, 3]
-n[:B => :c, :A => "two"] == 6
-n[:A=>:, :B=>:c] == [3, 6]
+julia> n[:A => "one"] == [1, 2, 3]
+true
 
-n[:B=>[:a, :b]] == [1 2; 4 5]
-n[:A=>["one", "two"], :B=>:a] == [1, 4]
-n[:A=>[1, 2], :B=>:a] == [1, 4]
-n[:A=>["one"], :B=>1:2] == [1 2]
+julia> n[:B => :c, :A => "two"] == 6
+true
 
-# Throws ArgumentError when trying to access non-existant dimension.
-n[:A=>["three"]]
-# ERROR: ArgumentError: Elements for A => ["three"] not found.
+julia> n[:A=>:, :B=>:c] == [3, 6]
+true
+
+julia> n[:B=>[:a, :b]] == [1 2; 4 5]
+true
+
+julia> n[:A=>["one", "two"], :B=>:a] == [1, 4]
+true
+
+julia> n[:A=>[1, 2], :B=>:a] == [1, 4]
+true
+
+julia> n[:A=>["one"], :B=>1:2] == [1 2]
+true
+
+julia> n[:A=>["three"]] # Throws ArgumentError when trying to access non-existent dimension.
+ERROR: ArgumentError: Elements for A => ["three"] not found.
 ```
 
 ### Assignment
 
 Most index types can be used for assignment as LHS
 ```julia
-n[1, 1] = 0
-n["one", :b] = 1
-n[:, :c] = 101:102
-n[:B=>:b, :A=>"two"] = 50
-@show(n) # ==>
+julia> n[1, 1] = 0
+0
 
-n = 2×3 Named Array{Int64,2}
-A ╲ B │  :a   :b   :c
+julia> n["one", :b] = 1
+1
+
+julia> n[:, :c] = 101:102
+101:102
+
+julia> n[:B=>:b, :A=>"two"] = 50
+50
+
+julia> n
+2×3 Named Matrix{Int64}
+A ╲ B │   a    b    c
 ──────┼──────────────
 one   │   0    1  101
 two   │   4   50  102
@@ -224,21 +308,20 @@ General functions
 ### Access to the names of the indices and dimensions
 
 ```julia
-names(n::NamedArray) ## get all index names for all dimensions
-names(n::NamedArray, dim::Integer) ## just for dimension `dim`
-dimnames(n::NamedArray) ## the names of the dimensions
+julia> names(n::NamedArray) ## get all index names for all dimensions
+2-element Vector{Vector}:
+ ["one", "two"]
+ [:a, :b, :c]
 
-@show names(n);
-names(n) = Array{T,1} where T[["one", "two"], Symbol[:a, :b, :c]]
-
-@show names(n, 1)
-names(n, 1) = ["one", "two"]
-2-element Array{String,1}:
+julia> names(n::NamedArray, 1) ## just for dimension `1`
+2-element Vector{String}:
  "one"
  "two"
 
-@show dimnames(n);
-dimnames(n) = Symbol[:A, :B]
+julia> dimnames(n::NamedArray) ## the names of the dimensions
+2-element Vector{Symbol}:
+ :A
+ :B
 ```
 
 ### Setting the names after construction
@@ -260,11 +343,16 @@ Similar to the iterator `enumerate` this package provides an `enamerate` functio
 ```julia
 enamerate(a::NamedArray)
 ```
+For example:
+```julia
+julia> n = NamedArray([1 2 3; 4 5 6], (["one", "two"], [:a, :b, :c]))
+2×3 Named Matrix{Int64}
+A ╲ B │ a  b  c
+──────┼────────
+one   │ 1  2  3
+two   │ 4  5  6
 
-Example below:
-```
-n = NamedArray([1 2 3; 4 5 6], (["one", "two"], [:a, :b, :c]))
-for (name,val) in enamerate(n)
+julia> for (name, val) in enamerate(n)
            println("$name ==  $val")
        end
 ("one", :a) ==  1
