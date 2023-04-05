@@ -5,6 +5,8 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
+include("init-namedarrays.jl")
+
 ## test arithmetic operations
 @testset "arithmetic" begin
 
@@ -46,7 +48,6 @@
 
     include("init-namedarrays.jl")
 
-
     @test n / π == π \ n
 
     @test (v - (1:6)).array == v.array - (1:6)
@@ -68,9 +69,15 @@
             @test M * M' ≈ M.array * M.array'
             value = M' * M
             @test (length(value) == 1 ? value[1] : value) ≈ M.array' * M.array # M' * M is always a NamedArray
-            @test n * M ≈ n * M.array ≈ n.array * M ≈ n.array * M.array
+            @test n * M ≈ n * M.array
+            @test n.array * M ≈ n.array * M.array
+            if ndims(M) > 1
+                @test_logs (:warn, "Using names of left argument") @test n * M.array ≈ n.array * M
+            else
+                @test n * M.array ≈ n.array * M
+            end
             ## the first expression dispatches Ac_Mul_Bc!:
-            @test isapprox(M' * n.array', M' * n')
+            @test_logs (:warn, "Using names of left argument") @test isapprox(M' * n.array', M' * n')
             # TODO : @test isapprox(M' * n', M.array' * n')
             # TODO : @test isapprox(M.array' * n', M.array' * n.array')
         end

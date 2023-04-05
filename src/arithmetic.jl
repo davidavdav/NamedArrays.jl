@@ -21,12 +21,10 @@ for op in (:+, :-)
     ## named %op% named
     @eval begin
         function ($op)(x::NamedArray{T1}, y::NamedArray{T2}) where {T1<:Number, T2<:Number}
-            if names(x) == names(y) && x.dimnames == y.dimnames
-                NamedArray(($op)(x.array, y.array), x.dicts, x.dimnames)
-            else
-                @warn("Dropping mismatching names")
-                ($op)(x.array, y.array)
+            if names(x) != names(y) || x.dimnames != y.dimnames
+                @warn("Using names of left argument")
             end
+            NamedArray(($op)(x.array, y.array), x.dicts, x.dimnames)
         end
         ($op)(x::NamedArray{T1,N}, y::AbstractArray{T2,N}) where {T1<:Number,T2<:Number,N} = NamedArray(($op)(x.array, y), x.dicts, x.dimnames)
         ($op)(x::AbstractArray{T1,N}, y::NamedArray{T2,N}) where {T1<:Number,T2<:Number,N} = NamedArray(($op)(x, y.array), y.dicts, y.dimnames)
@@ -155,9 +153,16 @@ LinearAlgebra.tril!(n::NamedMatrix, k::Integer) = (tril!(n.array, k); n)
 LinearAlgebra.triu!(n::NamedMatrix, k::Integer) = (triu!(n.array, k); n)
 
 ## LU factorization
-function LinearAlgebra.lu!(n::NamedArray{T, N, AT, DT}, pivot = Val(true); kargs...) where {T, N, AT, DT}
-    luf = lu!(n.array, pivot; kargs...)
-    LU(n, luf.ipiv, luf.info)
+if VERSION < v"1.9.0-rc"
+    function LinearAlgebra.lu!(n::NamedArray{T, N, AT, DT}, pivot = Val(true); kargs...) where {T, N, AT, DT}
+        luf = lu!(n.array, pivot; kargs...)
+        LU(n, luf.ipiv, luf.info)
+    end
+else
+    function LinearAlgebra.lu!(n::NamedArray{T, N, AT, DT}, pivot::Union{NoPivot, RowMaximum, RowNonZero} = RowMaximum(); kwargs...) where {T, N, AT, DT}
+        luf = lu!(n.array, pivot; kwargs...)
+        LU(n, luf.ipiv, luf.info)
+    end
 end
 
 # From /stdlib/LinearAlgebra/src/lu.jl
@@ -179,7 +184,7 @@ function Base.getproperty(A::LU{T,NamedArray{T, N, AT, DT}}, d::Symbol) where {T
     elseif d == :P
         return Matrix{T}(I, m, m)[:,invperm(A.p)]
     else
-        getfield(F, d)
+        getfield(A, d)
     end
 end
 
@@ -249,9 +254,9 @@ end
 
 # linreg(x::NamedVector, y::AbstractVector) = linreg(x.array, y)
 
-lyap(A::NamedMatrix, C::AbstractMatrix) = NamedArray(lyap(A.array,C), A.dicts, A.dimnames)
+lyap(A::NamedMatrix, C::AbstractMatrix{T}) where T<:Union{Float32, Float64, ComplexF32, ComplexF64} = NamedArray(lyap(A.array, C), A.dicts, A.dimnames)
 
-sylvester(A::NamedMatrix, B::AbstractMatrix, C::AbstractMatrix) = NamedArray(sylvester(A.array, B, C), A.dicts, A.dimnames)
+sylvester(A::NamedMatrix, B::AbstractMatrix{T}, C::AbstractMatrix{T}) where T<:Union{Float32, Float64, ComplexF32, ComplexF64} = NamedArray(sylvester(A.array, B, C), A.dicts, A.dimnames)
 
 ## issym, istriu, istril OK
 isposdef(n::NamedArray) = isposdef(n.array)

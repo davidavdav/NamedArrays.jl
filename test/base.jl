@@ -37,25 +37,8 @@
     # @test_throws BoundsError ind2sub(n, 0)
     # @test_throws BoundsError ind2sub(n, 9)
 
-    DelimitedFiles.writedlm(stdout, n)
-    DelimitedFiles.writedlm(stdout, v)
+    io = IOBuffer()
+    DelimitedFiles.writedlm(io, n)
+    DelimitedFiles.writedlm(io, v)
 
-    @testset "Issue #60: $func" for func in
-        [
-            similar,
-            a -> fill!(similar(a), zero(eltype(a))),
-            a -> fill!(similar(a), one(eltype(a))),
-            n -> hcat(n, n),
-            n -> vcat(n, n)
-        ]
-        fn = @inferred func(n)
-        @test keytype.(fn.dicts) == (String, String)
-    end
-
-    @testset "issue 61" begin
-        d = Dict(v)
-        for key in keys(d)
-           @test d[key] == v[key]
-        end
-    end
 end

@@ -9,16 +9,16 @@ using DataStructures
 using Test
 
 @testset "construction" begin
-
-    a = rand(2,3)
+    io = IOBuffer()
+    a = rand(2, 3)
     n1 = @inferred NamedArray(a, (OrderedDict(:a => 1, :b=>2), OrderedDict(:c=>3, :d=>2, :e=>1)), (:dim1, :dim2))
-    println(n1, " ", n1[1,1], " ", n1[:a, :e])
+    println(io, n1, " ", n1[1, 1], " ", n1[:a, :e])
     n2 = @inferred NamedArray(a, (OrderedDict(:a => 1, :b=>2), OrderedDict(:c=>3, :d=>2, :e=>1)))
-    println(n2)
+    println(io, n2)
     n3 = @inferred NamedArray(a, ([:a, :b], [:c, :d, :e]), (:dim1, :dim2))
-    println(n3)
+    println(io, n3)
     n4 = @inferred NamedArray(a, ([:a, :b], [:c, :d, :e]))
-    println(n4)
+    println(io, n4)
     n5 = @inferred NamedArray(a, [[Char(64+i) for i in 1:d] for d in 2:3], ["a", "b"])
     n6 = @inferred NamedArray(a, [[Char(64+i) for i in 1:d] for d in 2:3])
     n7 = @inferred NamedArray(a)

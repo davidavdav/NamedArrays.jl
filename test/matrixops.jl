@@ -11,7 +11,7 @@ using LinearAlgebra
     apd = a' * a
     asym = a' + a
     luf = lu(a)
-    chf = cholesky(apd, Val(false))
+    chf = cholesky(apd, NoPivot())
     qrf = qr(a)
     eif = eigen(a)
     eigvals(a)
