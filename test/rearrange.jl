@@ -24,7 +24,7 @@
         @test names(permutedims(m, p)) == names(m)[p]
         @test dimnames(permutedims(m, p)) == dimnames(m)[p]
     end
-    @test transpose(n) == permutedims(n, [2,1])
+    @test transpose(n) == permutedims(n, [2, 1])
 
     @test vec(n) == vec(n.array)
 
@@ -41,6 +41,13 @@
     @test rot180(n).array == rot180(n.array)
     @test names(rot180(n)) == [reverse(name) for name in names(n)]
     @test dimnames(rot180(n)) == dimnames(n)
+
+    for shift in (1, [0, 1], [1, 2], (2, 0))
+        @test circshift(n, shift).array == circshift(n.array, shift)
+        for dim in 1:length(shift)
+            @test names(circshift(n, shift), dim) == circshift(names(n, dim), shift[dim])
+        end
+    end
 
     for _ in 1:10
         p = rand(1:factorial(length(v)))

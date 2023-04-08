@@ -17,7 +17,7 @@ function adjoint(a::NamedArray)
 end
 
 import Base.reverse
-function reverse(a::NamedArray{T,N}; dims::Int) where {T,N}
+function reverse(a::NamedArray{T,N}; dims::Int=1) where {T,N}
     vdicts = Array{OrderedDict}(undef, N)
     n = size(a,dims)+1
     for i=1:N
@@ -34,7 +34,14 @@ function reverse(a::NamedArray{T,N}; dims::Int) where {T,N}
     NamedArray(reverse(a.array, dims=dims), tuple(vdicts...), a.dimnames)
 end
 
-## circshift automagically works...
+import Base.circshift
+function circshift(n::NamedArray{T, N}, shifts::Tuple{Vararg{Integer, NT}}) where {T, N, NT}
+    shifts = Base.fill_to_length(shifts, 0, Val(N))
+    newnames = Tuple(circshift(names(n, i), s) for (i, s) in enumerate(shifts))
+    return NamedArray(circshift(n.array, shifts), newnames, n.dimnames)
+end
+circshift(n::NamedArray, shift::Real) = circshift(n, Tuple(floor(Int, shift)))
+circshift(n::NamedArray, shifts::AbstractArray) = circshift(n, Tuple(shifts))
 ## :' automagically works, how is this possible? it is ctranspose!
 
 import Base.permutedims

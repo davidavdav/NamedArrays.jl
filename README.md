@@ -363,14 +363,24 @@ julia> for (name, val) in enamerate(n)
 ("two", :c) ==  6
 ```
 
+### Aggregating functions
 
-### Copy
-
+Some functions, when operated on a NamedArray, will a name for the singleton index:
 ```julia
-copy(a::NamedArray)
-```
+julia> sum(n, dims=1)
+1×3 Named Matrix{Int64}
+ A ╲ B │ a  b  c
+───────┼────────
+sum(A) │ 5  7  9
 
-returns a copy of all the elements in a, and copies of the names, and returns a NamedArray
+julia> prod(n, dims=2)
+2×1 Named Matrix{Int64}
+A ╲ B │ prod(B)
+──────┼────────
+one   │       6
+two   │     120
+
+Aggregating functions are `sum`, `prod`, `maximum`,  `minimum`,  `mean`,  `std`.
 
 ### Convert
 
@@ -385,62 +395,147 @@ Methods with special treatment of names / dimnames
 
 ### Concatenation
 
+If the names are identical
+for the relevant dimension, these are retained in the results.  Otherwise,
+the names are reinitialized to the default "1", "2", ...
+
+In the concatenated direction, the names are always re-initialized.  This may change is people find we should put more effort to check the concatenated names for uniqueness, and keep original names if that is the case.
+
 ```julia
-hcat(V::NamedVector...)
+julia> hcat(n, n)
+2×6 Named Matrix{Int64}
+A ╲ hcat │ 1  2  3  4  5  6
+─────────┼─────────────────
+one      │ 1  2  3  1  2  3
+two      │ 4  5  6  4  5  6
+
+julia> vcat(n, n)
+4×3 Named Matrix{Int64}
+vcat ╲ B │ a  b  c
+─────────┼────────
+1        │ 1  2  3
+2        │ 4  5  6
+3        │ 1  2  3
+4        │ 4  5  6
+
 ```
 
-concatenates (column) vectors to an array.  If the names are identical
-for all vectors, these are retained in the results.  Otherwise
-the names are reinitialized to the default "1", "2", ...
 
 ### Transposition
 
 ```julia
-' ## transpose post-fix operator '
-adjoint
-transpose
-permutedims
-circshift
-```
+julia> n'
+3×2 Named LinearAlgebra.Adjoint{Int64, Matrix{Int64}}
+B ╲ A │ one  two
+──────┼─────────
+a     │   1    4
+b     │   2    5
+c     │   3    6
 
-operate on the dimnames as well
+julia> circshift(n, (1, 2))
+2×3 Named Matrix{Int64}
+A ╲ B │ b  c  a
+──────┼────────
+two   │ 5  6  4
+one   │ 2  3  1
+
+```
+Similar functions: `adjoint`, `transpose`, `permutedims` operate on the dimnames as well.
+
+```julia
+julia> rotl90(n)
+3×2 Named Matrix{Int64}
+B ╲ A │ one  two
+──────┼─────────
+c     │   3    6
+b     │   2    5
+a     │   1    4
+
+julia> rotr90(n)
+3×2 Named Matrix{Int64}
+B ╲ A │ two  one
+──────┼─────────
+a     │   4    1
+b     │   5    2
+c     │   6    3
+```
 
  ### Reordering of dimensions in NamedVectors
 
 ```julia
-nthperm
-nthperm!
-permute!
-shuffle
-shuffle!
-reverse
-reverse!
-sort
-sort!
+julia> v = NamedArray([1, 2, 3], ["a", "b", "c"])
+3-element Named Vector{Int64}
+A  │
+───┼──
+a  │ 1
+b  │ 2
+c  │ 3
+
+julia> Combinatorics.nthperm(v, 4)
+3-element Named Vector{Int64}
+A  │
+───┼──
+b  │ 2
+c  │ 3
+a  │ 1
+
+julia> Random.shuffle(v)
+3-element Named Vector{Int64}
+A  │
+───┼──
+b  │ 2
+a  │ 1
+c  │ 3
+
+julia> reverse(v)
+3-element Named Vector{Int64}
+A  │
+───┼──
+c  │ 3
+b  │ 2
+a  │ 1
+
+julia> sort(1 ./ v)
+3-element Named Vector{Float64}
+A  │
+───┼─────────
+c  │ 0.333333
+b  │      0.5
+a  │      1.0
 ```
 
 operate on the names of the rows as well
 
  ### Broadcasts
 
-```julia
-broadcast
-broadcast!
-```
-These functions keep the names of the first argument
-
-### Aggregates
+In broadcasting, the names of the first argument are kept
 
 ```julia
-sum
-prod
-maximum
-minimum
-mean
-std
-```
+julia> ni = NamedArray(1 ./ n.array)
+2×3 Named Matrix{Float64}
+A ╲ B │        1         2         3
+──────┼─────────────────────────────
+1     │      1.0       0.5  0.333333
+2     │     0.25       0.2  0.166667
 
-These functions, when operating along one dimension, keep the names in the other dimensions, and name the left over singleton dimension as `$function($dimname)`.
+julia> n .+ ni
+┌ Warning: Using names of left argument
+└ @ NamedArrays ~/werk/julia/NamedArrays.jl/src/arithmetic.jl:25
+2×3 Named Matrix{Float64}
+A ╲ B │       a        b        c
+──────┼──────────────────────────
+one   │     2.0      2.5  3.33333
+two   │    4.25      5.2  6.16667
+
+julia> n .- v'
+2×3 Named Matrix{Int64}
+A ╲ B │ a  b  c
+──────┼────────
+one   │ 0  0  0
+two   │ 3  3  3
+
+```
+This is implemented through `broadcast`.
 
 ## Further Development
 
