@@ -85,7 +85,7 @@ import LinearAlgebra: Givens, LinearAlgebra.BlasFloat, lu!, lu, LU, ipiv2perm, q
     cond, kron, lyap, sylvester, isposdef
 
 ## matmul
-## ambiguity, this can somtimes be a pain to resolve...
+## ambiguity, this can sometimes be a pain to resolve...
 *(x::SparseMatrixCSC{Tx,TiA},y::NamedMatrix{Ty}) where {Tx,TiA,Ty} = x*y.array
 *(x::SparseMatrixCSC{Tx,S},y::NamedVector{Ty}) where {Tx,S,Ty} = x*y.array
 for t in (:Tridiagonal, :(LinearAlgebra.AbstractTriangular), :Givens, :Bidiagonal)

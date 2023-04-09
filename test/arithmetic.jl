@@ -158,7 +158,7 @@ include("init-namedarrays.jl")
 
     a = randn(1000,10); s = NamedArray(a'a)
 
-    ## The necessity for isapprox sugests we don't get BLAS implementations but a fallback...
+    ## The necessity for isapprox suggests we don't get BLAS implementations but a fallback...
     # TODO: @test isapprox(cholfact(s).factors.array, cholfact(s.array).factors)
 
     @test isapprox(qr(s).factors.array, qr(s.array).factors)

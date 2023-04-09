@@ -72,7 +72,7 @@ strdimnames(n::NamedArray) = [string(dn) for dn in n.dimnames]
 strdimnames(n::NamedArray, d::Integer) = string(n.dimnames[d])
 
 
-## seting names, dimnames
+## setting names, dimnames
 """
     setnames!(n::NamedArray, v::Vector{T}, d::Integer)
 
