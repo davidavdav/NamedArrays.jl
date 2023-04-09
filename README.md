@@ -102,7 +102,7 @@ Rows ╲ Cols │ C  D
 A           │ 1  3
 B           │ 2  4
 ```
-This is the basic constructor for a NamedArray.  The second argument `names` must be a tuple of `OrderedDict`s whose range (the values) are exacly covering the range `1:size(a,dim)` for each dimension.   The keys in the various dictionaries may be of mixed types, but after construction, the type of the names cannot be altered.  The third argument `dimnames` is a tuple of the names of the dimensions themselves, and these names may be of any type.
+This is the basic constructor for a NamedArray.  The second argument `names` must be a tuple of `OrderedDict`s whose range (the values) are exactly covering the range `1:size(a,dim)` for each dimension.   The keys in the various dictionaries may be of mixed types, but after construction, the type of the names cannot be altered.  The third argument `dimnames` is a tuple of the names of the dimensions themselves, and these names may be of any type.
 
 ### Vectors of names
 
