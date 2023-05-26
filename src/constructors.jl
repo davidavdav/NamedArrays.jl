@@ -89,7 +89,7 @@ cmn ╲ en │  first  second
 function NamedArray(array::AbstractArray{T,N},
                     names::NTuple{N,AbstractVector},
                     dimnames::NTuple{N, Any}=defaultdimnames(array)) where {T,N}
-    NamedArray(array; names, dimnames)
+    NamedArray(array; names=names, dimnames=dimnames)
 end
 function NamedArray(array::AbstractArray{T,N};
                     names::NTuple{N,AbstractVector}=tuple((defaultnames(d) for d in size(array))...),
