@@ -159,4 +159,10 @@ include("speed.jl")
     @test sum(abs, a, dims=1)[1] == 10
 end
 
+@testset "parent" begin
+    a = rand(2, 2)
+    n = NamedArray(a)
+    @test parent(n) === a
+end
+
 @info "done!"
