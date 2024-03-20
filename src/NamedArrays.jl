@@ -45,7 +45,7 @@ function __init__()
 
         ## rename a dimension
         function KahanSummation.cumsum_kbn(a::NamedArray; dims::Integer)
-            NamedArrays.fan(KahanSummation.cumsum_kbn, "cumsum_kbn", a, dims)
+            NamedArrays.fan(KahanSummation.cumsum_kbn, "cumsum_kbn", a; dims=dims)
         end
     end
 end

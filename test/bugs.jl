@@ -60,3 +60,12 @@ end
         @test op(nt) == op(n') == op(transpose(n)) == op(permutedims(n)) == op(permutedims(n, (2, 1)))
     end
 end
+
+@testset "issue 136" begin
+    n = NamedArray(randn(2, 3))
+    for fun in [var, std]
+        for corrected in [false, true]
+            @test fun(n, corrected=corrected) == fun(n.array, corrected=corrected)
+        end
+    end
+end
