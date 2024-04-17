@@ -102,13 +102,26 @@ function reverse!(v::NamedVector, start::Integer=1, stop::Integer=length(v))
     v
 end
 
-import Base: _sortslices, _negdims, DimSelector
+####################################
+# Copied from Base in v1.10
+# Works around inference's lack of ability to recognize partial constness
+struct DimSelector{dims, T}
+    A::T
+end
+DimSelector{dims}(x::T) where {dims, T} = DimSelector{dims, T}(x)
+(ds::DimSelector{dims, T})(i) where {dims, T} = i in dims ? axes(ds.A, i) : (:,)
+
+_negdims(n, dims) = filter(i->!(i in dims), 1:n)
+####################################
 
 function my_compute_itspace(A, ::Val{dims}) where {dims}
     negdims = _negdims(ndims(A), dims)
     axs = Iterators.product(ntuple(DimSelector{dims}(A), ndims(A))...)
     vec(permutedims(collect(axs), (dims..., negdims...))), negdims
 end
+
+Base.sortslices(A::NamedArray; dims, kws...) =
+    _sortslices(A, Val{dims}(), kws...)
 
 function _sortslices(A::NamedArray, d::Val{dims}; kws...) where dims
     itspace, negdims = my_compute_itspace(A, d)
