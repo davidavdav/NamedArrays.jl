@@ -63,8 +63,14 @@ end
 permutedims(n::NamedArray, perm::Tuple{Vararg{Int}}) = permutedims(n, collect(perm))
 
 import Base.transpose
-transpose(a::NamedVector) = permutedims(a)
-transpose(a::NamedArray) = permutedims(a, [2,1])
+function transpose(a::NamedArray)
+    ndims(a) ≤ 2 || error("Number of dimension must be ≤ 2")
+    if ndims(a) == 1
+        NamedArray(transpose(a.array), (["1"], names(a, 1)), ("'", a.dimnames[1]))
+    else
+        NamedArray(transpose(a.array), reverse(a.dicts), reverse(a.dimnames))
+    end
+end
 
 import Base.vec
 vec(a::NamedArray) = vec(a.array)
