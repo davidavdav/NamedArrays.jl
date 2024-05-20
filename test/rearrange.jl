@@ -24,7 +24,14 @@
         @test names(permutedims(m, p)) == names(m)[p]
         @test dimnames(permutedims(m, p)) == dimnames(m)[p]
     end
+
     @test transpose(n) == permutedims(n, [2, 1])
+    @testset "Issue #138" begin
+        @test transpose(n).array == transpose(n.array)
+        @test parent(transpose(n.array)) === n.array
+        @test transpose(v).array == transpose(v.array)
+        @test parent(transpose(v.array)) === v.array
+    end
 
     @test vec(n) == vec(n.array)
 
