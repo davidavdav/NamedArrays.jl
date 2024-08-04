@@ -69,3 +69,14 @@ end
         end
     end
 end
+
+@testset "issue 140" begin
+    substrings = split("a b c", " ")
+    letters = ["a", "b", "c"]
+    n1 = NamedArray(randn(2, 3), (letters[1:2], letters))
+    n2 = NamedArray(randn(2, 3), (substrings[1:2], substrings))
+    for i in 1:2, j in 1:3
+        @test n1[substrings[i], substrings[j]] == n1[i, j]
+        @test n2[letters[i], letters[j]] == n2[i, j]
+    end
+end

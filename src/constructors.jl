@@ -6,6 +6,8 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
+using DataStructures: OrderedDict
+
 letter(i) = string(Char((64+i) % 256))
 
 ## helpers for constructing names dictionaries
@@ -46,10 +48,10 @@ end
     NamedArray(a::AbstractArray{T,N}, names::Tuple{N,AbstractVector}, dimnames::NTuple{N,Any}))
     NamedArray(a::AbstractArray{T,N}; names::Tuple{N,AbstractVector}, dimnames::NTuple{N,Any}))
 
-Construct a NamedArray from array `a`, with names for the indices in each dimesion `names`, 
-and names of the dimensions `dimnames`. 
+Construct a NamedArray from array `a`, with names for the indices in each dimesion `names`,
+and names of the dimensions `dimnames`.
 
-If `dimnames` is unspecified, dimensions are named `:A, :B, ...`, 
+If `dimnames` is unspecified, dimensions are named `:A, :B, ...`,
 if `names` are unspecified, names are `"1", "2", "3", ...`.
 
 # Examples
@@ -118,9 +120,9 @@ end
 ## @Base.deprecate NamedArray(array::AbstractArray{T,N}, names::AbstractVector{<:AbstractVector}, dimnames::AbstractVector) where {T,N} NamedArray(array::AbstractArray{T,N}, names::NTuple{N}, dimnames::NTuple{N}) where {T,N}
 
 ## special case for 1-dim array to circumvent Julia tuple-comma-oddity, #86
-NamedArray(array::AbstractVector{T}, 
-           names::AbstractVector{VT}=defaultnames(length(array)), 
-           dimname=defaultdimname(1)) where {T,VT} = 
+NamedArray(array::AbstractVector{T},
+           names::AbstractVector{VT}=defaultnames(length(array)),
+           dimname=defaultdimname(1)) where {T,VT} =
     NamedArray(array, (names,), (dimname,))
 
 function NamedArray(array::AbstractArray{T,N}, names::NamedTuple) where {T, N}

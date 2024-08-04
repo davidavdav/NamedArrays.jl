@@ -93,6 +93,10 @@ indices(dict::AbstractDict{K,V}, ::Colon) where {K,V<:Integer} = collect(1:lengt
 indices(dict::AbstractDict{K,V}, i::K) where {K<:Not,V<:Integer} = dict[i]
 indices(dict::AbstractDict, i::Not) = setdiff(1:length(dict), indices(dict, i.skip))
 
+## AbstractString difficulties, see bug 140
+indices(dict::AbstractDict{S, Int64}, i::SubString{S}) where {S <: AbstractString} = indices(dict, S(i))
+indices(dict::AbstractDict{SubString{S}, Int64}, i::S) where {S <: AbstractString} = indices(dict, SubString(i))
+
 ## namedgetindex collects the elements from the array, and takes care of the index names
 ## `index` is an integer now, or an array of integers, or a cartesianindex
 ## and has been computed by `indices()`
