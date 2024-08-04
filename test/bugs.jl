@@ -101,3 +101,31 @@ end
     @test v["i"] == a[9]
     @test v.dicts[1] == Dict("c" => 1, "d" => 2, "f" => 3, "i" => 4, "j" => 5)
 end
+
+@testset "issue #130" begin
+    n = NamedArray([1 2; 3 4], (["a", "b"], ["one", "two"]), ("A", "B"))
+    @test names(n, "A") == ["a", "b"]
+    @test names(n, "B") == ["one", "two"]
+    @test_throws KeyError names(n, "C")
+end
+
+@testset "issue #133" begin
+    mutable struct NamedArrayHolder
+        named_array::NamedArray
+    end
+
+    mutable struct NamedVectorHolder
+        named_vector::NamedVector
+    end
+
+    na = NamedArray([1, 2, 3], names=(["x", "y", "z"],))
+    nb = NamedArray([10, 20, 30], names=(["x", "y", "z"],))
+
+    nah = NamedArrayHolder(na)
+    nah.named_array = nb
+    @test nah.named_array === nb
+
+    nvh = NamedVectorHolder(na)
+    nvh.named_vector = nb
+    @test nvh.named_vector === nb
+end

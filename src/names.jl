@@ -16,7 +16,7 @@ Extract the names of the indices along dimension `d`, or all dimentsions if `d` 
 ```jldoctest
 julia> n = NamedArray([1, 2, 3], (["one", "二", "trois"],))
 3-element Named Vector{Int64}
-A     │ 
+A     │
 ──────┼──
 one   │ 1
 二    │ 2
@@ -30,6 +30,12 @@ julia> names(n)
 names(dict::AbstractDict) = collect(keys(dict))
 names(n::NamedArray) = [names(dict) for dict in n.dicts]
 names(n::NamedArray, d::Integer) = names(n.dicts[d])
+function names(n::NamedArray, d)
+    i = findfirst(x -> x == d, dimnames(n))
+    isnothing(i) && throw(KeyError("dimension name"))
+    return names(n, i)
+end
+
 defaultnames(a::AbstractArray) = [defaultnames(a, d) for d in 1:ndims(a)]
 defaultnames(a::AbstractArray, d::Integer) = defaultnames(size(a, d))
 
@@ -42,7 +48,7 @@ defaultnames(a::AbstractArray, d::Integer) = defaultnames(size(a, d))
 
 Return the names of the `d`'th dimension of NamedArray `n`, or of all dimensions if `d` is unspecified.
 
-# Example 
+# Example
 
 ```jldoctest
 julia> n = NamedArray([1 2; 3 4; 5 6], (["一", "二", "三"], ["first", "second"]), ("cmn", "en"))
@@ -76,7 +82,7 @@ strdimnames(n::NamedArray, d::Integer) = string(n.dimnames[d])
 """
     setnames!(n::NamedArray, v::Vector{T}, d::Integer)
 
-Set the names of `n` along dimension `d` to `v`.  
+Set the names of `n` along dimension `d` to `v`.
 
 The NamedArray `n` must already have names of type `T`
 
@@ -155,7 +161,7 @@ setdimnames!(n::NamedArray, dn::Vector) = setdimnames!(n, tuple(dn...))
 """
     setdimnames!(n::NamedArray, name, d::Integer)
 
-Set the name of the dimension `d` of NamedArray `n` to `name`. 
+Set the name of the dimension `d` of NamedArray `n` to `name`.
 
 # Example
 ```jldoctest

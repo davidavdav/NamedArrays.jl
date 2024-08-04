@@ -22,3 +22,4 @@ convert(::Type{NamedVector}, a::AbstractArray) = NamedArray(a)
 convert(::Type{NamedArray{T}}, n::NamedArray) where {T} = NamedArray(T.(n.array), n.dicts, n.dimnames)
 
 @inline convert(::Type{NamedArray}, n::NamedArray) = n
+@inline convert(::Type{NamedVector}, n::NamedVector) = n
