@@ -88,3 +88,14 @@ function sort(n::NamedArray; dims::Integer, kws...)
     nms[dims] = [string(i) for i in 1:size(n, dims)]
     NamedArray(sort(n.array; dims=dims, kws...), tuple(nms...), n.dimnames)
 end
+
+function Base.deleteat!(v::NamedVector, ind)
+    if isa(ind, AbstractArray) || isa(ind, Tuple)
+        I = [pop!(v.dicts[1], name) for name in ind]
+    else
+        I = pop!(v.dicts[1], ind)
+    end
+    v.dicts = (defaultnamesdict(names(v, 1)), )
+    return deleteat!(v.array, I)
+end
+

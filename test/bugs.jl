@@ -80,3 +80,24 @@ end
         @test n2[letters[i], letters[j]] == n2[i, j]
     end
 end
+
+@testset "issue 89" begin
+    v = NamedArray(randn(10), (letters[1:10], ))
+    a = copy(v.array)
+    ## array
+    deleteat!(v, ["e", "g"])
+    @test v["a"] == a[1]
+    @test v["f"] == a[6]
+    @test v["j"] == a[10]
+
+    ## element
+    deleteat!(v, "a")
+    @test v["h"] == a[8]
+    @test length(v) == 7
+    @test_throws KeyError v["a"]
+
+    ## tuple
+    deleteat!(v, ("b", "h"))
+    @test v["i"] == a[9]
+    @test v.dicts[1] == Dict("c" => 1, "d" => 2, "f" => 3, "i" => 4, "j" => 5)
+end

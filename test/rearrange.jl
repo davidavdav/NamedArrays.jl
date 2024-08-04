@@ -96,4 +96,11 @@
         @test names(sortslices(nn, dims=1), 1) == ["2", "3", "1"]
         @test names(sortslices(nn, dims=2), 2) == ["2", "1", "3"]
     end
+
+    @testset "Issue #89" begin
+        v = NamedArray(collect(1:10), (letters[1:10], ))
+        filter!(isodd, v)
+        @test v == NamedArray(collect(1:2:10), (letters[1:2:10], ))
+    end
+
 end
