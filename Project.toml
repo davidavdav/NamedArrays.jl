@@ -25,7 +25,8 @@ julia = "1"
 [extras]
 InlineStrings = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
 KahanSummation = "8e2b3108-d4c1-50be-a7a2-16352aec75c3"
+AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["InlineStrings", "KahanSummation", "Test"]
+test = ["InlineStrings", "KahanSummation", "AxisArrays", "Test"]

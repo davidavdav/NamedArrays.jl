@@ -87,4 +87,18 @@ using Test
     @testset "Simplify vector constructor, #86" begin
         n8 = @inferred NamedArray([1, 2, 3], ["a", "b", "c"])
     end
+
+    @testset "Construction from AxisArray, #142" begin
+        axisarray = AxisArray(
+            rand(2,3,4),
+            Axis{:dim1}([:A, :B]),
+            Axis{:dim2}([:X, :Y, :Z]),
+            Axis{:dim3}([:F, :G, :H, :I]))
+
+        n11 = NamedArray(axisarray)
+        @test n11 isa NamedArray
+        @test dimnames(n11) == [:dim1, :dim2, :dim3]
+        @test names(n11) == [[:A, :B], [:X, :Y, :Z], [:F, :G, :H, :I]]
+        @test all(n11 .== axisarray)
+    end
 end
