@@ -34,10 +34,29 @@ Base.similar(n::NamedArray, t::Type) = NamedArray(similar(n.array, t), n.dicts, 
 
 function Base.similar(n::NamedArray{T,N}, t::Type, dims::Base.Dims) where {T,N}
     nd = length(dims)
-    dicts = Array{eltype(n.dicts)}(undef, nd)
+    last_same = 0
+    for d in 1:nd
+        if d ≤ ndims(n) && dims[d] == size(n, d)
+            last_same = d
+        else
+            break
+        end
+    end
+    default_dict_type = OrderedDict{String, Int}
+    dict_types = tuple(collect(d <= last_same ? typeof(n.dicts[d]) : default_dict_type for d in 1:nd)...)
+    println(dict_types)
+    if size(n) == dims
+        tdicts = n.dicts
+        array = similar(n.array, t)
+        return NamedArray{t,N,typeof(array),typeof(tdicts)}(array, tdicts, n.dimnames)
+    end
+    promoted_type = promote_type(dict_types...)
+    println(promoted_type)
+    tuple_dict_types = Tuple{dict_types...}
+    dicts = Array{promoted_type}(undef, nd)
     DimNamType = eltype(n.dimnames)
     dimnames = Array{DimNamType}(undef, nd)
-    for d in 1:length(dims)
+    for d in 1:nd
         if d ≤ ndims(n) && dims[d] == size(n, d)
             dicts[d] = n.dicts[d]
             dimnames[d] = n.dimnames[d]
@@ -48,7 +67,7 @@ function Base.similar(n::NamedArray{T,N}, t::Type, dims::Base.Dims) where {T,N}
     end
     tdicts = tuple(dicts...)
     array = similar(n.array, t, dims)
-    return NamedArray{t,N,typeof(array),typeof(tdicts)}(array, tdicts, tuple(dimnames...))
+    return NamedArray{t,N,typeof(array),tuple_dict_types}(array, tdicts, tuple(dimnames...))
 end
 
 ## our own interpretation of ind2sub

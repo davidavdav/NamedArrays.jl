@@ -129,3 +129,8 @@ end
     nvh.named_vector = nb
     @test nvh.named_vector === nb
 end
+
+@testset "issue #129" begin
+    n = NamedArray([1 2; 3 4], ([:a, :b], [:c, :d]))
+    @test n[1:end] == n.array[1:end]
+end
