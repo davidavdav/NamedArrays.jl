@@ -48,6 +48,17 @@ function __init__()
             NamedArrays.fan(KahanSummation.cumsum_kbn, "cumsum_kbn", a; dims=dims)
         end
     end
+
+    @require AxisArrays="39de3d68-74b9-583c-8d2d-e117c070f3a9" begin
+
+        ## constructor for AxisArray
+        function NamedArray(axisarray::AxisArrays.AxisArray{T, N, D, Ax}) where {T, N, D, Ax}
+            axes = AxisArrays.axes(axisarray)
+            dimlabels = ntuple(i -> first(AxisArrays.axisvalues(axes[i])), N)
+            dimnames = ntuple(i -> first(AxisArrays.axisnames(axes[i])), N)
+            return NamedArray(axisarray.data; names=dimlabels, dimnames=dimnames)
+        end
+    end
 end
 
 end

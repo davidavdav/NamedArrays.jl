@@ -18,5 +18,6 @@ using Random
 using InlineStrings
 
 using KahanSummation
+using AxisArrays
 
 include("test.jl")
