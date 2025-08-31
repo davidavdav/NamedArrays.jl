@@ -6,7 +6,7 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-using DataStructures: OrderedDict
+using OrderedCollections: OrderedDict
 
 letter(i) = string(Char((64+i) % 256))
 

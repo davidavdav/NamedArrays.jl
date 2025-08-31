@@ -1,4 +1,4 @@
-using DataStructures
+using OrderedCollections
 
 include("compat.jl")
 if ! @isdefined NamedArray

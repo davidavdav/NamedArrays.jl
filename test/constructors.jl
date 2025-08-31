@@ -5,7 +5,7 @@
 ## This code is licensed under the MIT license
 ## See the file LICENSE.md in this distribution
 
-using DataStructures
+using OrderedCollections
 using Test
 
 @testset "construction" begin
