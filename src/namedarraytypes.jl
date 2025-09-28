@@ -10,14 +10,14 @@
 ## This way NamedArray is dependent on the dictionary type of each dimensions.
 ## The inner constructor checks for consistency, the values must all be 1:d
 
-using DataStructures: OrderedDict
+using OrderedCollections: OrderedDict
 
 if ! @isdefined NamedArray
 
 """
     Name(name)
 
-Wrapper type to ensure a name is used in an index, and not the numeric value. 
+Wrapper type to ensure a name is used in an index, and not the numeric value.
 
 # Example
 ```jldoctest

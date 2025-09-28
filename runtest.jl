@@ -2,7 +2,7 @@
 # include("src/NamedArrays.jl")
 using NamedArrays
 #using Base.Test
-#using DataStructures
+#using OrderedCollections
 #using Combinatorics
 
 cd("test")

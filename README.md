@@ -90,9 +90,9 @@ NamedArray of element type `T` with the specified dimensions `dims...`.
 
 ### Lower level constructors
 
-The key-lookup for names is implemented by using `DataStructures.OrderedDict`s for each dimension.  At a lower level, you can construct `NamedArrays` this way:
+The key-lookup for names is implemented by using `OrderedCollections.OrderedDict`s for each dimension.  At a lower level, you can construct `NamedArrays` this way:
 ```julia
-julia> using DataStructures
+julia> using OrderedCollections
 
 julia> n = NamedArray([1 3; 2 4], ( OrderedDict("A"=>1, "B"=>2), OrderedDict("C"=>1, "D"=>2) ),
                       ("Rows", "Cols"))

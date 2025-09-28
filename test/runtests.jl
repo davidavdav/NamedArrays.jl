@@ -8,7 +8,7 @@
 
 using NamedArrays
 using Test
-using DataStructures
+using OrderedCollections
 using Combinatorics
 using LinearAlgebra
 using SparseArrays
